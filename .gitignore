@@ -1,4 +1,4 @@
-.venv/
+GameShelf.Desktop/.venv/
 __pycache__/
 *.pyc
 .idea/

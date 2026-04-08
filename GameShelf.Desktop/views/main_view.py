@@ -16,8 +16,9 @@ from views.logout_dialog import LogoutDialog
 
 
 class MainView(QWidget):
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
+        self.controller = controller
 
         self.setWindowTitle("GameShelf")
         self.current_filter = "all"
@@ -125,10 +126,7 @@ class MainView(QWidget):
             logout()
             clear_token()
 
-            self.login_view = LoginView()
-            self.login_view.show()
-
-            self.close()
+            self.controller.show_login()
 
     def change_tab(self, tab):
         self.current_filter = tab

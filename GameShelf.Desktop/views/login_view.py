@@ -5,8 +5,9 @@ from views.main_view import MainView
 
 
 class LoginView(QWidget):
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
+        self.controller = controller
 
         self.setWindowTitle("GameShelf - Login")
 
@@ -44,7 +45,4 @@ class LoginView(QWidget):
         set_token(token)
         self.status_label.setText("Login successful")
 
-        self.main_view = MainView()
-        self.main_view.show()
-
-        self.close()
+        self.controller.show_main()

@@ -29,3 +29,14 @@ def get_user_profile():
     response = requests.get(url, headers=headers, verify=False)
 
     return response.json()
+
+def logout():
+    url = f"{API_URL}/api/authentication/logout"
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    requests.post(url, headers=headers, verify=False)

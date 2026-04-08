@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel,
-    QScrollArea, QGridLayout, QStackedLayout
+    QScrollArea, QGridLayout, QStackedLayout, QDialog
 )
 from services.collection_service import get_my_collection
 from views.friends_view import FriendsView
@@ -8,6 +8,7 @@ from views.stats_view import StatsView
 from views.settings_view import SettingsView
 from views.global_stats_view import GlobalStatsView
 from views.notifications_view import NotificationsView
+from views.logout_dialog import LogoutDialog
 from services.session import clear_token
 
 
@@ -117,8 +118,20 @@ class MainView(QWidget):
         self.stacked_layout.setCurrentIndex(index)
 
     def logout(self):
-        clear_token()
-        self.close()
+        dialog = LogoutDialog()
+
+        result = dialog.exec()
+
+        if result == QDialog.Accepted:
+            from views.login_view import LoginView
+            from services.session import clear_token
+
+            clear_token()
+
+            self.login_view = LoginView()
+            self.login_view.show()
+
+            self.close()
 
     def change_tab(self, tab):
         self.current_filter = tab

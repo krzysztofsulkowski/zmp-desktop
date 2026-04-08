@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QListWidget
+from services.collection_service import get_my_collection
 
 
 class MainView(QWidget):
@@ -24,11 +25,20 @@ class MainView(QWidget):
 
         content_layout = QVBoxLayout()
 
-        self.content_label = QLabel("Main content area")
-
-        content_layout.addWidget(self.content_label)
+        self.games_list = QListWidget()
+        content_layout.addWidget(self.games_list)
 
         main_layout.addLayout(sidebar, 1)
         main_layout.addLayout(content_layout, 4)
 
         self.setLayout(main_layout)
+
+        self.load_games()
+
+    def load_games(self):
+        games = get_my_collection()
+
+        self.games_list.clear()
+
+        for game in games:
+            self.games_list.addItem(str(game))

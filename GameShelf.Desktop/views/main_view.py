@@ -4,6 +4,8 @@ from PySide6.QtWidgets import (
 )
 from services.collection_service import get_my_collection
 from views.friends_view import FriendsView
+from views.stats_view import StatsView
+from views.settings_view import SettingsView
 
 
 class MainView(QWidget):
@@ -69,9 +71,13 @@ class MainView(QWidget):
         self.home_widget.setLayout(home_layout)
 
         self.friends_view = FriendsView()
+        self.stats_view = StatsView()
+        self.settings_view = SettingsView()
 
-        self.stacked_layout.addWidget(self.home_widget)
-        self.stacked_layout.addWidget(self.friends_view)
+        self.stacked_layout.addWidget(self.home_widget)     # 0
+        self.stacked_layout.addWidget(self.friends_view)    # 1
+        self.stacked_layout.addWidget(self.stats_view)      # 2
+        self.stacked_layout.addWidget(self.settings_view)   # 3
 
         content_layout.addLayout(self.stacked_layout)
 
@@ -82,6 +88,8 @@ class MainView(QWidget):
 
         self.home_button.clicked.connect(lambda: self.switch_view(0))
         self.friends_button.clicked.connect(lambda: self.switch_view(1))
+        self.stats_button.clicked.connect(lambda: self.switch_view(2))
+        self.settings_button.clicked.connect(lambda: self.switch_view(3))
 
         self.load_games()
 

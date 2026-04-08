@@ -2,14 +2,18 @@ from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel,
     QScrollArea, QGridLayout, QStackedLayout, QDialog
 )
+
 from services.collection_service import get_my_collection
+from services.session import clear_token
+from services.auth_service import logout
+
+from views.login_view import LoginView
 from views.friends_view import FriendsView
 from views.stats_view import StatsView
 from views.settings_view import SettingsView
 from views.global_stats_view import GlobalStatsView
 from views.notifications_view import NotificationsView
 from views.logout_dialog import LogoutDialog
-from services.session import clear_token
 
 
 class MainView(QWidget):
@@ -17,7 +21,6 @@ class MainView(QWidget):
         super().__init__()
 
         self.setWindowTitle("GameShelf")
-
         self.current_filter = "all"
 
         main_layout = QHBoxLayout()
@@ -30,7 +33,6 @@ class MainView(QWidget):
         self.global_stats_button = QPushButton("Global Stats")
         self.notifications_button = QPushButton("Notifications")
         self.settings_button = QPushButton("Settings")
-
         self.logout_button = QPushButton("Logout")
 
         sidebar.addWidget(self.home_button)
@@ -41,7 +43,6 @@ class MainView(QWidget):
         sidebar.addWidget(self.settings_button)
 
         sidebar.addStretch()
-
         sidebar.addWidget(self.logout_button)
 
         content_layout = QVBoxLayout()
@@ -110,22 +111,19 @@ class MainView(QWidget):
         self.global_stats_button.clicked.connect(lambda: self.switch_view(4))
         self.notifications_button.clicked.connect(lambda: self.switch_view(5))
 
-        self.logout_button.clicked.connect(self.logout)
+        self.logout_button.clicked.connect(self.logout_view)
 
         self.load_games()
 
     def switch_view(self, index):
         self.stacked_layout.setCurrentIndex(index)
 
-    def logout(self):
+    def logout_view(self):
         dialog = LogoutDialog()
-
         result = dialog.exec()
 
         if result == QDialog.Accepted:
-            from views.login_view import LoginView
-            from services.session import clear_token
-
+            logout()
             clear_token()
 
             self.login_view = LoginView()
@@ -169,7 +167,6 @@ class MainView(QWidget):
         layout.addWidget(genre)
 
         card.setLayout(layout)
-
         card.setFixedSize(200, 120)
 
         card.setStyleSheet("""

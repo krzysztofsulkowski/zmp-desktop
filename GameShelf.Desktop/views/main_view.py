@@ -7,7 +7,6 @@ from services.collection_service import get_my_collection
 from services.session import clear_token
 from services.auth_service import logout
 
-from views.login_view import LoginView
 from views.friends_view import FriendsView
 from views.stats_view import StatsView
 from views.settings_view import SettingsView

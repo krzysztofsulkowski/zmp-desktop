@@ -6,6 +6,9 @@ from services.collection_service import get_my_collection
 from views.friends_view import FriendsView
 from views.stats_view import StatsView
 from views.settings_view import SettingsView
+from views.global_stats_view import GlobalStatsView
+from views.notifications_view import NotificationsView
+from services.session import clear_token
 
 
 class MainView(QWidget):
@@ -23,13 +26,22 @@ class MainView(QWidget):
         self.home_button = QPushButton("Home")
         self.stats_button = QPushButton("Stats")
         self.friends_button = QPushButton("Friends")
+        self.global_stats_button = QPushButton("Global Stats")
+        self.notifications_button = QPushButton("Notifications")
         self.settings_button = QPushButton("Settings")
+
+        self.logout_button = QPushButton("Logout")
 
         sidebar.addWidget(self.home_button)
         sidebar.addWidget(self.stats_button)
         sidebar.addWidget(self.friends_button)
+        sidebar.addWidget(self.global_stats_button)
+        sidebar.addWidget(self.notifications_button)
         sidebar.addWidget(self.settings_button)
+
         sidebar.addStretch()
+
+        sidebar.addWidget(self.logout_button)
 
         content_layout = QVBoxLayout()
 
@@ -73,11 +85,15 @@ class MainView(QWidget):
         self.friends_view = FriendsView()
         self.stats_view = StatsView()
         self.settings_view = SettingsView()
+        self.global_stats_view = GlobalStatsView()
+        self.notifications_view = NotificationsView()
 
-        self.stacked_layout.addWidget(self.home_widget)     # 0
-        self.stacked_layout.addWidget(self.friends_view)    # 1
-        self.stacked_layout.addWidget(self.stats_view)      # 2
-        self.stacked_layout.addWidget(self.settings_view)   # 3
+        self.stacked_layout.addWidget(self.home_widget)           # 0
+        self.stacked_layout.addWidget(self.friends_view)          # 1
+        self.stacked_layout.addWidget(self.stats_view)            # 2
+        self.stacked_layout.addWidget(self.settings_view)         # 3
+        self.stacked_layout.addWidget(self.global_stats_view)     # 4
+        self.stacked_layout.addWidget(self.notifications_view)    # 5
 
         content_layout.addLayout(self.stacked_layout)
 
@@ -90,11 +106,19 @@ class MainView(QWidget):
         self.friends_button.clicked.connect(lambda: self.switch_view(1))
         self.stats_button.clicked.connect(lambda: self.switch_view(2))
         self.settings_button.clicked.connect(lambda: self.switch_view(3))
+        self.global_stats_button.clicked.connect(lambda: self.switch_view(4))
+        self.notifications_button.clicked.connect(lambda: self.switch_view(5))
+
+        self.logout_button.clicked.connect(self.logout)
 
         self.load_games()
 
     def switch_view(self, index):
         self.stacked_layout.setCurrentIndex(index)
+
+    def logout(self):
+        clear_token()
+        self.close()
 
     def change_tab(self, tab):
         self.current_filter = tab

@@ -1,0 +1,53 @@
+QFrame#landingFrame {
+    border-radius: 30px;
+    border: 2px solid #8B5CF6;
+    background-color: qlineargradient(
+        spread:pad,
+        x1:0, y1:0,
+        x2:0, y2:1,
+        stop:0.23 #0F0F14,
+        stop:1 #21153B
+    );
+}
+
+QPushButton#primaryButton {
+    border-radius: 20px;
+    background-color: #7C3AED;
+    color: white;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+QPushButton#primaryButton:hover {
+    background-color: #8B5CF6;
+}
+
+QLabel#landingLogo {
+    font-size: 34px;
+    font-weight: 800;
+    color: #8B5CF6;
+}
+
+QLabel#landingHeadline {
+    font-size: 31px;
+    font-weight: 800;
+    color: white;
+}
+
+QLabel#landingDescription {
+    font-size: 20px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.68);
+}
+
+QLabel#landingSmallText {
+    font-size: 14px;
+    font-weight: 300;
+    color: white;
+}
+
+QFrame#previewPlaceholder {
+    border: 1px solid #8B5CF6;
+    border-radius: 20px;
+    background-color: rgba(9, 4, 17, 0.18);
+}

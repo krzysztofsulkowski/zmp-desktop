@@ -104,16 +104,18 @@ class MainView(QWidget):
 
         self.setLayout(main_layout)
 
-        self.home_button.clicked.connect(lambda: self.switch_view(0))
-        self.friends_button.clicked.connect(lambda: self.switch_view(1))
-        self.stats_button.clicked.connect(lambda: self.switch_view(2))
-        self.settings_button.clicked.connect(lambda: self.switch_view(3))
-        self.global_stats_button.clicked.connect(lambda: self.switch_view(4))
-        self.notifications_button.clicked.connect(lambda: self.switch_view(5))
+        self.home_button.clicked.connect(lambda: self.switch_view_with_highlight(0, self.home_button))
+        self.friends_button.clicked.connect(lambda: self.switch_view_with_highlight(1, self.friends_button))
+        self.stats_button.clicked.connect(lambda: self.switch_view_with_highlight(2, self.stats_button))
+        self.settings_button.clicked.connect(lambda: self.switch_view_with_highlight(3, self.settings_button))
+        self.global_stats_button.clicked.connect(lambda: self.switch_view_with_highlight(4, self.global_stats_button))
+        self.notifications_button.clicked.connect(lambda: self.switch_view_with_highlight(5, self.notifications_button))
 
         self.logout_button.clicked.connect(self.logout_view)
 
         self.load_games()
+
+        self.set_active_button(self.home_button)
 
     def switch_view(self, index):
         self.stacked_layout.setCurrentIndex(index)
@@ -176,3 +178,26 @@ class MainView(QWidget):
         """)
 
         return card
+
+    def set_active_button(self, active_button):
+        buttons = [
+            self.home_button,
+            self.stats_button,
+            self.friends_button,
+            self.global_stats_button,
+            self.notifications_button,
+            self.settings_button
+        ]
+
+        for button in buttons:
+            button.setProperty("active", False)
+            button.style().unpolish(button)
+            button.style().polish(button)
+
+        active_button.setProperty("active", True)
+        active_button.style().unpolish(active_button)
+        active_button.style().polish(active_button)
+
+    def switch_view_with_highlight(self, index, button):
+        self.switch_view(index)
+        self.set_active_button(button)

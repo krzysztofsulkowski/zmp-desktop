@@ -14,7 +14,7 @@ def main():
     load_stylesheet(app)
 
     controller = AppController()
-    controller.show_login()
+    controller.show_landing()
 
     sys.exit(app.exec())
 

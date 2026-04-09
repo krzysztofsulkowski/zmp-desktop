@@ -14,17 +14,32 @@ class LandingView(QWidget):
         self.setMinimumSize(1440, 840)
 
         self.load_stylesheet()
+        self.setup_ui()
+        self.connect_signals()
 
+    def setup_ui(self):
         outer_layout = QVBoxLayout()
         outer_layout.setContentsMargins(30, 30, 30, 30)
 
-        main_frame = QFrame()
-        main_frame.setObjectName("landingFrame")
+        self.main_frame = QFrame()
+        self.main_frame.setObjectName("landingFrame")
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(45, 35, 45, 35)
         main_layout.setSpacing(0)
 
+        top_bar = self.create_top_bar()
+        content_layout = self.create_content_layout()
+
+        main_layout.addLayout(top_bar)
+        main_layout.addLayout(content_layout)
+
+        self.main_frame.setLayout(main_layout)
+        outer_layout.addWidget(self.main_frame)
+
+        self.setLayout(outer_layout)
+
+    def create_top_bar(self):
         top_bar = QHBoxLayout()
         top_bar.setContentsMargins(0, 0, 0, 0)
         top_bar.addStretch()
@@ -40,10 +55,22 @@ class LandingView(QWidget):
         top_bar.addSpacing(20)
         top_bar.addWidget(self.register_button)
 
+        return top_bar
+
+    def create_content_layout(self):
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(0, 40, 0, 0)
         content_layout.setSpacing(70)
 
+        left_side = self.create_left_section()
+        right_side = self.create_right_section()
+
+        content_layout.addLayout(left_side, 1)
+        content_layout.addLayout(right_side, 1)
+
+        return content_layout
+
+    def create_left_section(self):
         left_side = QVBoxLayout()
         left_side.setSpacing(18)
         left_side.setAlignment(Qt.AlignCenter)
@@ -89,6 +116,9 @@ class LandingView(QWidget):
         left_side.addWidget(self.small_text_label, alignment=Qt.AlignCenter)
         left_side.addStretch()
 
+        return left_side
+
+    def create_right_section(self):
         right_side = QVBoxLayout()
         right_side.setAlignment(Qt.AlignCenter)
 
@@ -100,17 +130,9 @@ class LandingView(QWidget):
         right_side.addWidget(self.preview_placeholder, alignment=Qt.AlignCenter)
         right_side.addStretch()
 
-        content_layout.addLayout(left_side, 1)
-        content_layout.addLayout(right_side, 1)
+        return right_side
 
-        main_layout.addLayout(top_bar)
-        main_layout.addLayout(content_layout)
-
-        main_frame.setLayout(main_layout)
-        outer_layout.addWidget(main_frame)
-
-        self.setLayout(outer_layout)
-
+    def connect_signals(self):
         self.login_button.clicked.connect(self.controller.show_login)
         self.register_button.clicked.connect(self.controller.show_register)
         self.join_button.clicked.connect(self.controller.show_register)

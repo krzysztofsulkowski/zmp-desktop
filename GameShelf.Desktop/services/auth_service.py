@@ -41,22 +41,22 @@ def logout():
 
     requests.post(url, headers=headers, verify=False)
 
-    def register(email, username, password):
-        url = f"{API_URL}/api/authentication/register"
+def register(email, username, password):
+    url = f"{API_URL}/api/authentication/register"
 
-        data = {
-            "email": email,
-            "username": username,
-            "password": password
-        }
+    data = {
+        "email": email,
+        "username": username,
+        "password": password
+    }
 
-        response = requests.post(url, json=data, verify=False)
+    response = requests.post(url, json=data, verify=False)
 
-        if response.status_code == 200:
-            return True, None
+    if response.status_code == 200:
+        return True, None
 
-        try:
-            error_data = response.json()
-            return False, error_data.get("detail", "Registration failed.")
-        except:
-            return False, "Registration failed."
+    try:
+        error_data = response.json()
+        return False, error_data.get("detail", "Registration failed.")
+    except Exception:
+        return False, "Registration failed."

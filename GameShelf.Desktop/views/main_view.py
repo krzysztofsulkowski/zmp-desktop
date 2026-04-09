@@ -158,24 +158,17 @@ class MainView(QWidget):
         layout = QVBoxLayout()
 
         title = QLabel(game.title if hasattr(game, "title") else str(game))
-        title.setStyleSheet("font-weight: bold;")
-
         genre = QLabel(game.genre if hasattr(game, "genre") else "")
+
+        card.setObjectName("gameCard")
+        title.setObjectName("gameTitle")
+        genre.setObjectName("gameGenre")
 
         layout.addWidget(title)
         layout.addWidget(genre)
 
         card.setLayout(layout)
         card.setFixedSize(200, 120)
-
-        card.setStyleSheet("""
-            QWidget {
-                background-color: #2a2a3d;
-                border-radius: 10px;
-                padding: 8px;
-                color: white;
-            }
-        """)
 
         return card
 

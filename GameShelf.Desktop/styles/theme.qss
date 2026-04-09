@@ -1,0 +1,41 @@
+QWidget {
+    background-color: #1e1e2f;
+    color: white;
+    font-size: 14px;
+}
+
+QPushButton {
+    background-color: #2a2a3d;
+    border: none;
+    padding: 10px;
+    text-align: left;
+    border-radius: 8px;
+}
+
+QPushButton[active="true"] {
+    background-color: #3b3b5c;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #353550;
+}
+
+QLabel {
+    color: white;
+}
+
+#gameCard {
+    background-color: #2a2a3d;
+    border-radius: 10px;
+    padding: 8px;
+}
+
+#gameTitle {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+#gameGenre {
+    color: #cfcfe8;
+}

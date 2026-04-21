@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QPushButton, QLabel
 )
 from PySide6.QtCore import Qt
+from services.auth_service import forgot_password
 
 
 class ForgotPasswordView(QWidget):
@@ -33,6 +34,7 @@ class ForgotPasswordView(QWidget):
 
         self.status_label = QLabel("")
         self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setWordWrap(True)
 
         main_layout.addWidget(self.back_button, alignment=Qt.AlignLeft)
         main_layout.addSpacing(20)
@@ -57,4 +59,11 @@ class ForgotPasswordView(QWidget):
             self.status_label.setText("Podaj adres e-mail.")
             return
 
-        self.status_label.setText("to be added")
+        success = forgot_password(email)
+
+        if success:
+            self.status_label.setText(
+                "Jeśli konto istnieje, link do zmiany hasła został wysłany na podany adres e-mail."
+            )
+        else:
+            self.status_label.setText("Nie udało się wysłać żądania resetu hasła.")

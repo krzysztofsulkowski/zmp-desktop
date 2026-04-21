@@ -1,11 +1,11 @@
+import requests
 from config import API_URL
 from services.session import get_token
 from models.game import Game
-import requests
 
 
 def get_my_collection():
-    url = f"{API_URL}/api/collections/my-collection"
+    url = f"{API_URL}/api/collections/grouped-with-games"
 
     token = get_token()
 
@@ -17,7 +17,7 @@ def get_my_collection():
     data = {
         "draw": 1,
         "start": 0,
-        "length": 10,
+        "length": 50,
         "searchValue": "",
         "orderColumn": 0,
         "orderDir": "asc",
@@ -26,7 +26,16 @@ def get_my_collection():
 
     response = requests.post(url, json=data, headers=headers, verify=False)
 
-    result = response.json()
+    print("COLLECTION STATUS:", response.status_code)
+    print("COLLECTION TEXT:", response.text)
+
+    if response.status_code != 200:
+        return []
+
+    try:
+        result = response.json()
+    except Exception:
+        return []
 
     games = []
 

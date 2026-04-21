@@ -60,3 +60,14 @@ def register(email, username, password):
         return False, error_data.get("detail", "Registration failed.")
     except Exception:
         return False, "Registration failed."
+
+def forgot_password(email):
+    url = f"{API_URL}/api/authentication/forgot-password"
+
+    data = {
+        "email": email
+    }
+
+    response = requests.post(url, json=data, verify=False)
+
+    return response.status_code == 200

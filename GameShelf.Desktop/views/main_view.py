@@ -53,17 +53,21 @@ class MainView(QWidget):
         self.tab_fav = QPushButton("Ulubione")
         self.tab_planned = QPushButton("Planowane")
         self.tab_wishlist = QPushButton("Lista życzeń")
+        self.add_collection_button = QPushButton("+")
+        self.add_collection_button.setFixedSize(32, 32)
 
         self.tabs_layout.addWidget(self.tab_all)
         self.tabs_layout.addWidget(self.tab_fav)
         self.tabs_layout.addWidget(self.tab_planned)
         self.tabs_layout.addWidget(self.tab_wishlist)
+        self.tabs_layout.addWidget(self.add_collection_button)
         self.tabs_layout.addStretch()
 
         self.tab_all.clicked.connect(lambda: self.change_tab("all"))
         self.tab_fav.clicked.connect(lambda: self.change_tab("fav"))
         self.tab_planned.clicked.connect(lambda: self.change_tab("planned"))
         self.tab_wishlist.clicked.connect(lambda: self.change_tab("wishlist"))
+        self.add_collection_button.clicked.connect(self.handle_add_collection)
 
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -194,3 +198,13 @@ class MainView(QWidget):
     def switch_view_with_highlight(self, index, button):
         self.switch_view(index)
         self.set_active_button(button)
+
+    def handle_add_collection(self):
+        from services.collection_service import create_collection
+
+        success = create_collection("Nowa kolekcja", True)
+
+        print("CREATE COLLECTION RESULT:", success)
+
+        if success:
+            self.load_games()

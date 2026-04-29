@@ -52,3 +52,29 @@ def get_my_collection():
             )
 
     return games
+
+def create_collection(name, is_public):
+    url = f"{API_URL}/api/collections/create"
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "id": 0,
+        "name": name,
+        "isPublic": is_public
+    }
+
+    response = requests.post(url, json=data, headers=headers, verify=False)
+
+    print("CREATE STATUS:", response.status_code)
+    print("CREATE TEXT:", response.text)
+
+    if response.status_code == 200:
+        return True
+
+    return False

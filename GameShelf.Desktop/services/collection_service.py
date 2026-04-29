@@ -78,3 +78,25 @@ def create_collection(name, is_public):
         return True
 
     return False
+
+def get_collections_lookup():
+    url = f"{API_URL}/api/collections/lookup"
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.get(url, headers=headers, verify=False)
+
+    print("LOOKUP STATUS:", response.status_code)
+    print("LOOKUP TEXT:", response.text)
+
+    if response.status_code != 200:
+        return []
+
+    try:
+        return response.json()
+    except Exception:
+        return []

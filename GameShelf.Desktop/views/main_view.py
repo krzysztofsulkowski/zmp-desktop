@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QScrollArea, QGridLayout, QStackedLayout, QDialog
 )
 
-from services.collection_service import get_my_collection
+from services.collection_service import get_my_collection, get_collections_lookup
 from services.session import clear_token
 from services.auth_service import logout
 
@@ -13,7 +13,7 @@ from views.settings_view import SettingsView
 from views.global_stats_view import GlobalStatsView
 from views.notifications_view import NotificationsView
 from views.logout_dialog import LogoutDialog
-
+from views.create_collection_dialog import CreateCollectionDialog
 
 class MainView(QWidget):
     def __init__(self, controller):
@@ -50,23 +50,17 @@ class MainView(QWidget):
         self.tabs_layout = QHBoxLayout()
 
         self.tab_all = QPushButton("Biblioteka")
-        self.tab_fav = QPushButton("Ulubione")
-        self.tab_planned = QPushButton("Planowane")
-        self.tab_wishlist = QPushButton("Lista życzeń")
+        self.tab_all.clicked.connect(lambda: self.change_tab("all"))
+
+        self.collection_buttons = []
+
         self.add_collection_button = QPushButton("+")
         self.add_collection_button.setFixedSize(32, 32)
 
         self.tabs_layout.addWidget(self.tab_all)
-        self.tabs_layout.addWidget(self.tab_fav)
-        self.tabs_layout.addWidget(self.tab_planned)
-        self.tabs_layout.addWidget(self.tab_wishlist)
-        self.tabs_layout.addWidget(self.add_collection_button)
-        self.tabs_layout.addStretch()
 
-        self.tab_all.clicked.connect(lambda: self.change_tab("all"))
-        self.tab_fav.clicked.connect(lambda: self.change_tab("fav"))
-        self.tab_planned.clicked.connect(lambda: self.change_tab("planned"))
-        self.tab_wishlist.clicked.connect(lambda: self.change_tab("wishlist"))
+        self.load_collection_tabs()
+
         self.add_collection_button.clicked.connect(self.handle_add_collection)
 
         self.scroll_area = QScrollArea()
@@ -202,9 +196,45 @@ class MainView(QWidget):
     def handle_add_collection(self):
         from services.collection_service import create_collection
 
-        success = create_collection("Nowa kolekcja", True)
+        dialog = CreateCollectionDialog()
+        result = dialog.exec()
+
+        if result != QDialog.Accepted:
+            return
+
+        name, is_public = dialog.get_collection_data()
+
+        if not name:
+            print("Collection name is required")
+            return
+
+        success = create_collection(name, is_public)
 
         print("CREATE COLLECTION RESULT:", success)
 
         if success:
+            self.load_collection_tabs()
             self.load_games()
+
+    def load_collection_tabs(self):
+        for button in self.collection_buttons:
+            self.tabs_layout.removeWidget(button)
+            button.deleteLater()
+
+        self.collection_buttons.clear()
+
+        self.tabs_layout.removeWidget(self.add_collection_button)
+
+        collections = get_collections_lookup()
+
+        for collection in collections:
+            button = QPushButton(collection.get("name", "Bez nazwy"))
+
+            button.clicked.connect(
+                lambda checked=False, collection_id=collection.get("id"): self.change_tab(collection_id)
+            )
+
+            self.collection_buttons.append(button)
+            self.tabs_layout.addWidget(button)
+
+        self.tabs_layout.addWidget(self.add_collection_button)

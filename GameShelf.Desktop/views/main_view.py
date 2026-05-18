@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel,
-    QScrollArea, QGridLayout, QStackedLayout, QDialog
+    QScrollArea, QGridLayout, QStackedLayout, QDialog, QMessageBox
 )
 
-from services.collection_service import get_my_collection, get_collections_lookup
+from services.collection_service import get_my_collection, get_collections_lookup, update_collection, delete_collection
 from services.session import clear_token
 from services.auth_service import logout
-from services.game_service import get_available_games, add_game_to_collection
+from services.game_service import get_available_games, add_game_to_collection, remove_game_from_collection
 
 from views.friends_view import FriendsView
 from views.stats_view import StatsView
@@ -16,6 +16,7 @@ from views.notifications_view import NotificationsView
 from views.logout_dialog import LogoutDialog
 from views.create_collection_dialog import CreateCollectionDialog
 from views.add_game_dialog import AddGameDialog
+from views.edit_collection_dialog import EditCollectionDialog
 
 class MainView(QWidget):
     def __init__(self, controller):
@@ -59,11 +60,21 @@ class MainView(QWidget):
         self.add_collection_button = QPushButton("+")
         self.add_collection_button.setFixedSize(32, 32)
 
+        self.edit_collection_button = QPushButton("Edit")
+        self.edit_collection_button.setFixedSize(60, 32)
+
+        self.delete_collection_button = QPushButton("Delete")
+        self.delete_collection_button.setFixedSize(70, 32)
+
         self.tabs_layout.addWidget(self.tab_all)
 
         self.load_collection_tabs()
 
         self.add_collection_button.clicked.connect(self.handle_add_collection)
+
+        self.edit_collection_button.clicked.connect(self.handle_edit_collection)
+
+        self.delete_collection_button.clicked.connect(self.handle_delete_collection)
 
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -177,6 +188,11 @@ class MainView(QWidget):
         layout.addWidget(title)
         layout.addWidget(genre)
 
+        if self.current_filter != "all":
+            remove_button = QPushButton("Usuń")
+            remove_button.clicked.connect(lambda: self.handle_remove_game(game.game_id))
+            layout.addWidget(remove_button)
+
         card.setLayout(layout)
         card.setFixedSize(200, 120)
 
@@ -249,6 +265,8 @@ class MainView(QWidget):
             self.collection_buttons.append(button)
             self.tabs_layout.addWidget(button)
 
+        self.tabs_layout.addWidget(self.edit_collection_button)
+        self.tabs_layout.addWidget(self.delete_collection_button)
         self.tabs_layout.addWidget(self.add_collection_button)
 
     def handle_add_game(self):
@@ -277,4 +295,103 @@ class MainView(QWidget):
         print("ADD GAME RESULT:", success)
 
         if success:
+            self.load_games()
+
+    def handle_remove_game(self, game_id):
+        success = remove_game_from_collection(game_id)
+
+        print("REMOVE GAME RESULT:", success)
+
+        if success:
+            self.load_games()
+
+    def handle_edit_collection(self):
+        if self.current_filter == "all":
+            print("Choose a collection before editing")
+            return
+
+        collections = get_collections_lookup()
+
+        selected_collection = None
+
+        for collection in collections:
+            if collection.get("id") == self.current_filter:
+                selected_collection = collection
+                break
+
+        if not selected_collection:
+            print("Selected collection not found")
+            return
+
+        dialog = EditCollectionDialog(
+            selected_collection.get("name", ""),
+            selected_collection.get("isPublic", True)
+        )
+
+        result = dialog.exec()
+
+        if result != QDialog.Accepted:
+            return
+
+        name, is_public = dialog.get_collection_data()
+
+        if not name:
+            print("Collection name is required")
+            return
+
+        success = update_collection(self.current_filter, name, is_public)
+
+        print("UPDATE COLLECTION RESULT:", success)
+
+        if success:
+            self.load_collection_tabs()
+            self.load_games()
+
+    def handle_delete_collection(self):
+        if self.current_filter == "all":
+            print("Cannot delete library")
+            return
+
+        protected_collections = [
+            "Ulubione",
+            "Planowane",
+            "Lista życzeń",
+            "W trakcie",
+            "Ukończone",
+            "Porzucone"
+        ]
+
+        collections = get_collections_lookup()
+
+        selected_collection = None
+
+        for collection in collections:
+            if collection.get("id") == self.current_filter:
+                selected_collection = collection
+                break
+
+        if not selected_collection:
+            return
+
+        if selected_collection.get("name") in protected_collections:
+            print("Cannot delete default collection")
+            return
+
+        confirmation = QMessageBox.question(
+            self,
+            "Usuń kolekcję",
+            f"Czy na pewno chcesz usunąć kolekcję '{selected_collection.get('name')}'?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        if confirmation != QMessageBox.Yes:
+            return
+
+        success = delete_collection(self.current_filter)
+
+        print("DELETE COLLECTION RESULT:", success)
+
+        if success:
+            self.current_filter = "all"
+            self.load_collection_tabs()
             self.load_games()

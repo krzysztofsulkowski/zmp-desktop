@@ -55,3 +55,23 @@ def add_game_to_collection(game_id, collection_id):
     print("ADD GAME TEXT:", response.text)
 
     return response.status_code == 200
+
+def remove_game_from_collection(game_id):
+    url = f"{API_URL}/api/games/remove-from-collection/{game_id}"
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.delete(
+        url,
+        headers=headers,
+        verify=False
+    )
+
+    print("REMOVE GAME STATUS:", response.status_code)
+    print("REMOVE GAME TEXT:", response.text)
+
+    return response.status_code == 200

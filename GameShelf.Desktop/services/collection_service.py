@@ -101,3 +101,50 @@ def get_collections_lookup():
         return response.json()
     except Exception:
         return []
+
+def update_collection(collection_id, name, is_public=True):
+    url = f"{API_URL}/api/collections/update"
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    data = {
+        "id": collection_id,
+        "name": name,
+        "isPublic": is_public
+    }
+
+    response = requests.put(
+        url,
+        json=data,
+        headers=headers,
+        verify=False
+    )
+
+    print("UPDATE STATUS:", response.status_code)
+    print("UPDATE TEXT:", response.text)
+
+    return response.status_code == 200
+
+def delete_collection(collection_id):
+    url = f"{API_URL}/api/collections/delete/{collection_id}"
+
+    token = get_token()
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+
+    response = requests.delete(
+        url,
+        headers=headers,
+        verify=False
+    )
+
+    print("DELETE STATUS:", response.status_code)
+    print("DELETE TEXT:", response.text)
+
+    return response.status_code == 200

@@ -47,7 +47,8 @@ def get_my_collection():
                     title=game.get("title"),
                     genre=game.get("genreName"),
                     platform=game.get("platformName"),
-                    image_url=game.get("imageUrl")
+                    image_url=game.get("imageUrl"),
+                    collection_id=collection.get("collectionId")
                 )
             )
 

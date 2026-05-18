@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
 from services.collection_service import get_my_collection, get_collections_lookup
 from services.session import clear_token
 from services.auth_service import logout
+from services.game_service import get_available_games, add_game_to_collection
 
 from views.friends_view import FriendsView
 from views.stats_view import StatsView
@@ -14,6 +15,7 @@ from views.global_stats_view import GlobalStatsView
 from views.notifications_view import NotificationsView
 from views.logout_dialog import LogoutDialog
 from views.create_collection_dialog import CreateCollectionDialog
+from views.add_game_dialog import AddGameDialog
 
 class MainView(QWidget):
     def __init__(self, controller):
@@ -66,6 +68,9 @@ class MainView(QWidget):
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
 
+        self.add_game_button = QPushButton("Dodaj grę")
+        self.add_game_button.clicked.connect(self.handle_add_game)
+
         self.scroll_widget = QWidget()
         self.grid_layout = QGridLayout()
 
@@ -77,6 +82,10 @@ class MainView(QWidget):
         self.home_widget = QWidget()
         home_layout = QVBoxLayout()
 
+        home_layout.addLayout(self.tabs_layout)
+        home_layout.addWidget(self.scroll_area)
+
+        home_layout.addWidget(self.add_game_button)
         home_layout.addLayout(self.tabs_layout)
         home_layout.addWidget(self.scroll_area)
 
@@ -142,6 +151,9 @@ class MainView(QWidget):
         col = 0
 
         for game in games:
+            if self.current_filter != "all" and game.collection_id != self.current_filter:
+                continue
+
             card = self.create_game_card(game)
 
             self.grid_layout.addWidget(card, row, col)
@@ -238,3 +250,31 @@ class MainView(QWidget):
             self.tabs_layout.addWidget(button)
 
         self.tabs_layout.addWidget(self.add_collection_button)
+
+    def handle_add_game(self):
+        if self.current_filter == "all":
+            print("Choose a collection before adding a game")
+            return
+
+        games = get_available_games()
+
+        dialog = AddGameDialog(games)
+        result = dialog.exec()
+
+        if result != QDialog.Accepted:
+            return
+
+        selected_game = dialog.get_selected_game()
+
+        if not selected_game:
+            return
+
+        game_id = selected_game.get("id")
+        collection_id = self.current_filter
+
+        success = add_game_to_collection(game_id, collection_id)
+
+        print("ADD GAME RESULT:", success)
+
+        if success:
+            self.load_games()

@@ -9,7 +9,8 @@ from PySide6.QtWidgets import (
 from services.auth_service import get_user_profile
 from services.app_settings_service import (
     load_settings,
-    save_settings
+    save_settings,
+    set_start_with_system
 )
 
 from config import API_URL
@@ -72,3 +73,7 @@ class SettingsView(QWidget):
         )
 
         save_settings(self.settings)
+
+        set_start_with_system(
+            self.settings["start_with_system"]
+        )

@@ -1,6 +1,6 @@
 import requests
 
-from config import API_URL
+from config import API_URL, VERIFY_SSL
 from services.session import get_token
 
 
@@ -18,7 +18,7 @@ def api_get(endpoint):
     return requests.get(
         url,
         headers=get_headers(),
-        verify=False
+        verify=VERIFY_SSL
     )
 
 
@@ -29,7 +29,7 @@ def api_post(endpoint, data=None):
         url,
         json=data,
         headers=get_headers(),
-        verify=False
+        verify=VERIFY_SSL
     )
 
 
@@ -40,7 +40,7 @@ def api_put(endpoint, data=None):
         url,
         json=data,
         headers=get_headers(),
-        verify=False
+        verify=VERIFY_SSL
     )
 
 
@@ -50,7 +50,7 @@ def api_delete(endpoint):
     return requests.delete(
         url,
         headers=get_headers(),
-        verify=False
+        verify=VERIFY_SSL
     )
 
 

@@ -8,6 +8,7 @@ from services.session import clear_token
 from services.auth_service import logout
 from services.game_service import get_available_games, add_game_to_collection, remove_game_from_collection
 
+from views.profile_view import ProfileView
 from views.friends_view import FriendsView
 from views.stats_view import StatsView
 from views.settings_view import SettingsView
@@ -30,6 +31,7 @@ class MainView(QWidget):
 
         sidebar = QVBoxLayout()
 
+        self.profile_button = QPushButton("Profile")
         self.home_button = QPushButton("Home")
         self.stats_button = QPushButton("Stats")
         self.friends_button = QPushButton("Friends")
@@ -38,6 +40,7 @@ class MainView(QWidget):
         self.settings_button = QPushButton("Settings")
         self.logout_button = QPushButton("Logout")
 
+        sidebar.addWidget(self.profile_button)
         sidebar.addWidget(self.home_button)
         sidebar.addWidget(self.stats_button)
         sidebar.addWidget(self.friends_button)
@@ -107,13 +110,15 @@ class MainView(QWidget):
         self.settings_view = SettingsView()
         self.global_stats_view = GlobalStatsView()
         self.notifications_view = NotificationsView()
+        self.profile_view = ProfileView(self.logout_view)
 
-        self.stacked_layout.addWidget(self.home_widget)           # 0
-        self.stacked_layout.addWidget(self.friends_view)          # 1
-        self.stacked_layout.addWidget(self.stats_view)            # 2
-        self.stacked_layout.addWidget(self.settings_view)         # 3
-        self.stacked_layout.addWidget(self.global_stats_view)     # 4
-        self.stacked_layout.addWidget(self.notifications_view)    # 5
+        self.stacked_layout.addWidget(self.home_widget)
+        self.stacked_layout.addWidget(self.friends_view)
+        self.stacked_layout.addWidget(self.stats_view)
+        self.stacked_layout.addWidget(self.settings_view)
+        self.stacked_layout.addWidget(self.global_stats_view)
+        self.stacked_layout.addWidget(self.notifications_view)
+        self.stacked_layout.addWidget(self.profile_view)
 
         content_layout.addLayout(self.stacked_layout)
 
@@ -122,6 +127,7 @@ class MainView(QWidget):
 
         self.setLayout(main_layout)
 
+        self.profile_button.clicked.connect(lambda: self.switch_view_with_highlight(6, self.profile_button))
         self.home_button.clicked.connect(lambda: self.switch_view_with_highlight(0, self.home_button))
         self.friends_button.clicked.connect(lambda: self.switch_view_with_highlight(1, self.friends_button))
         self.stats_button.clicked.connect(lambda: self.switch_view_with_highlight(2, self.stats_button))
@@ -200,6 +206,7 @@ class MainView(QWidget):
 
     def set_active_button(self, active_button):
         buttons = [
+            self.profile_button,
             self.home_button,
             self.stats_button,
             self.friends_button,

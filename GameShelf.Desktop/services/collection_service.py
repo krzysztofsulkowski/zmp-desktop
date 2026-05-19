@@ -1,19 +1,8 @@
-import requests
-from config import API_URL
-from services.session import get_token
+from services.api_client import api_get, api_post, api_put, api_delete
 from models.game import Game
 
 
 def get_my_collection():
-    url = f"{API_URL}/api/collections/grouped-with-games"
-
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
     data = {
         "draw": 1,
         "start": 0,
@@ -24,10 +13,7 @@ def get_my_collection():
         "extraFilters": {}
     }
 
-    response = requests.post(url, json=data, headers=headers, verify=False)
-
-    print("COLLECTION STATUS:", response.status_code)
-    print("COLLECTION TEXT:", response.text)
+    response = api_post("/api/collections/grouped-with-games", data)
 
     if response.status_code != 200:
         return []
@@ -54,45 +40,9 @@ def get_my_collection():
 
     return games
 
-def create_collection(name, is_public):
-    url = f"{API_URL}/api/collections/create"
-
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
-    data = {
-        "id": 0,
-        "name": name,
-        "isPublic": is_public
-    }
-
-    response = requests.post(url, json=data, headers=headers, verify=False)
-
-    print("CREATE STATUS:", response.status_code)
-    print("CREATE TEXT:", response.text)
-
-    if response.status_code == 200:
-        return True
-
-    return False
 
 def get_collections_lookup():
-    url = f"{API_URL}/api/collections/lookup"
-
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = requests.get(url, headers=headers, verify=False)
-
-    print("LOOKUP STATUS:", response.status_code)
-    print("LOOKUP TEXT:", response.text)
+    response = api_get("/api/collections/lookup")
 
     if response.status_code != 200:
         return []
@@ -102,49 +52,32 @@ def get_collections_lookup():
     except Exception:
         return []
 
-def update_collection(collection_id, name, is_public=True):
-    url = f"{API_URL}/api/collections/update"
 
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
+def create_collection(name, is_public):
+    data = {
+        "id": 0,
+        "name": name,
+        "isPublic": is_public
     }
 
+    response = api_post("/api/collections/create", data)
+
+    return response.status_code == 200
+
+
+def update_collection(collection_id, name, is_public=True):
     data = {
         "id": collection_id,
         "name": name,
         "isPublic": is_public
     }
 
-    response = requests.put(
-        url,
-        json=data,
-        headers=headers,
-        verify=False
-    )
-
-    print("UPDATE STATUS:", response.status_code)
-    print("UPDATE TEXT:", response.text)
+    response = api_put("/api/collections/update", data)
 
     return response.status_code == 200
 
+
 def delete_collection(collection_id):
-    url = f"{API_URL}/api/collections/delete/{collection_id}"
-
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = requests.delete(
-        url,
-        headers=headers,
-        verify=False
-    )
-
-    print("DELETE STATUS:", response.status_code)
-    print("DELETE TEXT:", response.text)
+    response = api_delete(f"/api/collections/delete/{collection_id}")
 
     return response.status_code == 200

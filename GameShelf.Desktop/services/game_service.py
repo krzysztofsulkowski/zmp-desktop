@@ -1,17 +1,7 @@
-import requests
-from config import API_URL
-from services.session import get_token
+from services.api_client import api_post, api_delete
 
 
 def get_available_games():
-    url = f"{API_URL}/api/games/available-table"
-
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
     data = {
         "draw": 1,
         "start": 0,
@@ -22,56 +12,28 @@ def get_available_games():
         "extraFilters": {}
     }
 
-    response = requests.post(
-        url,
-        json=data,
-        headers=headers,
-        verify=False
-    )
+    response = api_post("/api/games/available-table", data)
 
     if response.status_code != 200:
         return []
 
-    result = response.json()
+    try:
+        result = response.json()
+    except Exception:
+        return []
+
     return result.get("data", [])
 
 
 def add_game_to_collection(game_id, collection_id):
-    url = f"{API_URL}/api/games/add-to-collection/{game_id}?collectionId={collection_id}"
-
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = requests.post(
-        url,
-        headers=headers,
-        verify=False
+    response = api_post(
+        f"/api/games/add-to-collection/{game_id}?collectionId={collection_id}"
     )
-
-    print("ADD GAME STATUS:", response.status_code)
-    print("ADD GAME TEXT:", response.text)
 
     return response.status_code == 200
 
+
 def remove_game_from_collection(game_id):
-    url = f"{API_URL}/api/games/remove-from-collection/{game_id}"
-
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = requests.delete(
-        url,
-        headers=headers,
-        verify=False
-    )
-
-    print("REMOVE GAME STATUS:", response.status_code)
-    print("REMOVE GAME TEXT:", response.text)
+    response = api_delete(f"/api/games/remove-from-collection/{game_id}")
 
     return response.status_code == 200

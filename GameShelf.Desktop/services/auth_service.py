@@ -1,6 +1,9 @@
 import requests
-from config import API_URL
+
+from config import API_URL, VERIFY_SSL
 from services.session import get_token
+from services.api_client import api_get, api_post
+
 
 def login(email, password):
     url = f"{API_URL}/api/authentication/login"
@@ -10,47 +13,31 @@ def login(email, password):
         "password": password
     }
 
-    response = requests.post(url, json=data, verify=False)
+    response = requests.post(url, json=data, verify=VERIFY_SSL)
 
     if response.status_code == 200:
         return response.json().get("token")
-    else:
-        return None
+
+    return None
+
 
 def get_user_profile():
-    url = f"{API_URL}/api/authentication/me"
-
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    response = requests.get(url, headers=headers, verify=False)
-
+    response = api_get("/api/authentication/me")
     return response.json()
 
+
 def logout():
-    url = f"{API_URL}/api/authentication/logout"
+    api_post("/api/authentication/logout")
 
-    token = get_token()
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-
-    requests.post(url, headers=headers, verify=False)
 
 def register(email, username, password):
-    url = f"{API_URL}/api/authentication/register"
-
     data = {
         "email": email,
         "username": username,
         "password": password
     }
 
-    response = requests.post(url, json=data, verify=False)
+    response = api_post("/api/authentication/register", data)
 
     if response.status_code == 200:
         return True, None
@@ -61,13 +48,12 @@ def register(email, username, password):
     except Exception:
         return False, "Registration failed."
 
-def forgot_password(email):
-    url = f"{API_URL}/api/authentication/forgot-password"
 
+def forgot_password(email):
     data = {
         "email": email
     }
 
-    response = requests.post(url, json=data, verify=False)
+    response = api_post("/api/authentication/forgot-password", data)
 
     return response.status_code == 200

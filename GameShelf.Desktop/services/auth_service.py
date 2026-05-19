@@ -1,7 +1,6 @@
 import requests
 
 from config import API_URL, VERIFY_SSL
-from services.session import get_token
 from services.api_client import api_get, api_post
 
 
@@ -13,7 +12,15 @@ def login(email, password):
         "password": password
     }
 
-    response = requests.post(url, json=data, verify=VERIFY_SSL)
+    try:
+        response = requests.post(
+            url,
+            json=data,
+            verify=VERIFY_SSL,
+            timeout=10
+        )
+    except requests.RequestException:
+        return None
 
     if response.status_code == 200:
         return response.json().get("token")
@@ -23,6 +30,10 @@ def login(email, password):
 
 def get_user_profile():
     response = api_get("/api/authentication/me")
+
+    if response is None or response.status_code != 200:
+        return {}
+
     return response.json()
 
 
@@ -37,16 +48,23 @@ def register(email, username, password):
         "password": password
     }
 
-    response = api_post("/api/authentication/register", data)
+    response = api_post(
+        "/api/authentication/register",
+        data,
+        auth_required=False
+    )
+
+    if response is None:
+        return False, "Nie udało się połączyć z API."
 
     if response.status_code == 200:
         return True, None
 
     try:
         error_data = response.json()
-        return False, error_data.get("detail", "Registration failed.")
+        return False, error_data.get("detail", "Rejestracja nie powiodła się.")
     except Exception:
-        return False, "Registration failed."
+        return False, "Rejestracja nie powiodła się."
 
 
 def forgot_password(email):
@@ -54,6 +72,38 @@ def forgot_password(email):
         "email": email
     }
 
-    response = api_post("/api/authentication/forgot-password", data)
+    response = api_post(
+        "/api/authentication/forgot-password",
+        data,
+        auth_required=False
+    )
+
+    if response is None:
+        return False
 
     return response.status_code == 200
+
+
+def reset_password(email, token, new_password):
+    data = {
+        "email": email,
+        "token": token,
+        "newPassword": new_password
+    }
+
+    response = api_post(
+        "/api/authentication/reset-password",
+        data,
+        auth_required=False
+    )
+
+    if response is None:
+        return False, "Brak połączenia z API."
+
+    if response.status_code == 200:
+        return True, None
+
+    try:
+        return False, response.json()
+    except Exception:
+        return False, response.text

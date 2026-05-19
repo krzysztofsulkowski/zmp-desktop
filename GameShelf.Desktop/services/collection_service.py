@@ -15,7 +15,7 @@ def get_my_collection():
 
     response = api_post("/api/collections/grouped-with-games", data)
 
-    if response.status_code != 200:
+    if response is None or response.status_code != 200:
         return []
 
     try:
@@ -34,7 +34,8 @@ def get_my_collection():
                     genre=game.get("genreName"),
                     platform=game.get("platformName"),
                     image_url=game.get("imageUrl"),
-                    collection_id=collection.get("collectionId")
+                    collection_id=collection.get("collectionId"),
+                    rating=game.get("rating") or game.get("userRating")
                 )
             )
 
@@ -44,7 +45,7 @@ def get_my_collection():
 def get_collections_lookup():
     response = api_get("/api/collections/lookup")
 
-    if response.status_code != 200:
+    if response is None or response.status_code != 200:
         return []
 
     try:
@@ -62,7 +63,7 @@ def create_collection(name, is_public):
 
     response = api_post("/api/collections/create", data)
 
-    return response.status_code == 200
+    return response is not None and response.status_code == 200
 
 
 def update_collection(collection_id, name, is_public=True):
@@ -74,10 +75,10 @@ def update_collection(collection_id, name, is_public=True):
 
     response = api_put("/api/collections/update", data)
 
-    return response.status_code == 200
+    return response is not None and response.status_code == 200
 
 
 def delete_collection(collection_id):
     response = api_delete(f"/api/collections/delete/{collection_id}")
 
-    return response.status_code == 200
+    return response is not None and response.status_code == 200

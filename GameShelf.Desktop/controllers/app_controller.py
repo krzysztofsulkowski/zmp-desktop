@@ -3,8 +3,7 @@ from views.login_view import LoginView
 from views.register_view import RegisterView
 from views.main_view import MainView
 from views.forgot_password_view import ForgotPasswordView
-
-
+from views.reset_password_view import ResetPasswordView
 
 class AppController:
     def __init__(self):
@@ -49,3 +48,10 @@ class AppController:
         self.close_all_views()
         self.forgot_password_view = ForgotPasswordView(self)
         self.forgot_password_view.show()
+
+    def show_reset_password(self):
+        self.window = ResetPasswordView(
+            self.show_login
+        )
+
+        self.window.show()

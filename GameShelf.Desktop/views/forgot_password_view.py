@@ -3,17 +3,17 @@ from PySide6.QtWidgets import (
     QPushButton, QLabel
 )
 from PySide6.QtCore import Qt
+
 from services.auth_service import forgot_password
 
 
 class ForgotPasswordView(QWidget):
     def __init__(self, controller):
         super().__init__()
+
         self.controller = controller
 
         self.setWindowTitle("Forgot Password")
-
-        main_layout = QVBoxLayout()
 
         self.back_button = QPushButton("←")
         self.back_button.setFixedWidth(40)
@@ -31,10 +31,17 @@ class ForgotPasswordView(QWidget):
         self.info_label.setAlignment(Qt.AlignCenter)
 
         self.send_button = QPushButton("Wyślij link")
+        self.reset_password_button = QPushButton("Mam token resetujący")
 
         self.status_label = QLabel("")
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setWordWrap(True)
+
+        self.setup_ui()
+        self.connect_signals()
+
+    def setup_ui(self):
+        main_layout = QVBoxLayout()
 
         main_layout.addWidget(self.back_button, alignment=Qt.AlignLeft)
         main_layout.addSpacing(20)
@@ -44,13 +51,16 @@ class ForgotPasswordView(QWidget):
         main_layout.addWidget(self.info_label)
         main_layout.addSpacing(15)
         main_layout.addWidget(self.send_button)
+        main_layout.addWidget(self.reset_password_button)
         main_layout.addWidget(self.status_label)
         main_layout.addStretch()
 
         self.setLayout(main_layout)
 
+    def connect_signals(self):
         self.back_button.clicked.connect(self.controller.show_login)
         self.send_button.clicked.connect(self.handle_send_link)
+        self.reset_password_button.clicked.connect(self.open_reset_password)
 
     def handle_send_link(self):
         email = self.email_input.text().strip()
@@ -65,5 +75,9 @@ class ForgotPasswordView(QWidget):
             self.status_label.setText(
                 "Jeśli konto istnieje, link do zmiany hasła został wysłany na podany adres e-mail."
             )
-        else:
-            self.status_label.setText("Nie udało się wysłać żądania resetu hasła.")
+            return
+
+        self.status_label.setText("Nie udało się wysłać żądania resetu hasła.")
+
+    def open_reset_password(self):
+        self.controller.show_reset_password()

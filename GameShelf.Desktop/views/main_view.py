@@ -9,8 +9,11 @@ from PySide6.QtWidgets import (
     QStackedLayout,
     QDialog,
     QMessageBox,
-    QComboBox
+    QComboBox,
+    QApplication
 )
+
+from config import API_URL
 
 from services.collection_service import (
     get_my_collection,
@@ -28,6 +31,7 @@ from services.game_service import (
     move_game,
     rate_game
 )
+from services.share_code_store import get_share_code
 
 from views.profile_view import ProfileView
 from views.friends_view import FriendsView
@@ -124,10 +128,12 @@ class MainView(QWidget):
         self.add_collection_button = QPushButton("+")
         self.edit_collection_button = QPushButton("Edytuj")
         self.delete_collection_button = QPushButton("Usuń")
+        self.share_collection_button = QPushButton("Udostępnij")
 
         self.add_collection_button.setFixedSize(32, 32)
         self.edit_collection_button.setFixedSize(70, 32)
         self.delete_collection_button.setFixedSize(70, 32)
+        self.share_collection_button.setFixedSize(100, 32)
 
         self.filters_layout = QHBoxLayout()
 
@@ -195,6 +201,7 @@ class MainView(QWidget):
         self.add_collection_button.clicked.connect(self.handle_add_collection)
         self.edit_collection_button.clicked.connect(self.handle_edit_collection)
         self.delete_collection_button.clicked.connect(self.handle_delete_collection)
+        self.share_collection_button.clicked.connect(self.handle_share_collection)
         self.add_game_button.clicked.connect(self.handle_add_game)
 
         self.genre_filter.currentIndexChanged.connect(self.apply_filters)
@@ -454,6 +461,7 @@ class MainView(QWidget):
 
         self.tabs_layout.addWidget(self.edit_collection_button)
         self.tabs_layout.addWidget(self.delete_collection_button)
+        self.tabs_layout.addWidget(self.share_collection_button)
         self.tabs_layout.addWidget(self.add_collection_button)
 
     def clear_collection_tabs(self):
@@ -461,6 +469,7 @@ class MainView(QWidget):
             self.tab_all,
             self.edit_collection_button,
             self.delete_collection_button,
+            self.share_collection_button,
             self.add_collection_button
         ]
 
@@ -678,4 +687,38 @@ class MainView(QWidget):
             self,
             "GameShelf",
             "Ocena została zapisana."
+        )
+
+    def handle_share_collection(self):
+        if self.current_filter == "all":
+            self.show_warning("Najpierw wybierz konkretną kolekcję.")
+            return
+
+        selected_collection = self.get_current_collection()
+
+        if not selected_collection:
+            self.show_warning("Nie znaleziono wybranej kolekcji.")
+            return
+
+        if not selected_collection.get("isPublic", False):
+            self.show_warning("Kolekcja musi być publiczna, żeby można było ją udostępnić.")
+            return
+
+        share_code = get_share_code(self.current_filter)
+
+        if not share_code:
+            self.show_warning(
+                "Nie udało się pobrać kodu udostępniania dla tej kolekcji. "
+                "API zwraca shareCode tylko przy tworzeniu kolekcji, więc działa to dla kolekcji utworzonych od teraz w desktopie."
+            )
+            return
+
+        share_link = f"{API_URL}/api/collections/share/{share_code}"
+
+        QApplication.clipboard().setText(share_link)
+
+        QMessageBox.information(
+            self,
+            "GameShelf",
+            f"Link do kolekcji został skopiowany do schowka:\n\n{share_link}"
         )

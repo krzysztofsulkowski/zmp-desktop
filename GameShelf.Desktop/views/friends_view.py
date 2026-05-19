@@ -5,8 +5,11 @@ from PySide6.QtWidgets import (
     QLabel,
     QListWidget,
     QLineEdit,
-    QPushButton
+    QPushButton,
+    QApplication
 )
+
+from config import WEB_REGISTER_URL
 
 from services.friends_service import (
     get_my_friends,
@@ -46,6 +49,8 @@ class FriendsView(QWidget):
         self.search_button = QPushButton("Szukaj")
         self.add_button = QPushButton("Dodaj wybranego")
 
+        self.invite_link_button = QPushButton("Kopiuj link zaproszenia")
+
         search_layout.addWidget(self.search_input)
         search_layout.addWidget(self.search_button)
         search_layout.addWidget(self.add_button)
@@ -76,6 +81,7 @@ class FriendsView(QWidget):
         friend_buttons_layout.addWidget(self.view_collections_button)
         friend_buttons_layout.addWidget(self.compare_button)
         friend_buttons_layout.addWidget(self.remove_friend_button)
+        friend_buttons_layout.addWidget(self.invite_link_button)
 
         self.friend_collections_label = QLabel("Kolekcje znajomego")
         self.friend_collections_list = QListWidget()
@@ -112,6 +118,9 @@ class FriendsView(QWidget):
         self.view_collections_button.clicked.connect(self.handle_view_friend_collections)
         self.compare_button.clicked.connect(self.handle_compare_friend)
         self.remove_friend_button.clicked.connect(self.handle_remove_selected_friend)
+        self.invite_link_button.clicked.connect(
+            self.handle_copy_invite_link
+        )
 
     def load_friends(self):
         self.friends_list.clear()
@@ -363,3 +372,12 @@ class FriendsView(QWidget):
 
     def set_status(self, message):
         self.status_label.setText(message)
+
+    def handle_copy_invite_link(self):
+        QApplication.clipboard().setText(
+            WEB_REGISTER_URL
+        )
+
+        self.set_status(
+            "Link zaproszenia został skopiowany do schowka."
+        )

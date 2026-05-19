@@ -1,5 +1,6 @@
 from services.api_client import api_get, api_post, api_put, api_delete
 from models.game import Game
+from services.share_code_store import save_share_code
 
 
 def get_my_collection():
@@ -63,7 +64,16 @@ def create_collection(name, is_public):
 
     response = api_post("/api/collections/create", data)
 
-    return response is not None and response.status_code == 200
+    if response is None or response.status_code != 200:
+        return False
+
+    try:
+        result = response.json()
+        save_share_code(result.get("id"), result.get("shareCode"))
+    except Exception:
+        pass
+
+    return True
 
 
 def update_collection(collection_id, name, is_public=True):

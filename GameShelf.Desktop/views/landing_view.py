@@ -17,6 +17,8 @@ class LandingView(QWidget):
     def __init__(self, controller):
         super().__init__()
 
+        self.setObjectName("LandingView")
+
         self.controller = controller
         self.drag_position = QPoint()
         self.is_dragging = False
@@ -190,7 +192,7 @@ class LandingView(QWidget):
         self.offer_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.offer_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-        offer_path = self.base_dir / "assets" / "offer.svg"
+        offer_path = self.base_dir / "assets" / "offer.png"
         offer_pixmap = QPixmap(str(offer_path))
 
         if offer_pixmap.isNull():

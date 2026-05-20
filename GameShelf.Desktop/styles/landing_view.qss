@@ -1,5 +1,5 @@
-QWidget {
-    background-color: #0f0f1a;
+LandingView {
+    background: transparent;
     color: #f8fafc;
     font-family: "Figtree", "Segoe UI", "Arial";
 }
@@ -24,7 +24,7 @@ QPushButton#landingLoginButton {
     background: transparent;
     color: #ffffff;
     border: none;
-    border-radius: 18px;
+    border-radius: 20px;
     font-family: "Figtree", "Segoe UI", "Arial";
     font-size: 14px;
     font-weight: 900;
@@ -40,7 +40,7 @@ QPushButton#landingRegisterButton {
     background-color: #7C3AED;
     color: #ffffff;
     border: none;
-    border-radius: 13px;
+    border-radius: 15px;
     font-family: "Figtree", "Segoe UI", "Arial";
     font-size: 14px;
     font-weight: 900;
@@ -56,7 +56,7 @@ QPushButton#landingJoinButton {
     background-color: #7C3AED;
     color: #ffffff;
     border: none;
-    border-radius: 13px;
+    border-radius: 15px;
     font-family: "Figtree", "Segoe UI", "Arial";
     font-size: 14px;
     font-weight: 900;
@@ -73,7 +73,7 @@ QPushButton#windowCloseButton {
     background-color: rgba(255, 255, 255, 0.06);
     color: rgba(255, 255, 255, 0.82);
     border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 10px;
+    border-radius: 11px;
     font-family: "Figtree", "Segoe UI", "Arial";
     font-size: 15px;
     font-weight: 900;
@@ -91,8 +91,15 @@ QPushButton#windowCloseButton:hover {
     color: #ffffff;
 }
 
-QLabel#landingLogo {
+QLabel#landingLogo,
+QLabel#landingHeadline,
+QLabel#landingDescription,
+QLabel#landingSmallText,
+QLabel#landingOfferImage {
     background-color: transparent;
+}
+
+QLabel#landingLogo {
     color: #ffffff;
     font-family: "Figtree", "Segoe UI", "Arial";
     font-size: 38px;
@@ -100,7 +107,6 @@ QLabel#landingLogo {
 }
 
 QLabel#landingHeadline {
-    background-color: transparent;
     color: #ffffff;
     font-family: "Figtree", "Segoe UI", "Arial";
     font-size: 34px;
@@ -109,7 +115,6 @@ QLabel#landingHeadline {
 }
 
 QLabel#landingDescription {
-    background-color: transparent;
     color: rgba(255, 255, 255, 0.76);
     font-family: "Figtree Light", "Figtree", "Segoe UI Light", "Segoe UI", "Arial";
     font-size: 16px;
@@ -118,14 +123,8 @@ QLabel#landingDescription {
 }
 
 QLabel#landingSmallText {
-    background-color: transparent;
     color: rgba(255, 255, 255, 0.62);
     font-family: "Figtree Light", "Figtree", "Segoe UI Light", "Segoe UI", "Arial";
     font-size: 13px;
     font-weight: 300;
-}
-
-QLabel#landingOfferImage {
-    background-color: transparent;
-    border: none;
 }

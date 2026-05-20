@@ -299,7 +299,7 @@ QLabel#addGameText {
     background-color: transparent;
     color: #CBC3DF;
     font-family: "Figtree Light", "Figtree", "Segoe UI", "Arial";
-    font-size: 23px;
+    font-size: 22px;
     font-weight: 300;
 }
 
@@ -311,7 +311,7 @@ QFrame#libraryGameCard {
 QLabel#gameCover {
     background-color: #2A2141;
     color: #ffffff;
-    border-radius: 14px;
+    border-radius: 14px 14px 0px 0px;
     font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
     font-size: 18px;
     font-weight: 900;

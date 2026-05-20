@@ -3,7 +3,42 @@ from models.game import Game
 from services.share_code_store import save_share_code
 
 
+def get_available_game_images():
+    data = {
+        "draw": 1,
+        "start": 0,
+        "length": 1000,
+        "searchValue": "",
+        "orderColumn": 0,
+        "orderDir": "asc",
+        "extraFilters": {}
+    }
+
+    response = api_post("/api/games/available-table", data)
+
+    if response is None or response.status_code != 200:
+        return {}
+
+    try:
+        result = response.json()
+    except Exception:
+        return {}
+
+    images = {}
+
+    for game in result.get("data", []):
+        game_id = game.get("id")
+        image_url = game.get("imageUrl")
+
+        if game_id is not None and image_url:
+            images[game_id] = image_url
+
+    return images
+
+
 def get_my_collection():
+    game_images = get_available_game_images()
+
     data = {
         "draw": 1,
         "start": 0,
@@ -34,7 +69,7 @@ def get_my_collection():
                     title=game.get("title"),
                     genre=game.get("genreName"),
                     platform=game.get("platformName"),
-                    image_url=game.get("imageUrl"),
+                    image_url=game.get("imageUrl") or game_images.get(game.get("gameId")),
                     collection_id=collection.get("collectionId"),
                     rating=game.get("rating") or game.get("userRating")
                 )

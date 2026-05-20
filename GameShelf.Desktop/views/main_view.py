@@ -18,8 +18,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QSize, QPoint
 from PySide6.QtGui import QPixmap, QFontDatabase, QIcon
+import requests
 
-from config import API_URL
+from config import API_URL, VERIFY_SSL
 
 from services.collection_service import (
     get_my_collection,
@@ -71,6 +72,7 @@ class MainView(QWidget):
         self.current_filter = "all"
         self.collection_buttons = []
         self.all_games = []
+        self.cover_cache = {}
         self.base_dir = Path(__file__).resolve().parents[1]
 
         self.drag_position = QPoint()
@@ -361,6 +363,7 @@ class MainView(QWidget):
         self.scroll_area.setObjectName("gamesScrollArea")
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         self.scroll_widget = QWidget()
         self.scroll_widget.setObjectName("gamesScrollWidget")
@@ -550,7 +553,7 @@ class MainView(QWidget):
 
             col += 1
 
-            if col == 5:
+            if col == 3:
                 col = 0
                 row += 1
 
@@ -565,18 +568,18 @@ class MainView(QWidget):
     def create_add_game_card(self):
         card = QPushButton()
         card.setObjectName("addGameCard")
-        card.setFixedSize(190, 326)
+        card.setFixedSize(252, 204)
         card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         card.clicked.connect(self.handle_add_game)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(20, 38, 20, 38)
-        layout.setSpacing(18)
+        layout.setContentsMargins(20, 24, 20, 24)
+        layout.setSpacing(14)
 
         plus_circle = QLabel("+")
         plus_circle.setObjectName("addGamePlus")
         plus_circle.setAlignment(Qt.AlignCenter)
-        plus_circle.setFixedSize(60, 60)
+        plus_circle.setFixedSize(56, 56)
 
         text = QLabel("dodaj kolejną grę")
         text.setObjectName("addGameText")
@@ -595,7 +598,7 @@ class MainView(QWidget):
     def create_game_card(self, game):
         card = QFrame()
         card.setObjectName("libraryGameCard")
-        card.setFixedSize(190, 326)
+        card.setFixedSize(252, 204)
         card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         layout = QVBoxLayout()
@@ -604,24 +607,13 @@ class MainView(QWidget):
 
         cover = QLabel()
         cover.setObjectName("gameCover")
-        cover.setFixedSize(190, 266)
+        cover.setFixedSize(252, 142)
         cover.setAlignment(Qt.AlignCenter)
-
-        image_url = getattr(game, "image_url", None)
-
-        if image_url:
-            image_path = image_url
-
-            if image_path.startswith("/"):
-                image_path = f"{API_URL}{image_path}"
-
-            cover.setText("")
-        else:
-            cover.setText(game.title)
+        self.set_cover_image(cover, game)
 
         info = QFrame()
         info.setObjectName("gameInfoPanel")
-        info.setFixedSize(190, 60)
+        info.setFixedSize(252, 62)
 
         info_layout = QVBoxLayout()
         info_layout.setContentsMargins(10, 7, 10, 7)
@@ -666,7 +658,7 @@ class MainView(QWidget):
         badge.setParent(card)
         badge.adjustSize()
         badge.resize(max(38, badge.width() + 18), 22)
-        badge.move(76, 0)
+        badge.move(12, 10)
 
         layout.addWidget(cover)
         layout.addWidget(info)
@@ -674,6 +666,66 @@ class MainView(QWidget):
         card.setLayout(layout)
 
         return card
+
+    def set_cover_image(self, cover, game):
+        image_url = getattr(game, "image_url", None)
+
+        if not image_url:
+            cover.setText(game.title)
+            return
+
+        normalized_url = self.normalize_image_url(image_url)
+        pixmap = self.get_cached_cover(normalized_url)
+
+        if pixmap is None or pixmap.isNull():
+            cover.setText(game.title)
+            return
+
+        cover.setPixmap(self.crop_pixmap(pixmap, 252, 142))
+
+    def normalize_image_url(self, image_url):
+        if image_url.startswith("http://") or image_url.startswith("https://"):
+            return image_url
+
+        if image_url.startswith("/"):
+            return f"{API_URL}{image_url}"
+
+        return f"{API_URL}/{image_url}"
+
+    def get_cached_cover(self, image_url):
+        if image_url in self.cover_cache:
+            return self.cover_cache[image_url]
+
+        pixmap = QPixmap()
+
+        try:
+            response = requests.get(
+                image_url,
+                verify=VERIFY_SSL,
+                timeout=8
+            )
+
+            if response.status_code == 200:
+                pixmap.loadFromData(response.content)
+        except requests.RequestException:
+            pass
+
+        self.cover_cache[image_url] = pixmap
+
+        return pixmap
+
+    def crop_pixmap(self, pixmap, width, height):
+        scaled = pixmap.scaled(
+            width,
+            height,
+            Qt.KeepAspectRatioByExpanding,
+            Qt.SmoothTransformation
+        )
+
+        x = max(0, (scaled.width() - width) // 2)
+        y = max(0, (scaled.height() - height) // 2)
+
+        return scaled.copy(x, y, width, height)
 
     def set_active_button(self, active_button):
         buttons = [

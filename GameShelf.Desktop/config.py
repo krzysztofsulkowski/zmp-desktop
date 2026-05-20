@@ -9,3 +9,7 @@ WEB_REGISTER_URL = os.getenv(
     "WEB_REGISTER_URL",
     "http://localhost:5173/register"
 )
+CHAT_HUB_URL = os.getenv(
+    "CHAT_HUB_URL",
+    f"{API_URL}/chatHub"
+)

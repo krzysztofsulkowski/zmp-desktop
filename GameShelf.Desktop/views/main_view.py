@@ -45,9 +45,20 @@ from views.add_game_dialog import AddGameDialog
 from views.edit_collection_dialog import EditCollectionDialog
 from views.move_game_dialog import MoveGameDialog
 from views.rate_game_dialog import RateGameDialog
+from views.chat_view import ChatView
 
 
 class MainView(QWidget):
+
+    PROFILE_VIEW_INDEX = 0
+    HOME_VIEW_INDEX = 1
+    FRIENDS_VIEW_INDEX = 2
+    CHAT_VIEW_INDEX = 3
+    NOTIFICATIONS_VIEW_INDEX = 4
+    STATS_VIEW_INDEX = 5
+    GLOBAL_STATS_VIEW_INDEX = 6
+    SETTINGS_VIEW_INDEX = 7
+
     def __init__(self, controller):
         super().__init__()
 
@@ -62,6 +73,7 @@ class MainView(QWidget):
         self.connect_signals()
         self.load_collection_tabs()
         self.load_games()
+        self.switch_view(self.HOME_VIEW_INDEX)
         self.set_active_button(self.home_button)
 
     def setup_ui(self):
@@ -72,19 +84,23 @@ class MainView(QWidget):
         self.home_widget = self.create_home_widget()
 
         self.friends_view = FriendsView()
+        self.chat_view = ChatView()
         self.stats_view = StatsView()
         self.settings_view = SettingsView()
         self.global_stats_view = GlobalStatsView()
         self.notifications_view = NotificationsView()
         self.profile_view = ProfileView(self.logout_view)
 
+        self.stacked_layout.addWidget(self.profile_view)
         self.stacked_layout.addWidget(self.home_widget)
         self.stacked_layout.addWidget(self.friends_view)
-        self.stacked_layout.addWidget(self.stats_view)
-        self.stacked_layout.addWidget(self.settings_view)
-        self.stacked_layout.addWidget(self.global_stats_view)
+        self.stacked_layout.addWidget(self.chat_view)
         self.stacked_layout.addWidget(self.notifications_view)
-        self.stacked_layout.addWidget(self.profile_view)
+        self.stacked_layout.addWidget(self.stats_view)
+        self.stacked_layout.addWidget(self.global_stats_view)
+        self.stacked_layout.addWidget(self.settings_view)
+
+
 
         content_layout = QVBoxLayout()
         content_layout.addLayout(self.stacked_layout)
@@ -101,6 +117,7 @@ class MainView(QWidget):
         self.home_button = QPushButton("Biblioteka")
         self.stats_button = QPushButton("Statystyki")
         self.friends_button = QPushButton("Znajomi")
+        self.chat_button = QPushButton("Czat")
         self.global_stats_button = QPushButton("Statystyki globalne")
         self.notifications_button = QPushButton("Powiadomienia")
         self.settings_button = QPushButton("Ustawienia")
@@ -110,6 +127,7 @@ class MainView(QWidget):
         sidebar.addWidget(self.home_button)
         sidebar.addWidget(self.stats_button)
         sidebar.addWidget(self.friends_button)
+        sidebar.addWidget(self.chat_button)
         sidebar.addWidget(self.global_stats_button)
         sidebar.addWidget(self.notifications_button)
         sidebar.addWidget(self.settings_button)
@@ -175,25 +193,28 @@ class MainView(QWidget):
 
     def connect_signals(self):
         self.profile_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(6, self.profile_button)
+            lambda: self.switch_view_with_highlight(self.PROFILE_VIEW_INDEX, self.profile_button)
         )
         self.home_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(0, self.home_button)
-        )
-        self.friends_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(1, self.friends_button)
+            lambda: self.switch_view_with_highlight(self.HOME_VIEW_INDEX, self.home_button)
         )
         self.stats_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(2, self.stats_button)
+            lambda: self.switch_view_with_highlight(self.STATS_VIEW_INDEX, self.stats_button)
         )
-        self.settings_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(3, self.settings_button)
+        self.friends_button.clicked.connect(
+            lambda: self.switch_view_with_highlight(self.FRIENDS_VIEW_INDEX, self.friends_button)
+        )
+        self.chat_button.clicked.connect(
+            lambda: self.switch_view_with_highlight(self.CHAT_VIEW_INDEX, self.chat_button)
         )
         self.global_stats_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(4, self.global_stats_button)
+            lambda: self.switch_view_with_highlight(self.GLOBAL_STATS_VIEW_INDEX, self.global_stats_button)
         )
         self.notifications_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(5, self.notifications_button)
+            lambda: self.switch_view_with_highlight(self.NOTIFICATIONS_VIEW_INDEX, self.notifications_button)
+        )
+        self.settings_button.clicked.connect(
+            lambda: self.switch_view_with_highlight(self.SETTINGS_VIEW_INDEX, self.settings_button)
         )
 
         self.logout_button.clicked.connect(self.logout_view)
@@ -404,6 +425,7 @@ class MainView(QWidget):
             self.home_button,
             self.stats_button,
             self.friends_button,
+            self.chat_button,
             self.global_stats_button,
             self.notifications_button,
             self.settings_button

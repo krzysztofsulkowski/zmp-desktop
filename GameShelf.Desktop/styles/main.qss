@@ -138,3 +138,259 @@ QLabel#emptyState {
     font-size: 15px;
     padding: 24px;
 }
+
+QWidget#mainPage {
+    background-color: #0F0F14;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+}
+
+QFrame#mainSidebar {
+    background-color: #21153B;
+    border-radius: 22px;
+}
+
+QLabel#mainLogo {
+    background-color: transparent;
+}
+
+QPushButton#mainSidebarButton {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 20px;
+    font-weight: 900;
+}
+
+QPushButton#mainSidebarButton:hover {
+    background-color: rgba(139, 92, 246, 0.18);
+}
+
+QPushButton#mainSidebarButton[active="true"] {
+    background-color: rgba(139, 92, 246, 0.30);
+}
+
+QWidget#homeWidget {
+    background-color: transparent;
+}
+
+QLabel#mainPageTitle {
+    color: #ffffff;
+    background-color: transparent;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 29px;
+    font-weight: 900;
+}
+
+QFrame#collectionPanel {
+    background-color: rgba(9, 4, 17, 0.18);
+    border-radius: 23px;
+}
+
+QPushButton#collectionTab {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 18px;
+    font-weight: 400;
+    padding: 0 0 8px 0;
+}
+
+QPushButton#collectionTab:hover {
+    color: #c4b5fd;
+}
+
+QPushButton#collectionTab[active="true"] {
+    font-weight: 800;
+    border-bottom: 3px solid #8B5CF6;
+}
+
+QComboBox#mainFilter {
+    background-color: #261C40;
+    color: #ffffff;
+    border: none;
+    border-radius: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-family: "Figtree Light", "Figtree", "Segoe UI", "Arial";
+    font-size: 16px;
+    font-weight: 300;
+}
+
+QComboBox#mainFilter::drop-down {
+    border: none;
+    width: 28px;
+}
+
+QComboBox#mainFilter QAbstractItemView {
+    background-color: #21153B;
+    color: #ffffff;
+    border: 1px solid #8B5CF6;
+    selection-background-color: #7C3AED;
+}
+
+QScrollArea#gamesScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+QWidget#gamesScrollWidget {
+    background-color: transparent;
+}
+
+QScrollBar:vertical {
+    background-color: rgba(139, 92, 246, 0.21);
+    width: 13px;
+    border-radius: 8px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #8B5CF6;
+    border-radius: 8px;
+    min-height: 43px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+
+QPushButton#addGameCard {
+    background-color: #5C4E7E;
+    border: none;
+    border-radius: 14px;
+}
+
+QPushButton#addGameCard:hover {
+    background-color: #66558d;
+}
+
+QLabel#addGamePlus {
+    background-color: #CBC3DF;
+    color: #5C4E7E;
+    border-radius: 30px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 42px;
+    font-weight: 900;
+}
+
+QLabel#addGameText {
+    background-color: transparent;
+    color: #CBC3DF;
+    font-family: "Figtree Light", "Figtree", "Segoe UI", "Arial";
+    font-size: 23px;
+    font-weight: 300;
+}
+
+QFrame#libraryGameCard {
+    background-color: transparent;
+    border: none;
+}
+
+QLabel#gameCover {
+    background-color: #2A2141;
+    color: #ffffff;
+    border-radius: 14px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 18px;
+    font-weight: 900;
+}
+
+QFrame#gameInfoPanel {
+    background-color: #5C4E7E;
+    border-radius: 0 0 14px 14px;
+}
+
+QLabel#libraryGameTitle {
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 800;
+}
+
+QLabel#libraryGameDate {
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree Light", "Figtree", "Segoe UI", "Arial";
+    font-size: 13px;
+    font-weight: 300;
+}
+
+QLabel#libraryGameRating {
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 12px;
+    font-weight: 800;
+}
+
+QLabel#libraryGameStar {
+    background-color: transparent;
+    color: #FFD900;
+    font-size: 16px;
+}
+
+QLabel#platformBadge {
+    background-color: #7C3AED;
+    color: #ffffff;
+    border-radius: 11px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 11px;
+    font-weight: 900;
+    padding: 2px 8px;
+}
+
+QFrame#mainFrame {
+    background-color: #0F0F14;
+    border: 1px solid rgba(139, 92, 246, 0.95);
+    border-radius: 28px;
+}
+
+QPushButton#smallIconButton,
+QPushButton#wideIconButton {
+    background-color: #5C4E7E;
+    color: #ffffff;
+    border: none;
+    border-radius: 7px;
+}
+
+QPushButton#smallIconButton:hover,
+QPushButton#wideIconButton:hover {
+    background-color: #66558d;
+}
+
+QPushButton#addCollectionIconButton {
+    background: transparent;
+    border: none;
+    padding: 0px;
+    margin-top: -4px;
+}
+
+QPushButton#addCollectionIconButton:hover {
+    background: transparent;
+}
+
+QPushButton#windowControlButton,
+QPushButton#windowCloseButton {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 11px;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+QPushButton#windowControlButton:hover {
+    background-color: rgba(124, 58, 237, 0.32);
+}
+
+QPushButton#windowCloseButton:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+}

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PySide6.QtWidgets import (
     QWidget,
     QHBoxLayout,
@@ -14,8 +16,8 @@ from PySide6.QtWidgets import (
     QFrame,
     QSizePolicy
 )
-
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize, QPoint
+from PySide6.QtGui import QPixmap, QFontDatabase, QIcon
 
 from config import API_URL
 
@@ -53,7 +55,6 @@ from views.chat_view import ChatView
 
 
 class MainView(QWidget):
-
     PROFILE_VIEW_INDEX = 0
     HOME_VIEW_INDEX = 1
     FRIENDS_VIEW_INDEX = 2
@@ -70,8 +71,18 @@ class MainView(QWidget):
         self.current_filter = "all"
         self.collection_buttons = []
         self.all_games = []
+        self.base_dir = Path(__file__).resolve().parents[1]
 
+        self.drag_position = QPoint()
+        self.is_dragging = False
+
+        self.load_fonts()
         self.setWindowTitle("GameShelf")
+        self.setObjectName("mainPage")
+        self.setMinimumSize(1180, 720)
+        self.resize(1280, 760)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
 
         self.setup_ui()
         self.connect_signals()
@@ -80,8 +91,33 @@ class MainView(QWidget):
         self.switch_view(self.HOME_VIEW_INDEX)
         self.set_active_button(self.home_button)
 
+    def load_fonts(self):
+        font_dir = self.base_dir / "assets"
+
+        for font_path in font_dir.glob("*.ttf"):
+            QFontDatabase.addApplicationFont(str(font_path))
+
+        for font_path in font_dir.glob("*.otf"):
+            QFontDatabase.addApplicationFont(str(font_path))
+
     def setup_ui(self):
-        main_layout = QHBoxLayout()
+        outer_layout = QVBoxLayout()
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+
+        self.main_frame = QFrame()
+        self.main_frame.setObjectName("mainFrame")
+
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(28, 24, 28, 28)
+        main_layout.setSpacing(18)
+
+        main_layout.addLayout(self.create_window_controls_bar())
+
+        body_layout = QHBoxLayout()
+        body_layout.setContentsMargins(0, 0, 0, 0)
+        body_layout.setSpacing(28)
+
         sidebar = self.create_sidebar()
 
         self.stacked_layout = QStackedLayout()
@@ -104,64 +140,206 @@ class MainView(QWidget):
         self.stacked_layout.addWidget(self.global_stats_view)
         self.stacked_layout.addWidget(self.settings_view)
 
-
-
         content_layout = QVBoxLayout()
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(0)
         content_layout.addLayout(self.stacked_layout)
 
-        main_layout.addLayout(sidebar, 1)
-        main_layout.addLayout(content_layout, 4)
+        body_layout.addWidget(sidebar)
+        body_layout.addLayout(content_layout, 1)
 
-        self.setLayout(main_layout)
+        main_layout.addLayout(body_layout)
+        self.main_frame.setLayout(main_layout)
+
+        outer_layout.addWidget(self.main_frame)
+        self.setLayout(outer_layout)
+
+    def create_window_controls_bar(self):
+        controls_bar = QHBoxLayout()
+        controls_bar.setContentsMargins(0, 0, 6, 0)
+        controls_bar.setSpacing(10)
+
+        self.minimize_button = QPushButton("—")
+        self.maximize_button = QPushButton("□")
+        self.close_button = QPushButton("×")
+
+        self.minimize_button.setObjectName("windowControlButton")
+        self.maximize_button.setObjectName("windowControlButton")
+        self.close_button.setObjectName("windowCloseButton")
+
+        for button in [self.minimize_button, self.maximize_button, self.close_button]:
+            button.setFixedSize(34, 34)
+
+        self.minimize_button.clicked.connect(self.showMinimized)
+        self.maximize_button.clicked.connect(self.toggle_maximized)
+        self.close_button.clicked.connect(self.close)
+
+        controls_bar.addStretch()
+        controls_bar.addWidget(self.minimize_button)
+        controls_bar.addWidget(self.maximize_button)
+        controls_bar.addWidget(self.close_button)
+
+        return controls_bar
+
+    def toggle_maximized(self):
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton and event.position().y() <= 90:
+            self.is_dragging = True
+            self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event):
+        if self.is_dragging and event.buttons() == Qt.LeftButton and not self.isMaximized():
+            self.move(event.globalPosition().toPoint() - self.drag_position)
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        self.is_dragging = False
+        event.accept()
 
     def create_sidebar(self):
+        sidebar_frame = QFrame()
+        sidebar_frame.setObjectName("mainSidebar")
+        sidebar_frame.setFixedWidth(102)
+
         sidebar = QVBoxLayout()
+        sidebar.setContentsMargins(12, 22, 12, 22)
+        sidebar.setSpacing(18)
 
-        self.profile_button = QPushButton("Profil")
-        self.home_button = QPushButton("Biblioteka")
-        self.stats_button = QPushButton("Statystyki")
-        self.friends_button = QPushButton("Znajomi")
-        self.chat_button = QPushButton("Czat")
-        self.global_stats_button = QPushButton("Statystyki globalne")
-        self.notifications_button = QPushButton("Powiadomienia")
-        self.settings_button = QPushButton("Ustawienia")
-        self.logout_button = QPushButton("Wyloguj")
+        self.logo_label = QLabel()
+        self.logo_label.setObjectName("mainLogo")
+        self.logo_label.setFixedSize(78, 52)
+        self.logo_label.setAlignment(Qt.AlignCenter)
 
-        sidebar.addWidget(self.profile_button)
-        sidebar.addWidget(self.home_button)
-        sidebar.addWidget(self.stats_button)
-        sidebar.addWidget(self.friends_button)
-        sidebar.addWidget(self.chat_button)
-        sidebar.addWidget(self.global_stats_button)
-        sidebar.addWidget(self.notifications_button)
-        sidebar.addWidget(self.settings_button)
+        logo_path = self.base_dir / "assets" / "logo.svg"
+        logo_pixmap = QPixmap(str(logo_path))
+
+        if logo_pixmap.isNull():
+            self.logo_label.setText("GS")
+        else:
+            self.logo_label.setPixmap(
+                logo_pixmap.scaled(
+                    76,
+                    48,
+                    Qt.KeepAspectRatio,
+                    Qt.SmoothTransformation
+                )
+            )
+
+        self.profile_button = self.create_sidebar_icon_button("ProfileIcon.svg")
+        self.home_button = self.create_sidebar_icon_button("HomeIcon.svg")
+        self.stats_button = self.create_sidebar_icon_button("StatsIcon.svg")
+        self.friends_button = self.create_sidebar_icon_button("FriendsIcon.svg")
+        self.chat_button = self.create_sidebar_icon_button("ChatIcon.svg")
+        self.global_stats_button = self.create_sidebar_icon_button("GlobalStatsIcon.svg")
+        self.notifications_button = self.create_sidebar_icon_button("NotificationsIcon.svg")
+        self.settings_button = self.create_sidebar_icon_button("SettingsIcon.svg")
+        self.logout_button = self.create_sidebar_icon_button("LogOutIcon.svg")
+
+        buttons = [
+            self.profile_button,
+            self.home_button,
+            self.stats_button,
+            self.friends_button,
+            self.chat_button,
+            self.global_stats_button,
+            self.notifications_button,
+            self.settings_button,
+            self.logout_button
+        ]
+
+        for button in buttons:
+            button.setFixedSize(52, 52)
+
+        sidebar.addWidget(self.logo_label, alignment=Qt.AlignCenter)
+        sidebar.addSpacing(20)
+        sidebar.addWidget(self.profile_button, alignment=Qt.AlignCenter)
+        sidebar.addWidget(self.home_button, alignment=Qt.AlignCenter)
+        sidebar.addWidget(self.stats_button, alignment=Qt.AlignCenter)
+        sidebar.addWidget(self.friends_button, alignment=Qt.AlignCenter)
+        sidebar.addWidget(self.chat_button, alignment=Qt.AlignCenter)
+        sidebar.addWidget(self.global_stats_button, alignment=Qt.AlignCenter)
+        sidebar.addWidget(self.notifications_button, alignment=Qt.AlignCenter)
+        sidebar.addWidget(self.settings_button, alignment=Qt.AlignCenter)
         sidebar.addStretch()
-        sidebar.addWidget(self.logout_button)
+        sidebar.addWidget(self.logout_button, alignment=Qt.AlignCenter)
 
-        return sidebar
+        sidebar_frame.setLayout(sidebar)
+
+        return sidebar_frame
+
+    def create_sidebar_icon_button(self, icon_name):
+        button = QPushButton()
+        button.setObjectName("mainSidebarButton")
+        button.setFixedSize(52, 52)
+        button.setIcon(QIcon(str(self.base_dir / "assets" / icon_name)))
+        button.setIconSize(QSize(30, 30))
+
+        return button
+
+    def create_collection_icon_button(self, icon_name, object_name):
+        button = QPushButton()
+        button.setObjectName(object_name)
+        button.setIcon(QIcon(str(self.base_dir / "assets" / icon_name)))
+        button.setIconSize(QSize(22, 22))
+
+        return button
 
     def create_home_widget(self):
         widget = QWidget()
+        widget.setObjectName("homeWidget")
+
         layout = QVBoxLayout()
+        layout.setContentsMargins(34, 22, 34, 22)
+        layout.setSpacing(22)
+
+        self.page_title = QLabel("Twoje kolekcje")
+        self.page_title.setObjectName("mainPageTitle")
+        self.page_title.setAlignment(Qt.AlignCenter)
+
+        self.collection_panel = QFrame()
+        self.collection_panel.setObjectName("collectionPanel")
+
+        panel_layout = QVBoxLayout()
+        panel_layout.setContentsMargins(56, 32, 42, 26)
+        panel_layout.setSpacing(20)
 
         self.tabs_layout = QHBoxLayout()
+        self.tabs_layout.setContentsMargins(0, 0, 0, 0)
+        self.tabs_layout.setSpacing(26)
 
         self.tab_all = QPushButton("Biblioteka")
-        self.add_collection_button = QPushButton("+")
-        self.edit_collection_button = QPushButton("Edytuj")
-        self.delete_collection_button = QPushButton("Usuń")
-        self.share_collection_button = QPushButton("Udostępnij")
+        self.tab_all.setObjectName("collectionTab")
+        self.add_collection_button = self.create_collection_icon_button("AddCollectionIcon.svg", "addCollectionIconButton")
+        self.edit_collection_button = self.create_collection_icon_button("EditCollectionIcon.svg", "smallIconButton")
+        self.delete_collection_button = self.create_collection_icon_button("DeleteCollectionIcon.svg", "smallIconButton")
+        self.share_collection_button = self.create_collection_icon_button("CollectionShareCodeIcon.svg", "wideIconButton")
 
-        self.add_collection_button.setFixedSize(32, 32)
-        self.edit_collection_button.setFixedSize(70, 32)
-        self.delete_collection_button.setFixedSize(70, 32)
-        self.share_collection_button.setFixedSize(100, 32)
+        self.add_collection_button.setFixedSize(24, 24)
+        self.edit_collection_button.setFixedSize(36, 36)
+        self.delete_collection_button.setFixedSize(36, 36)
+        self.share_collection_button.setFixedSize(48, 36)
 
         self.filters_layout = QHBoxLayout()
+        self.filters_layout.setContentsMargins(0, 0, 0, 0)
+        self.filters_layout.setSpacing(14)
 
         self.genre_filter = QComboBox()
         self.platform_filter = QComboBox()
         self.sort_filter = QComboBox()
+
+        for combo in [self.genre_filter, self.platform_filter, self.sort_filter]:
+            combo.setObjectName("mainFilter")
+            combo.setFixedHeight(36)
+
+        self.genre_filter.setFixedWidth(196)
+        self.platform_filter.setFixedWidth(196)
+        self.sort_filter.setFixedWidth(226)
 
         self.genre_filter.addItem("Wszystkie gatunki", "all")
         self.platform_filter.addItem("Wszystkie platformy", "all")
@@ -174,22 +352,36 @@ class MainView(QWidget):
         self.filters_layout.addWidget(self.genre_filter)
         self.filters_layout.addWidget(self.platform_filter)
         self.filters_layout.addWidget(self.sort_filter)
+        self.filters_layout.addStretch()
+        self.filters_layout.addWidget(self.edit_collection_button)
+        self.filters_layout.addWidget(self.delete_collection_button)
+        self.filters_layout.addWidget(self.share_collection_button)
 
         self.scroll_area = QScrollArea()
+        self.scroll_area.setObjectName("gamesScrollArea")
         self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.scroll_widget = QWidget()
+        self.scroll_widget.setObjectName("gamesScrollWidget")
+
         self.grid_layout = QGridLayout()
+        self.grid_layout.setContentsMargins(0, 14, 0, 0)
+        self.grid_layout.setHorizontalSpacing(22)
+        self.grid_layout.setVerticalSpacing(28)
+        self.grid_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
 
         self.scroll_widget.setLayout(self.grid_layout)
         self.scroll_area.setWidget(self.scroll_widget)
 
-        self.add_game_button = QPushButton("Dodaj grę")
+        panel_layout.addLayout(self.tabs_layout)
+        panel_layout.addLayout(self.filters_layout)
+        panel_layout.addWidget(self.scroll_area)
 
-        layout.addLayout(self.tabs_layout)
-        layout.addLayout(self.filters_layout)
-        layout.addWidget(self.scroll_area)
-        layout.addWidget(self.add_game_button)
+        self.collection_panel.setLayout(panel_layout)
+
+        layout.addWidget(self.page_title)
+        layout.addWidget(self.collection_panel, 1)
 
         widget.setLayout(layout)
 
@@ -227,7 +419,6 @@ class MainView(QWidget):
         self.edit_collection_button.clicked.connect(self.handle_edit_collection)
         self.delete_collection_button.clicked.connect(self.handle_delete_collection)
         self.share_collection_button.clicked.connect(self.handle_share_collection)
-        self.add_game_button.clicked.connect(self.handle_add_game)
 
         self.genre_filter.currentIndexChanged.connect(self.apply_filters)
         self.platform_filter.currentIndexChanged.connect(self.apply_filters)
@@ -254,6 +445,7 @@ class MainView(QWidget):
     def change_tab(self, tab):
         self.current_filter = tab
         self.apply_filters()
+        self.refresh_active_collection_tab()
 
     def load_games(self):
         self.all_games = get_my_collection()
@@ -346,14 +538,11 @@ class MainView(QWidget):
     def render_games(self, games):
         self.clear_games_grid()
 
-        if not games:
-            empty_label = QLabel("Brak gier do wyświetlenia.")
-            empty_label.setObjectName("emptyState")
-            self.grid_layout.addWidget(empty_label, 0, 0)
-            return
+        add_card = self.create_add_game_card()
+        self.grid_layout.addWidget(add_card, 0, 0)
 
         row = 0
-        col = 0
+        col = 1
 
         for game in games:
             card = self.create_game_card(game)
@@ -361,7 +550,7 @@ class MainView(QWidget):
 
             col += 1
 
-            if col == 3:
+            if col == 5:
                 col = 0
                 row += 1
 
@@ -373,65 +562,116 @@ class MainView(QWidget):
             if widget:
                 widget.setParent(None)
 
-    def create_game_card(self, game):
-        card = QWidget()
+    def create_add_game_card(self):
+        card = QPushButton()
+        card.setObjectName("addGameCard")
+        card.setFixedSize(190, 326)
+        card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        card.clicked.connect(self.handle_add_game)
+
         layout = QVBoxLayout()
-        layout.setContentsMargins(14, 14, 14, 14)
-        layout.setSpacing(8)
+        layout.setContentsMargins(20, 38, 20, 38)
+        layout.setSpacing(18)
 
-        title = QLabel(game.title)
-        genre = QLabel(f"Gatunek: {game.genre or 'brak danych'}")
-        platform = QLabel(f"Platforma: {game.platform or 'brak danych'}")
+        plus_circle = QLabel("+")
+        plus_circle.setObjectName("addGamePlus")
+        plus_circle.setAlignment(Qt.AlignCenter)
+        plus_circle.setFixedSize(60, 60)
 
-        card.setObjectName("gameCard")
-        title.setObjectName("gameTitle")
-        genre.setObjectName("gameGenre")
-        platform.setObjectName("gamePlatform")
+        text = QLabel("dodaj kolejną grę")
+        text.setObjectName("addGameText")
+        text.setAlignment(Qt.AlignCenter)
+        text.setWordWrap(True)
 
-        layout.addWidget(title)
-        layout.addWidget(genre)
-        layout.addWidget(platform)
-
-        rating_text = game.rating if game.rating else "brak"
-        rating_label = QLabel(f"Ocena: {rating_text}")
-
-        rating_label.setObjectName("gameRating")
-
-        layout.addWidget(rating_label)
-
-        if self.current_filter != "all":
-            rate_button = QPushButton("Oceń")
-            move_button = QPushButton("Przenieś")
-            remove_button = QPushButton("Usuń")
-
-            rate_button.setObjectName("gameActionButton")
-            move_button.setObjectName("gameActionButton")
-            remove_button.setObjectName("dangerGameActionButton")
-
-            rate_button.clicked.connect(
-                lambda checked=False, game_obj=game: self.handle_rate_game(game_obj)
-            )
-
-            move_button.clicked.connect(
-                lambda checked=False, game_obj=game: self.handle_move_game(game_obj)
-            )
-
-            remove_button.clicked.connect(
-                lambda checked=False, game_id=game.game_id: self.handle_remove_game(game_id)
-            )
-
-            layout.addWidget(rate_button)
-            layout.addWidget(move_button)
-            layout.addWidget(remove_button)
+        layout.addStretch()
+        layout.addWidget(plus_circle, alignment=Qt.AlignCenter)
+        layout.addWidget(text)
+        layout.addStretch()
 
         card.setLayout(layout)
 
-        if self.current_filter != "all":
-            card.setFixedSize(220, 260)
-        else:
-            card.setFixedSize(220, 190)
+        return card
 
+    def create_game_card(self, game):
+        card = QFrame()
+        card.setObjectName("libraryGameCard")
+        card.setFixedSize(190, 326)
         card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        cover = QLabel()
+        cover.setObjectName("gameCover")
+        cover.setFixedSize(190, 266)
+        cover.setAlignment(Qt.AlignCenter)
+
+        image_url = getattr(game, "image_url", None)
+
+        if image_url:
+            image_path = image_url
+
+            if image_path.startswith("/"):
+                image_path = f"{API_URL}{image_path}"
+
+            cover.setText("")
+        else:
+            cover.setText(game.title)
+
+        info = QFrame()
+        info.setObjectName("gameInfoPanel")
+        info.setFixedSize(190, 60)
+
+        info_layout = QVBoxLayout()
+        info_layout.setContentsMargins(10, 7, 10, 7)
+        info_layout.setSpacing(2)
+
+        title = QLabel(game.title)
+        title.setObjectName("libraryGameTitle")
+        title.setAlignment(Qt.AlignLeft)
+        title.setWordWrap(False)
+
+        platform_text = game.platform or "brak"
+        date_text = "dodano do biblioteki"
+
+        bottom_row = QHBoxLayout()
+        bottom_row.setContentsMargins(0, 0, 0, 0)
+        bottom_row.setSpacing(4)
+
+        date = QLabel(date_text)
+        date.setObjectName("libraryGameDate")
+
+        rating_text = str(game.rating) if game.rating else ""
+
+        rating = QLabel(rating_text)
+        rating.setObjectName("libraryGameRating")
+
+        star = QLabel("★" if game.rating else "")
+        star.setObjectName("libraryGameStar")
+
+        bottom_row.addWidget(date)
+        bottom_row.addStretch()
+        bottom_row.addWidget(rating)
+        bottom_row.addWidget(star)
+
+        info_layout.addWidget(title)
+        info_layout.addLayout(bottom_row)
+
+        info.setLayout(info_layout)
+
+        badge = QLabel(platform_text)
+        badge.setObjectName("platformBadge")
+        badge.setAlignment(Qt.AlignCenter)
+        badge.setParent(card)
+        badge.adjustSize()
+        badge.resize(max(38, badge.width() + 18), 22)
+        badge.move(76, 0)
+
+        layout.addWidget(cover)
+        layout.addWidget(info)
+
+        card.setLayout(layout)
 
         return card
 
@@ -455,6 +695,27 @@ class MainView(QWidget):
         active_button.setProperty("active", True)
         active_button.style().unpolish(active_button)
         active_button.style().polish(active_button)
+
+    def refresh_active_collection_tab(self):
+        tabs = [self.tab_all] + self.collection_buttons
+
+        for button in tabs:
+            button.setProperty("active", False)
+            button.style().unpolish(button)
+            button.style().polish(button)
+
+        if self.current_filter == "all":
+            self.tab_all.setProperty("active", True)
+            self.tab_all.style().unpolish(self.tab_all)
+            self.tab_all.style().polish(self.tab_all)
+            return
+
+        for button in self.collection_buttons:
+            if button.property("collectionId") == self.current_filter:
+                button.setProperty("active", True)
+                button.style().unpolish(button)
+                button.style().polish(button)
+                return
 
     def handle_add_collection(self):
         dialog = CreateCollectionDialog()
@@ -491,6 +752,7 @@ class MainView(QWidget):
 
             button = QPushButton(collection_name)
             button.setObjectName("collectionTab")
+            button.setProperty("collectionId", collection_id)
             button.clicked.connect(
                 lambda checked=False, selected_id=collection_id: self.change_tab(selected_id)
             )
@@ -498,17 +760,17 @@ class MainView(QWidget):
             self.collection_buttons.append(button)
             self.tabs_layout.addWidget(button)
 
-        self.tabs_layout.addWidget(self.edit_collection_button)
-        self.tabs_layout.addWidget(self.delete_collection_button)
-        self.tabs_layout.addWidget(self.share_collection_button)
-        self.tabs_layout.addWidget(self.add_collection_button)
+        self.tabs_layout.addWidget(
+            self.add_collection_button,
+            alignment=Qt.AlignTop
+        )
+        self.tabs_layout.setContentsMargins(0, 0, 0, 0)
+        self.tabs_layout.addStretch()
+        self.refresh_active_collection_tab()
 
     def clear_collection_tabs(self):
         widgets = [
             self.tab_all,
-            self.edit_collection_button,
-            self.delete_collection_button,
-            self.share_collection_button,
             self.add_collection_button
         ]
 

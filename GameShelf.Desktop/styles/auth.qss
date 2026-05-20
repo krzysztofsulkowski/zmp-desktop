@@ -228,3 +228,34 @@ QLabel#authRegisterLink a {
     font-weight: 900;
     text-decoration: underline;
 }
+
+QPushButton#authBackButton {
+    background-color: transparent;
+    color: #0F0F14;
+    border: none;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 22px;
+    font-weight: 900;
+    padding: 0;
+}
+
+QPushButton#authBackButton:hover {
+    color: #7C3AED;
+    background-color: transparent;
+}
+
+QLabel#authInfoLabel {
+    color: #0F0F14;
+    background-color: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 400;
+}
+
+QLabel#authStatusText {
+    color: #0F0F14;
+    background-color: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 400;
+}

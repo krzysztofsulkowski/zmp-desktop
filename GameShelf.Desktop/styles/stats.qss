@@ -1,0 +1,21 @@
+QWidget#statsView,
+QWidget#globalStatsView,
+QWidget#friendsView,
+QWidget#chatView,
+QWidget#profileView,
+QWidget#settingsView,
+QWidget#notificationsView {
+    background: transparent;
+}
+
+QLabel#statValue {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+QLabel#statLabel {
+    color: #a1a1aa;
+    font-size: 13px;
+    font-weight: 700;
+}

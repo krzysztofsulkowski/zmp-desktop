@@ -20,17 +20,21 @@ from views.edit_profile_dialog import EditProfileDialog
 class ProfileView(QWidget):
     def __init__(self, on_logout):
         super().__init__()
+        self.setObjectName("profileView")
 
         self.on_logout = on_logout
         self.user_data = {}
 
         self.title_label = QLabel("Profil użytkownika")
+        self.title_label.setObjectName("pageTitle")
         self.avatar_label = QLabel("Brak avatara")
         self.email_label = QLabel("Email: ładowanie...")
         self.username_label = QLabel("Nazwa użytkownika: ładowanie...")
         self.bio_label = QLabel("Bio: ładowanie...")
         self.edit_profile_button = QPushButton("Edytuj profil")
+        self.edit_profile_button.setObjectName("secondaryButton")
         self.logout_button = QPushButton("Wyloguj")
+        self.logout_button.setObjectName("dangerButton")
 
         self.setup_ui()
         self.connect_signals()

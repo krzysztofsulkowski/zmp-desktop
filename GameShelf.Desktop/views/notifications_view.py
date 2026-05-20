@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 class NotificationsView(QWidget):
     def __init__(self):
         super().__init__()
+        self.setObjectName("notificationsView")
 
         layout = QVBoxLayout()
 

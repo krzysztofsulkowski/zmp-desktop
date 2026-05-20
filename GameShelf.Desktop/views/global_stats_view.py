@@ -11,6 +11,7 @@ from services.statistics_service import get_global_statistics
 class GlobalStatsView(QWidget):
     def __init__(self):
         super().__init__()
+        self.setObjectName("global_statsView")
 
         self.layout = QVBoxLayout(self)
 

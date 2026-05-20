@@ -17,13 +17,13 @@ QPushButton {
     background-color: #7C3AED;
     color: #ffffff;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 10px 16px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 QPushButton:hover {
-    background-color: #6D28D9;
+    background-color: #8B5CF6;
 }
 
 QPushButton:pressed {
@@ -41,9 +41,9 @@ QPlainTextEdit,
 QComboBox {
     background-color: #ffffff;
     color: #18181b;
-    border: 1px solid #d4d4d8;
-    border-radius: 10px;
-    padding: 9px 12px;
+    border: 1px solid #e4e4e7;
+    border-radius: 12px;
+    padding: 10px 14px;
     selection-background-color: #7C3AED;
     selection-color: #ffffff;
 }
@@ -52,7 +52,7 @@ QLineEdit:focus,
 QTextEdit:focus,
 QPlainTextEdit:focus,
 QComboBox:focus {
-    border: 1px solid #7C3AED;
+    border: 1px solid #8B5CF6;
 }
 
 QComboBox::drop-down {
@@ -73,14 +73,14 @@ QTableWidget {
     background-color: #151527;
     color: #f8fafc;
     border: 1px solid rgba(124, 58, 237, 0.35);
-    border-radius: 12px;
-    padding: 6px;
+    border-radius: 14px;
+    padding: 8px;
 }
 
 QListWidget::item,
 QTableWidget::item {
-    padding: 8px;
-    border-radius: 8px;
+    padding: 9px;
+    border-radius: 9px;
 }
 
 QListWidget::item:selected,
@@ -113,7 +113,7 @@ QMessageBox QLabel {
 }
 
 QScrollBar:vertical {
-    background: #181827;
+    background: transparent;
     width: 10px;
     margin: 0;
     border-radius: 5px;
@@ -121,7 +121,7 @@ QScrollBar:vertical {
 
 QScrollBar::handle:vertical {
     background: #7C3AED;
-    min-height: 24px;
+    min-height: 28px;
     border-radius: 5px;
 }
 
@@ -132,4 +132,22 @@ QScrollBar::handle:vertical:hover {
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 10px;
+    margin: 0;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #7C3AED;
+    min-width: 28px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0;
 }

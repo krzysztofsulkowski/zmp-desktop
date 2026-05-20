@@ -1,0 +1,46 @@
+QFrame#sectionCard,
+QFrame#profileCard,
+QFrame#statsCard,
+QFrame#friendCard,
+QFrame#chatPanel {
+    background-color: #181827;
+    border: 1px solid rgba(124, 58, 237, 0.38);
+    border-radius: 18px;
+}
+
+QLabel#pageTitle {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 900;
+}
+
+QLabel#sectionTitle {
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 900;
+}
+
+QLabel#mutedText {
+    color: #a1a1aa;
+    font-size: 13px;
+}
+
+QPushButton#secondaryButton {
+    background-color: transparent;
+    color: #e5e7eb;
+    border: 1px solid rgba(124, 58, 237, 0.45);
+    border-radius: 12px;
+    font-weight: 800;
+}
+
+QPushButton#secondaryButton:hover {
+    background-color: rgba(124, 58, 237, 0.18);
+}
+
+QPushButton#dangerButton {
+    background-color: rgba(239, 68, 68, 0.14);
+    color: #fecaca;
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    border-radius: 12px;
+    font-weight: 800;
+}

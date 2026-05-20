@@ -26,6 +26,7 @@ from services.friends_service import (
 class FriendsView(QWidget):
     def __init__(self):
         super().__init__()
+        self.setObjectName("friendsView")
 
         self.search_results = []
         self.pending_requests = []

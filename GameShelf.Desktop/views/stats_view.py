@@ -11,10 +11,12 @@ from services.statistics_service import get_my_library_statistics
 class StatsView(QWidget):
     def __init__(self):
         super().__init__()
+        self.setObjectName("statsView")
 
         self.layout = QVBoxLayout(self)
 
         self.title_label = QLabel("Twoje statystyki")
+        self.title_label.setObjectName("pageTitle")
         self.layout.addWidget(self.title_label)
 
         self.total_games_label = QLabel()

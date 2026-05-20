@@ -1,53 +1,131 @@
+QWidget {
+    background-color: #0f0f1a;
+    color: #f8fafc;
+    font-family: "Figtree", "Segoe UI", "Arial";
+}
+
 QFrame#landingFrame {
-    border-radius: 30px;
-    border: 2px solid #8B5CF6;
-    background-color: qlineargradient(
-        spread:pad,
-        x1:0, y1:0,
-        x2:0, y2:1,
-        stop:0.23 #0F0F14,
-        stop:1 #21153B
+    background: qlineargradient(
+        x1: 0,
+        y1: 0,
+        x2: 1,
+        y2: 0,
+        stop: 0 #10101c,
+        stop: 0.36 #151125,
+        stop: 0.58 #24134a,
+        stop: 0.78 #3b1d73,
+        stop: 1 #180f2c
     );
+    border: 1px solid rgba(139, 92, 246, 0.95);
+    border-radius: 28px;
 }
 
-QPushButton#primaryButton {
-    border-radius: 20px;
+QPushButton#landingLoginButton {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    border-radius: 18px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    padding: 0;
+}
+
+QPushButton#landingLoginButton:hover {
+    background-color: rgba(124, 58, 237, 0.18);
+}
+
+QPushButton#landingRegisterButton {
     background-color: #7C3AED;
-    color: white;
-    font-size: 20px;
-    font-weight: 800;
+    color: #ffffff;
+    border: none;
+    border-radius: 13px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    padding: 0;
 }
 
-QPushButton#primaryButton:hover {
+QPushButton#landingRegisterButton:hover {
     background-color: #8B5CF6;
 }
 
+QPushButton#landingJoinButton {
+    background-color: #7C3AED;
+    color: #ffffff;
+    border: none;
+    border-radius: 13px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    padding: 0;
+}
+
+QPushButton#landingJoinButton:hover {
+    background-color: #8B5CF6;
+}
+
+QPushButton#windowControlButton,
+QPushButton#windowCloseButton {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 15px;
+    font-weight: 900;
+    padding: 0;
+}
+
+QPushButton#windowControlButton:hover {
+    background-color: rgba(124, 58, 237, 0.32);
+    border: 1px solid rgba(139, 92, 246, 0.70);
+}
+
+QPushButton#windowCloseButton:hover {
+    background-color: #ef4444;
+    border: 1px solid #ef4444;
+    color: #ffffff;
+}
+
 QLabel#landingLogo {
-    font-size: 34px;
-    font-weight: 800;
-    color: #8B5CF6;
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 38px;
+    font-weight: 900;
 }
 
 QLabel#landingHeadline {
-    font-size: 31px;
-    font-weight: 800;
-    color: white;
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1.16;
 }
 
 QLabel#landingDescription {
-    font-size: 20px;
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.76);
+    font-family: "Figtree Light", "Figtree", "Segoe UI Light", "Segoe UI", "Arial";
+    font-size: 16px;
     font-weight: 300;
-    color: rgba(255,255,255,0.68);
+    line-height: 1.45;
 }
 
 QLabel#landingSmallText {
-    font-size: 14px;
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.62);
+    font-family: "Figtree Light", "Figtree", "Segoe UI Light", "Segoe UI", "Arial";
+    font-size: 13px;
     font-weight: 300;
-    color: white;
 }
 
-QFrame#previewPlaceholder {
-    border: 1px solid #8B5CF6;
-    border-radius: 20px;
-    background-color: rgba(9, 4, 17, 0.18);
+QLabel#landingOfferImage {
+    background-color: transparent;
+    border: none;
 }

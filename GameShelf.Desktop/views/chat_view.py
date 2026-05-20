@@ -25,6 +25,7 @@ class ChatView(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setObjectName("chatView")
 
         self.chats = []
         self.friends = []

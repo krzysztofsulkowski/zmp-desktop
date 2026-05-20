@@ -11,8 +11,11 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QComboBox,
     QApplication,
-    QFrame
+    QFrame,
+    QSizePolicy
 )
+
+from PySide6.QtCore import Qt
 
 from config import API_URL
 
@@ -79,14 +82,7 @@ class MainView(QWidget):
 
     def setup_ui(self):
         main_layout = QHBoxLayout()
-        main_layout.setContentsMargins(16, 16, 16, 16)
-        main_layout.setSpacing(16)
-
-        sidebar_layout = self.create_sidebar()
-
-        sidebar_frame = QFrame()
-        sidebar_frame.setObjectName("sidebar")
-        sidebar_frame.setLayout(sidebar_layout)
+        sidebar = self.create_sidebar()
 
         self.stacked_layout = QStackedLayout()
         self.home_widget = self.create_home_widget()
@@ -108,23 +104,18 @@ class MainView(QWidget):
         self.stacked_layout.addWidget(self.global_stats_view)
         self.stacked_layout.addWidget(self.settings_view)
 
+
+
         content_layout = QVBoxLayout()
-        content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.addLayout(self.stacked_layout)
 
-        content_frame = QFrame()
-        content_frame.setObjectName("contentPanel")
-        content_frame.setLayout(content_layout)
-
-        main_layout.addWidget(sidebar_frame, 1)
-        main_layout.addWidget(content_frame, 5)
+        main_layout.addLayout(sidebar, 1)
+        main_layout.addLayout(content_layout, 4)
 
         self.setLayout(main_layout)
 
     def create_sidebar(self):
         sidebar = QVBoxLayout()
-        sidebar.setContentsMargins(12, 12, 12, 12)
-        sidebar.setSpacing(8)
 
         self.profile_button = QPushButton("Profil")
         self.home_button = QPushButton("Biblioteka")
@@ -135,24 +126,6 @@ class MainView(QWidget):
         self.notifications_button = QPushButton("Powiadomienia")
         self.settings_button = QPushButton("Ustawienia")
         self.logout_button = QPushButton("Wyloguj")
-
-        sidebar_buttons = [
-            self.profile_button,
-            self.home_button,
-            self.stats_button,
-            self.friends_button,
-            self.chat_button,
-            self.global_stats_button,
-            self.notifications_button,
-            self.settings_button,
-            self.logout_button
-        ]
-
-        for button in sidebar_buttons:
-            button.setObjectName("sidebarButton")
-            button.setMinimumHeight(42)
-
-        self.logout_button.setObjectName("logoutButton")
 
         sidebar.addWidget(self.profile_button)
         sidebar.addWidget(self.home_button)
@@ -169,14 +142,9 @@ class MainView(QWidget):
 
     def create_home_widget(self):
         widget = QWidget()
-        widget.setObjectName("homeView")
-
         layout = QVBoxLayout()
-        layout.setContentsMargins(24, 24, 24, 24)
-        layout.setSpacing(16)
 
         self.tabs_layout = QHBoxLayout()
-        self.tabs_layout.setSpacing(8)
 
         self.tab_all = QPushButton("Biblioteka")
         self.add_collection_button = QPushButton("+")
@@ -184,27 +152,16 @@ class MainView(QWidget):
         self.delete_collection_button = QPushButton("Usuń")
         self.share_collection_button = QPushButton("Udostępnij")
 
-        self.tab_all.setObjectName("collectionTab")
-        self.add_collection_button.setObjectName("collectionActionButton")
-        self.edit_collection_button.setObjectName("collectionActionButton")
-        self.delete_collection_button.setObjectName("collectionActionButton")
-        self.share_collection_button.setObjectName("collectionActionButton")
-
-        self.add_collection_button.setFixedSize(38, 38)
-        self.edit_collection_button.setFixedSize(82, 38)
-        self.delete_collection_button.setFixedSize(82, 38)
-        self.share_collection_button.setFixedSize(112, 38)
+        self.add_collection_button.setFixedSize(32, 32)
+        self.edit_collection_button.setFixedSize(70, 32)
+        self.delete_collection_button.setFixedSize(70, 32)
+        self.share_collection_button.setFixedSize(100, 32)
 
         self.filters_layout = QHBoxLayout()
-        self.filters_layout.setSpacing(10)
 
         self.genre_filter = QComboBox()
         self.platform_filter = QComboBox()
         self.sort_filter = QComboBox()
-
-        self.genre_filter.setObjectName("filterSelect")
-        self.platform_filter.setObjectName("filterSelect")
-        self.sort_filter.setObjectName("filterSelect")
 
         self.genre_filter.addItem("Wszystkie gatunki", "all")
         self.platform_filter.addItem("Wszystkie platformy", "all")
@@ -219,23 +176,15 @@ class MainView(QWidget):
         self.filters_layout.addWidget(self.sort_filter)
 
         self.scroll_area = QScrollArea()
-        self.scroll_area.setObjectName("gamesScrollArea")
         self.scroll_area.setWidgetResizable(True)
 
         self.scroll_widget = QWidget()
-        self.scroll_widget.setObjectName("gamesScrollContent")
-
         self.grid_layout = QGridLayout()
-        self.grid_layout.setContentsMargins(0, 8, 0, 8)
-        self.grid_layout.setHorizontalSpacing(20)
-        self.grid_layout.setVerticalSpacing(20)
 
         self.scroll_widget.setLayout(self.grid_layout)
         self.scroll_area.setWidget(self.scroll_widget)
 
         self.add_game_button = QPushButton("Dodaj grę")
-        self.add_game_button.setObjectName("primaryWideButton")
-        self.add_game_button.setMinimumHeight(44)
 
         layout.addLayout(self.tabs_layout)
         layout.addLayout(self.filters_layout)
@@ -455,6 +404,10 @@ class MainView(QWidget):
             move_button = QPushButton("Przenieś")
             remove_button = QPushButton("Usuń")
 
+            rate_button.setObjectName("gameActionButton")
+            move_button.setObjectName("gameActionButton")
+            remove_button.setObjectName("dangerGameActionButton")
+
             rate_button.clicked.connect(
                 lambda checked=False, game_obj=game: self.handle_rate_game(game_obj)
             )
@@ -472,10 +425,13 @@ class MainView(QWidget):
             layout.addWidget(remove_button)
 
         card.setLayout(layout)
+
         if self.current_filter != "all":
             card.setFixedSize(220, 260)
         else:
             card.setFixedSize(220, 190)
+
+        card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         return card
 
@@ -534,6 +490,7 @@ class MainView(QWidget):
             collection_name = collection.get("name", "Bez nazwy")
 
             button = QPushButton(collection_name)
+            button.setObjectName("collectionTab")
             button.clicked.connect(
                 lambda checked=False, selected_id=collection_id: self.change_tab(selected_id)
             )

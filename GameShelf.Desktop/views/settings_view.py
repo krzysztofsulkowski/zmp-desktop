@@ -19,6 +19,7 @@ from config import API_URL
 class SettingsView(QWidget):
     def __init__(self):
         super().__init__()
+        self.setObjectName("settingsView")
 
         self.settings = load_settings()
 

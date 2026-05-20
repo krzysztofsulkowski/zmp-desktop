@@ -196,3 +196,35 @@ QLabel#authLoginLink a {
     font-weight: 900;
     text-decoration: underline;
 }
+
+QPushButton#authForgotButton {
+    background-color: transparent;
+    color: #0F0F14;
+    border: none;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 900;
+    text-decoration: underline;
+    padding: 0;
+    margin: 0;
+}
+
+QPushButton#authForgotButton:hover {
+    color: #7C3AED;
+    background-color: transparent;
+}
+
+QLabel#authRegisterLink {
+    color: #0F0F14;
+    background-color: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 9px;
+    font-weight: 400;
+}
+
+QLabel#authRegisterLink a {
+    color: #0F0F14;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-weight: 900;
+    text-decoration: underline;
+}

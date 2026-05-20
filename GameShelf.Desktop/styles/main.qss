@@ -1,0 +1,123 @@
+QFrame#sidebar {
+    background-color: #151527;
+    border: 1px solid rgba(124, 58, 237, 0.28);
+    border-radius: 18px;
+}
+
+QFrame#contentPanel {
+    background-color: #111120;
+    border: 1px solid rgba(124, 58, 237, 0.22);
+    border-radius: 22px;
+}
+
+QPushButton#sidebarButton {
+    background-color: transparent;
+    color: #e5e7eb;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+}
+
+QPushButton#sidebarButton:hover {
+    background-color: rgba(124, 58, 237, 0.22);
+    border: 1px solid rgba(124, 58, 237, 0.35);
+}
+
+QPushButton#sidebarButton[active="true"] {
+    background-color: #7C3AED;
+    color: #ffffff;
+    border: 1px solid #8B5CF6;
+}
+
+QPushButton#logoutButton {
+    background-color: rgba(239, 68, 68, 0.14);
+    color: #fecaca;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 700;
+}
+
+QPushButton#logoutButton:hover {
+    background-color: rgba(239, 68, 68, 0.28);
+}
+
+QWidget#homeView {
+    background: transparent;
+}
+
+QPushButton#collectionTab,
+QPushButton#collectionActionButton {
+    background-color: rgba(124, 58, 237, 0.92);
+    color: #ffffff;
+    border: 1px solid rgba(139, 92, 246, 0.7);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-weight: 700;
+}
+
+QPushButton#collectionTab:hover,
+QPushButton#collectionActionButton:hover {
+    background-color: #8B5CF6;
+}
+
+QComboBox#filterSelect {
+    background-color: #ffffff;
+    color: #18181b;
+    border: 1px solid #e4e4e7;
+    border-radius: 12px;
+    padding: 10px 14px;
+    min-height: 22px;
+}
+
+QScrollArea#gamesScrollArea {
+    background: transparent;
+    border: none;
+}
+
+QWidget#gamesScrollContent {
+    background: transparent;
+}
+
+QWidget#gameCard {
+    background-color: #181827;
+    border: 1px solid rgba(124, 58, 237, 0.38);
+    border-radius: 18px;
+}
+
+QWidget#gameCard:hover {
+    border: 1px solid rgba(139, 92, 246, 0.9);
+    background-color: #1f1f34;
+}
+
+QLabel#gameTitle {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+QLabel#gameGenre,
+QLabel#gamePlatform,
+QLabel#gameRating {
+    color: #c4c4d8;
+    font-size: 13px;
+}
+
+QPushButton#primaryWideButton {
+    background-color: #7C3AED;
+    color: #ffffff;
+    border-radius: 14px;
+    font-weight: 800;
+}
+
+QPushButton#primaryWideButton:hover {
+    background-color: #8B5CF6;
+}
+
+QLabel#emptyState {
+    color: #a1a1aa;
+    font-size: 15px;
+    padding: 24px;
+}

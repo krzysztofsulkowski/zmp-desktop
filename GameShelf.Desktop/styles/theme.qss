@@ -1,41 +1,135 @@
-QWidget {
-    background-color: #1e1e2f;
-    color: white;
+* {
+    font-family: "Segoe UI", "Arial";
     font-size: 14px;
 }
 
-QPushButton {
-    background-color: #2a2a3d;
-    border: none;
-    padding: 10px;
-    text-align: left;
-    border-radius: 8px;
-}
-
-QPushButton[active="true"] {
-    background-color: #3b3b5c;
-    font-weight: bold;
-}
-
-QPushButton:hover {
-    background-color: #353550;
+QWidget {
+    background-color: #0f0f1a;
+    color: #f8fafc;
 }
 
 QLabel {
-    color: white;
+    color: #f8fafc;
+    background: transparent;
 }
 
-#gameCard {
-    background-color: #2a2a3d;
+QPushButton {
+    background-color: #7C3AED;
+    color: #ffffff;
+    border: none;
     border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 600;
+}
+
+QPushButton:hover {
+    background-color: #6D28D9;
+}
+
+QPushButton:pressed {
+    background-color: #5B21B6;
+}
+
+QPushButton:disabled {
+    background-color: #3f3f46;
+    color: #a1a1aa;
+}
+
+QLineEdit,
+QTextEdit,
+QPlainTextEdit,
+QComboBox {
+    background-color: #ffffff;
+    color: #18181b;
+    border: 1px solid #d4d4d8;
+    border-radius: 10px;
+    padding: 9px 12px;
+    selection-background-color: #7C3AED;
+    selection-color: #ffffff;
+}
+
+QLineEdit:focus,
+QTextEdit:focus,
+QPlainTextEdit:focus,
+QComboBox:focus {
+    border: 1px solid #7C3AED;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 28px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #ffffff;
+    color: #18181b;
+    border: 1px solid #d4d4d8;
+    selection-background-color: #7C3AED;
+    selection-color: #ffffff;
+}
+
+QListWidget,
+QTableWidget {
+    background-color: #151527;
+    color: #f8fafc;
+    border: 1px solid rgba(124, 58, 237, 0.35);
+    border-radius: 12px;
+    padding: 6px;
+}
+
+QListWidget::item,
+QTableWidget::item {
     padding: 8px;
+    border-radius: 8px;
 }
 
-#gameTitle {
-    font-weight: bold;
-    font-size: 15px;
+QListWidget::item:selected,
+QTableWidget::item:selected {
+    background-color: #7C3AED;
+    color: #ffffff;
 }
 
-#gameGenre {
-    color: #cfcfe8;
+QScrollArea {
+    border: none;
+    background: transparent;
+}
+
+QFrame {
+    background: transparent;
+}
+
+QDialog {
+    background-color: #0f0f1a;
+    color: #f8fafc;
+}
+
+QMessageBox {
+    background-color: #ffffff;
+    color: #18181b;
+}
+
+QMessageBox QLabel {
+    color: #18181b;
+}
+
+QScrollBar:vertical {
+    background: #181827;
+    width: 10px;
+    margin: 0;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical {
+    background: #7C3AED;
+    min-height: 24px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #8B5CF6;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
 }

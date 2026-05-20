@@ -202,7 +202,9 @@ QPushButton#collectionTab {
 }
 
 QPushButton#collectionTab:hover {
-    color: #c4b5fd;
+    color: #ffffff;
+    border-bottom: 3px solid rgba(139, 92, 246, 0.55);
+    background-color: transparent;
 }
 
 QPushButton#collectionTab[active="true"] {
@@ -216,10 +218,14 @@ QComboBox#mainFilter {
     border: none;
     border-radius: 7px;
     padding-left: 10px;
-    padding-right: 10px;
+    padding-right: 28px;
+    padding-top: 0px;
+    padding-bottom: 0px;
     font-family: "Figtree Light", "Figtree", "Segoe UI", "Arial";
     font-size: 16px;
     font-weight: 300;
+    min-height: 36px;
+    max-height: 36px;
 }
 
 QComboBox#mainFilter::drop-down {
@@ -232,6 +238,16 @@ QComboBox#mainFilter QAbstractItemView {
     color: #ffffff;
     border: 1px solid #8B5CF6;
     selection-background-color: #7C3AED;
+}
+
+QComboBox#mainFilter::down-arrow {
+    image: none;
+    width: 0px;
+    height: 0px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #ffffff;
+    margin-right: 10px;
 }
 
 QScrollArea#gamesScrollArea {
@@ -303,7 +319,7 @@ QLabel#gameCover {
 
 QFrame#gameInfoPanel {
     background-color: #5C4E7E;
-    border-radius: 0 0 14px 14px;
+    border-radius: 0px 0px 14px 14px;
 }
 
 QLabel#libraryGameTitle {
@@ -347,7 +363,15 @@ QLabel#platformBadge {
 }
 
 QFrame#mainFrame {
-    background-color: #0F0F14;
+    background: qlineargradient(
+        x1: 0,
+        y1: 0,
+        x2: 1,
+        y2: 1,
+        stop: 0 #0F0F14,
+        stop: 0.55 #151125,
+        stop: 1 #21153B
+    );
     border: 1px solid rgba(139, 92, 246, 0.95);
     border-radius: 28px;
 }
@@ -369,7 +393,7 @@ QPushButton#addCollectionIconButton {
     background: transparent;
     border: none;
     padding: 0px;
-    margin-top: -4px;
+    margin-top: 0px;
 }
 
 QPushButton#addCollectionIconButton:hover {

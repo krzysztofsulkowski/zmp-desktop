@@ -18,6 +18,7 @@ def load_styles(app):
         base_dir / "styles" / "cards.qss",
         base_dir / "styles" / "stats.qss",
         base_dir / "styles" / "friends.qss",
+        base_dir / "styles" / "settings.qss",
     ]
 
     combined_styles = ""

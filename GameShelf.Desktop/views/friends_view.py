@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from config import WEB_REGISTER_URL
-
+from services.api_client import get_me
 from services.friends_service import (
     get_my_friends,
     search_users,
@@ -36,6 +36,9 @@ class FriendsView(QWidget):
         self.search_results = []
         self.pending_requests = []
         self.friends = []
+
+        self.current_user = {}
+        self.load_current_user()
 
         self.setup_ui()
         self.connect_signals()
@@ -264,6 +267,7 @@ class FriendsView(QWidget):
         meta_label.setObjectName("compareResultMeta")
 
         chips_layout = QHBoxLayout()
+        chips_layout.setContentsMargins(0, 2, 0, 4)
         chips_layout.setSpacing(8)
 
         if owned_by_me:
@@ -278,7 +282,8 @@ class FriendsView(QWidget):
         layout.addWidget(meta_label)
         layout.addLayout(chips_layout)
 
-        item.setSizeHint(widget.sizeHint())
+        widget.adjustSize()
+        item.setSizeHint(QSize(0, max(96, widget.sizeHint().height() + 14)))
         self.compare_results_list.addItem(item)
         self.compare_results_list.setItemWidget(item, widget)
 
@@ -286,6 +291,9 @@ class FriendsView(QWidget):
         label = QLabel(text)
         label.setObjectName("compareChip")
         label.setWordWrap(True)
+        label.setMinimumHeight(30)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label.setContentsMargins(0, 0, 0, 0)
         return label
 
     def load_friends(self):
@@ -536,5 +544,18 @@ class FriendsView(QWidget):
         self.status_label.setText(message)
 
     def handle_copy_invite_link(self):
-        QApplication.clipboard().setText(WEB_REGISTER_URL)
-        self.set_status("Link zaproszenia został skopiowany do schowka.")
+        username = ""
+
+        if hasattr(self, "current_user") and self.current_user:
+            username = self.current_user.get("userName", "")
+
+        invite_link = f"{WEB_REGISTER_URL}?invitedBy={username}"
+
+        QApplication.clipboard().setText(invite_link)
+        self.set_status("")
+
+    def load_current_user(self):
+        response = get_me()
+
+        if response is not None and response.status_code == 200:
+            self.current_user = response.json()

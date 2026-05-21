@@ -21,6 +21,8 @@ from PySide6.QtCore import Qt, QSize, QPoint, QTimer
 from PySide6.QtGui import QPixmap, QFontDatabase, QIcon
 import requests
 
+from utils.window_corners import disable_windows_11_rounded_corners
+
 from config import API_URL, VERIFY_SSL
 
 from services.collection_service import (
@@ -150,6 +152,10 @@ class MainView(QWidget):
         self.load_games()
         self.switch_view(self.HOME_VIEW_INDEX)
         self.set_active_button(self.home_button)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        disable_windows_11_rounded_corners(self)
 
     def load_fonts(self):
         font_dir = self.base_dir / "assets"
@@ -457,7 +463,7 @@ class MainView(QWidget):
 
         self.tab_all = QPushButton("Biblioteka")
         self.tab_all.setObjectName("collectionTab")
-        self.add_collection_button = self.create_collection_icon_button("AddCollectionIcon.svg", "addCollectionIconButton")
+        self.add_collection_button = self.create_collection_icon_button("AddGameIcon.svg", "addCollectionIconButton")
         self.edit_collection_button = self.create_collection_icon_button("EditCollectionIcon.svg", "smallIconButton")
         self.delete_collection_button = self.create_collection_icon_button("DeleteCollectionIcon.svg", "smallIconButton")
         self.share_collection_button = self.create_collection_icon_button("CollectionShareCodeIcon.svg", "wideIconButton")
@@ -726,7 +732,7 @@ class MainView(QWidget):
         plus_circle.setObjectName("addGamePlus")
         plus_circle.setAlignment(Qt.AlignCenter)
         plus_circle.setFixedSize(58, 58)
-        plus_icon = QPixmap(str(self.base_dir / "assets" / "AddCollectionIcon.svg"))
+        plus_icon = QPixmap(str(self.base_dir / "assets" / "AddGameIcon.svg"))
         plus_circle.setPixmap(plus_icon.scaled(58, 58, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         text = QLabel("dodaj kolejną grę")

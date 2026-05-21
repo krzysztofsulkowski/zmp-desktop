@@ -20,6 +20,7 @@ def load_styles(app):
         base_dir / "styles" / "friends.qss",
         base_dir / "styles" / "settings.qss",
         base_dir / "styles" / "notifications.qss",
+        base_dir / "styles" / "chat.qss",
     ]
 
     combined_styles = ""

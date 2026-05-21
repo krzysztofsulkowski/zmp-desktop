@@ -1,0 +1,225 @@
+QWidget#chatView {
+    background: transparent;
+}
+
+QLabel#chatPageTitle {
+    color: #ffffff;
+    background: transparent;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 29px;
+    font-weight: 900;
+}
+
+QLabel#chatPageSubtitle,
+QLabel#chatHintLabel,
+QLabel#chatStatusLabel,
+QLabel#chatConversationMeta {
+    color: #CBC3DF;
+    background: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 13px;
+    font-weight: 500;
+}
+
+QLabel#chatStatusLabel {
+    background-color: rgba(124, 58, 237, 0.18);
+    border: 1px solid rgba(139, 92, 246, 0.55);
+    border-radius: 14px;
+    padding: 10px 14px;
+}
+
+QFrame#chatCard {
+    background-color: rgba(9, 4, 17, 0.18);
+    border: 1px solid #8B5CF6;
+    border-radius: 22px;
+}
+
+QLabel#chatSectionTitle,
+QLabel#chatConversationTitle {
+    color: #ffffff;
+    background: transparent;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-weight: 900;
+}
+
+QLabel#chatSectionTitle {
+    font-size: 18px;
+}
+
+QLabel#chatConversationTitle {
+    font-size: 22px;
+}
+
+QLineEdit#chatInput,
+QTextEdit#chatMessageInput {
+    background-color: #ffffff;
+    color: #18181b;
+    border: 1px solid #8B5CF6;
+    border-radius: 12px;
+    padding: 10px 13px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+}
+
+QLineEdit#chatInput:focus,
+QTextEdit#chatMessageInput:focus {
+    border: 1px solid #A78BFA;
+}
+
+QPushButton#chatPrimaryButton,
+QPushButton#chatSecondaryButton {
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 16px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 900;
+}
+
+QPushButton#chatPrimaryButton {
+    background-color: #7C3AED;
+}
+
+QPushButton#chatPrimaryButton:hover {
+    background-color: #8B5CF6;
+}
+
+QPushButton#chatPrimaryButton:disabled {
+    background-color: rgba(92, 78, 126, 0.55);
+    color: rgba(255, 255, 255, 0.55);
+}
+
+QPushButton#chatSecondaryButton {
+    background-color: #5C4E7E;
+}
+
+QPushButton#chatSecondaryButton:hover {
+    background-color: #66558d;
+}
+
+QListWidget#chatConversationsList {
+    background-color: rgba(17, 17, 32, 0.78);
+    color: #ffffff;
+    border: 1px solid rgba(139, 92, 246, 0.55);
+    border-radius: 16px;
+    padding: 8px;
+    outline: none;
+}
+
+QListWidget#chatConversationsList::item {
+    border-radius: 14px;
+    margin: 4px 0px;
+}
+
+QListWidget#chatConversationsList::item:selected {
+    background-color: rgba(139, 92, 246, 0.35);
+}
+
+QFrame#chatListItem {
+    background-color: transparent;
+    border: none;
+    border-radius: 14px;
+}
+
+QLabel#chatListItemTitle {
+    color: #ffffff;
+    background: transparent;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 900;
+}
+
+QLabel#chatListItemTime,
+QLabel#chatListItemMeta,
+QLabel#chatListItemPreview {
+    color: #CBC3DF;
+    background: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 12px;
+    font-weight: 500;
+}
+
+QLabel#chatListItemPreview {
+    color: #ffffff;
+}
+
+QScrollArea#chatMessagesScrollArea {
+    background: transparent;
+    border: none;
+}
+
+QWidget#chatMessagesWidget {
+    background: transparent;
+}
+
+QLabel#chatEmptyState {
+    color: #CBC3DF;
+    background: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 15px;
+    font-weight: 500;
+    padding: 24px;
+}
+
+QFrame#messageBubbleOwn {
+    background-color: #7C3AED;
+    border: 1px solid rgba(167, 139, 250, 0.75);
+    border-radius: 16px;
+}
+
+QFrame#messageBubbleOther {
+    background-color: rgba(92, 78, 126, 0.30);
+    border: 1px solid rgba(139, 92, 246, 0.48);
+    border-radius: 16px;
+}
+
+QLabel#messageHeaderOwn,
+QLabel#messageHeaderOther {
+    background: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 11px;
+    font-weight: 700;
+}
+
+QLabel#messageHeaderOwn {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+QLabel#messageHeaderOther {
+    color: #CBC3DF;
+}
+
+QLabel#messageBodyOwn,
+QLabel#messageBodyOther {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 500;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 10px;
+    margin: 4px 0px 4px 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(139, 92, 246, 0.55);
+    border-radius: 5px;
+    min-height: 28px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: rgba(167, 139, 250, 0.75);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: transparent;
+    border: none;
+    height: 0px;
+}

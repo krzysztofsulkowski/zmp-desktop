@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_URL = os.getenv("API_URL")
+API_URL = os.getenv("API_URL", "https://localhost:8081").rstrip("/")
 VERIFY_SSL = os.getenv("VERIFY_SSL", "true").lower() == "true"
 WEB_REGISTER_URL = os.getenv(
     "WEB_REGISTER_URL",
@@ -12,4 +12,4 @@ WEB_REGISTER_URL = os.getenv(
 CHAT_HUB_URL = os.getenv(
     "CHAT_HUB_URL",
     f"{API_URL}/chatHub"
-)
+).rstrip("/")

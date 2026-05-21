@@ -5,3 +5,4 @@ __pycache__/
 .env
 app_settings.json
 share_codes.json
+notifications_read.json

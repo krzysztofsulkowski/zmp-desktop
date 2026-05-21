@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QStackedLayout,
     QDialog,
-    QMessageBox,
     QComboBox,
     QApplication,
     QFrame,
@@ -55,6 +54,7 @@ from views.add_game_dialog import AddGameDialog
 from views.edit_collection_dialog import EditCollectionDialog
 from views.move_game_dialog import MoveGameDialog
 from views.rate_game_dialog import RateGameDialog
+from views.styled_dialog import ask_confirmation, show_info, show_warning
 from views.chat_view import ChatView
 
 class MainFilterComboBox(QComboBox):
@@ -1076,14 +1076,7 @@ class MainView(QWidget):
         self.load_games()
 
     def handle_remove_game(self, game_id):
-        confirmation = QMessageBox.question(
-            self,
-            "Usuń grę",
-            "Czy na pewno chcesz usunąć tę grę z kolekcji?",
-            QMessageBox.Yes | QMessageBox.No
-        )
-
-        if confirmation != QMessageBox.Yes:
+        if not ask_confirmation(self, "Czy na pewno chcesz usunąć tę grę z kolekcji?", "Usuń grę"):
             return
 
         success = remove_game_from_collection(game_id)
@@ -1145,14 +1138,11 @@ class MainView(QWidget):
             self.show_warning("Nie można usunąć domyślnej kolekcji.")
             return
 
-        confirmation = QMessageBox.question(
+        if not ask_confirmation(
             self,
-            "Usuń kolekcję",
             f"Czy na pewno chcesz usunąć kolekcję „{selected_collection.get('name')}”?",
-            QMessageBox.Yes | QMessageBox.No
-        )
-
-        if confirmation != QMessageBox.Yes:
+            "Usuń kolekcję"
+        ):
             return
 
         success = delete_collection(self.current_filter)
@@ -1187,7 +1177,7 @@ class MainView(QWidget):
         return collection_name in protected_collections
 
     def show_warning(self, message):
-        QMessageBox.warning(self, "GameShelf", message)
+        show_warning(self, message)
 
     def handle_move_game(self, game):
         collections = get_collections_lookup()
@@ -1245,11 +1235,7 @@ class MainView(QWidget):
 
         self.apply_filters()
 
-        QMessageBox.information(
-            self,
-            "GameShelf",
-            "Ocena została zapisana."
-        )
+        show_info(self, "Ocena została zapisana.")
 
     def handle_share_collection(self):
         if self.current_filter == "all":
@@ -1277,8 +1263,4 @@ class MainView(QWidget):
 
         QApplication.clipboard().setText(share_code)
 
-        QMessageBox.information(
-            self,
-            "GameShelf",
-            f"Kod udostępniania kolekcji został skopiowany do schowka:\n\n{share_code}"
-        )
+        show_info(self, f"Kod udostępniania kolekcji został skopiowany do schowka:\n\n{share_code}")

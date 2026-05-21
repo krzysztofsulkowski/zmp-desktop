@@ -1,29 +1,21 @@
-from PySide6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QLabel,
-    QComboBox,
-    QPushButton
-)
+from PySide6.QtWidgets import QLabel, QComboBox, QPushButton
+
+from views.styled_dialog import StyledDialog
 
 
-class MoveGameDialog(QDialog):
+class MoveGameDialog(StyledDialog):
     def __init__(self, collections, current_collection_id):
-        super().__init__()
+        super().__init__("Przenieś grę")
 
         self.collections = collections
         self.current_collection_id = current_collection_id
 
-        self.setWindowTitle("Przenieś grę")
-        self.setMinimumWidth(350)
-
+        self.setMinimumWidth(400)
         self.setup_ui()
 
     def setup_ui(self):
-        layout = QVBoxLayout()
-
         title = QLabel("Wybierz kolekcję docelową")
-        layout.addWidget(title)
+        self.body_layout.addWidget(title)
 
         self.collection_select = QComboBox()
 
@@ -34,20 +26,13 @@ class MoveGameDialog(QDialog):
                 continue
 
             collection_name = collection.get("name", "Bez nazwy")
+            self.collection_select.addItem(collection_name, collection_id)
 
-            self.collection_select.addItem(
-                collection_name,
-                collection_id
-            )
-
-        layout.addWidget(self.collection_select)
+        self.body_layout.addWidget(self.collection_select)
 
         self.submit_button = QPushButton("Przenieś grę")
         self.submit_button.clicked.connect(self.accept)
-
-        layout.addWidget(self.submit_button)
-
-        self.setLayout(layout)
+        self.body_layout.addWidget(self.submit_button)
 
     def get_selected_collection_id(self):
         return self.collection_select.currentData()

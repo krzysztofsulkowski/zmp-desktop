@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPus
 
 from utils.window_corners import disable_windows_11_rounded_corners
 
-from services.auth_service import login
+from services.auth_service import login, login_with_google
 from services.session import set_token
 
 
@@ -71,9 +71,13 @@ class LoginView(QWidget):
         controls_bar.setContentsMargins(0, 0, 6, 0)
         controls_bar.setSpacing(10)
 
-        self.minimize_button = QPushButton("—")
-        self.maximize_button = QPushButton("□")
-        self.close_button = QPushButton("×")
+        self.minimize_button = QPushButton()
+        self.maximize_button = QPushButton()
+        self.close_button = QPushButton()
+
+        self.minimize_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowMinimizeIcon.svg")))
+        self.maximize_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowMaximizeIcon.svg")))
+        self.close_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowCloseIcon.svg")))
 
         self.minimize_button.setObjectName("windowControlButton")
         self.maximize_button.setObjectName("windowControlButton")
@@ -257,4 +261,17 @@ class LoginView(QWidget):
         self.controller.show_main()
 
     def handle_google_login(self):
-        self.set_status("Logowanie przez Google nie jest jeszcze dostępne.")
+        self.set_status("Otwieram logowanie Google w przeglądarce...")
+        self.google_login_button.setEnabled(False)
+
+        token, error = login_with_google()
+
+        self.google_login_button.setEnabled(True)
+
+        if not token:
+            self.set_status(error or "Logowanie przez Google nie powiodło się.")
+            return
+
+        set_token(token)
+        self.set_status("Zalogowano przez Google.", True)
+        self.controller.show_main()

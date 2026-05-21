@@ -10,9 +10,11 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QPushButton,
     QFileDialog,
-    QMessageBox,
     QFrame
 )
+
+from utils.window_corners import disable_windows_11_rounded_corners
+from views.styled_dialog import show_warning
 
 
 class EditProfileDialog(QDialog):
@@ -92,29 +94,32 @@ class EditProfileDialog(QDialog):
         self.save_button.clicked.connect(self.validate_and_accept)
 
     def select_avatar(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Wybierz avatar",
-            "",
-            "Obrazy (*.png *.jpg *.jpeg *.webp)"
-        )
+        file_dialog = QFileDialog(self, "Wybierz avatar")
+        file_dialog.setNameFilter("Obrazy (*.png *.jpg *.jpeg *.webp)")
+        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
 
-        if not file_path:
+        if file_dialog.exec() != QFileDialog.DialogCode.Accepted:
             return
 
-        self.avatar_path = file_path
-        self.avatar_label.setText(Path(file_path).name)
+        selected_files = file_dialog.selectedFiles()
+
+        if not selected_files:
+            return
+
+        self.avatar_path = selected_files[0]
+        self.avatar_label.setText(Path(self.avatar_path).name)
 
     def validate_and_accept(self):
         if not self.get_username():
-            QMessageBox.warning(
-                self,
-                "GameShelf",
-                "Nazwa użytkownika jest wymagana."
-            )
+            show_warning(self, "Nazwa użytkownika jest wymagana.")
             return
 
         self.accept()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        disable_windows_11_rounded_corners(self)
 
     def get_username(self):
         return self.username_input.text().strip()

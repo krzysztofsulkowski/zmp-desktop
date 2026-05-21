@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QMessageBox,
     QFrame,
     QSizePolicy
 )
@@ -17,6 +16,7 @@ from config import API_URL, VERIFY_SSL
 from services.api_client import get_me
 from services.profile_service import update_profile
 from views.edit_profile_dialog import EditProfileDialog
+from views.styled_dialog import show_info, show_warning
 
 
 class ProfileView(QWidget):
@@ -207,17 +207,9 @@ class ProfileView(QWidget):
         )
 
         if not success:
-            QMessageBox.warning(
-                self,
-                "GameShelf",
-                f"Nie udało się zaktualizować profilu.\n\n{error}"
-            )
+            show_warning(self, f"Nie udało się zaktualizować profilu.\n\n{error}")
             return
 
-        QMessageBox.information(
-            self,
-            "GameShelf",
-            "Profil został zaktualizowany."
-        )
+        show_info(self, "Profil został zaktualizowany.")
 
         self.load_user_data()

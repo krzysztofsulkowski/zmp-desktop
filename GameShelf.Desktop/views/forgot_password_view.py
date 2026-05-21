@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import QPixmap, QFontDatabase
+from PySide6.QtGui import QPixmap, QIcon, QFontDatabase
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QFrame
 
 from utils.window_corners import disable_windows_11_rounded_corners
@@ -70,9 +70,13 @@ class ForgotPasswordView(QWidget):
         controls_bar.setContentsMargins(0, 0, 6, 0)
         controls_bar.setSpacing(10)
 
-        self.minimize_button = QPushButton("—")
-        self.maximize_button = QPushButton("□")
-        self.close_button = QPushButton("×")
+        self.minimize_button = QPushButton()
+        self.maximize_button = QPushButton()
+        self.close_button = QPushButton()
+
+        self.minimize_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowMinimizeIcon.svg")))
+        self.maximize_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowMaximizeIcon.svg")))
+        self.close_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowCloseIcon.svg")))
 
         self.minimize_button.setObjectName("windowControlButton")
         self.maximize_button.setObjectName("windowControlButton")

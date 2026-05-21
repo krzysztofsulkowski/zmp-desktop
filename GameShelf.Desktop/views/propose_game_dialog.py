@@ -1,68 +1,46 @@
-from PySide6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QLabel,
-    QLineEdit,
-    QTextEdit,
-    QComboBox,
-    QPushButton,
-    QFileDialog,
-    QMessageBox
-)
+from PySide6.QtWidgets import QLabel, QLineEdit, QTextEdit, QComboBox, QPushButton, QFileDialog
 
-from services.game_service import (
-    get_game_genres,
-    get_game_platforms,
-    propose_game
-)
+from services.game_service import get_game_genres, get_game_platforms, propose_game
+from views.styled_dialog import StyledDialog, show_info, show_warning
 
 
-class ProposeGameDialog(QDialog):
+class ProposeGameDialog(StyledDialog):
     def __init__(self):
-        super().__init__()
+        super().__init__("Zgłoś nową grę")
 
         self.image_path = None
         self.genres = []
         self.platforms = []
 
-        self.setWindowTitle("Zgłoś nową grę")
-        self.setMinimumWidth(500)
-
+        self.setMinimumWidth(560)
         self.setup_ui()
         self.load_options()
         self.connect_signals()
 
     def setup_ui(self):
-        layout = QVBoxLayout()
-
         self.title_input = QLineEdit()
         self.description_input = QTextEdit()
+        self.description_input.setMinimumHeight(100)
         self.genre_select = QComboBox()
         self.platform_select = QComboBox()
         self.image_label = QLabel("Nie wybrano pliku")
+        self.image_label.setWordWrap(True)
 
         self.image_button = QPushButton("Wybierz miniaturkę")
         self.submit_button = QPushButton("Wyślij zgłoszenie")
 
-        layout.addWidget(QLabel("Tytuł*"))
-        layout.addWidget(self.title_input)
-
-        layout.addWidget(QLabel("Opis"))
-        layout.addWidget(self.description_input)
-
-        layout.addWidget(QLabel("Gatunek*"))
-        layout.addWidget(self.genre_select)
-
-        layout.addWidget(QLabel("Platforma*"))
-        layout.addWidget(self.platform_select)
-
-        layout.addWidget(QLabel("Miniaturka"))
-        layout.addWidget(self.image_label)
-        layout.addWidget(self.image_button)
-
-        layout.addWidget(self.submit_button)
-
-        self.setLayout(layout)
+        self.body_layout.addWidget(QLabel("Tytuł*"))
+        self.body_layout.addWidget(self.title_input)
+        self.body_layout.addWidget(QLabel("Opis"))
+        self.body_layout.addWidget(self.description_input)
+        self.body_layout.addWidget(QLabel("Gatunek*"))
+        self.body_layout.addWidget(self.genre_select)
+        self.body_layout.addWidget(QLabel("Platforma*"))
+        self.body_layout.addWidget(self.platform_select)
+        self.body_layout.addWidget(QLabel("Miniaturka"))
+        self.body_layout.addWidget(self.image_label)
+        self.body_layout.addWidget(self.image_button)
+        self.body_layout.addWidget(self.submit_button)
 
     def connect_signals(self):
         self.image_button.clicked.connect(self.select_image)
@@ -86,57 +64,46 @@ class ProposeGameDialog(QDialog):
             self.platform_select.addItem(platform_name, platform_id)
 
     def select_image(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Wybierz miniaturkę gry",
-            "",
-            "Obrazy (*.png *.jpg *.jpeg *.webp)"
-        )
+        file_dialog = QFileDialog(self, "Wybierz miniaturkę gry")
+        file_dialog.setNameFilter("Obrazy (*.png *.jpg *.jpeg *.webp)")
+        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
 
-        if not file_path:
+        if file_dialog.exec() != QFileDialog.DialogCode.Accepted:
             return
 
-        self.image_path = file_path
-        self.image_label.setText(file_path)
+        selected_files = file_dialog.selectedFiles()
+
+        if not selected_files:
+            return
+
+        self.image_path = selected_files[0]
+        self.image_label.setText(self.image_path)
 
     def submit(self):
         title = self.title_input.text().strip()
         description = self.description_input.toPlainText().strip()
 
         if not title:
-            self.show_warning("Tytuł gry jest wymagany.")
+            show_warning(self, "Tytuł gry jest wymagany.")
             return
 
         if self.genre_select.currentIndex() < 0:
-            self.show_warning("Wybierz gatunek gry.")
+            show_warning(self, "Wybierz gatunek gry.")
             return
 
         if self.platform_select.currentIndex() < 0:
-            self.show_warning("Wybierz platformę gry.")
+            show_warning(self, "Wybierz platformę gry.")
             return
 
         genre_id = self.genre_select.currentData()
         platform_id = self.platform_select.currentData()
 
-        success = propose_game(
-            title,
-            description,
-            genre_id,
-            platform_id,
-            self.image_path
-        )
+        success = propose_game(title, description, genre_id, platform_id, self.image_path)
 
         if not success:
-            self.show_warning("Nie udało się wysłać zgłoszenia.")
+            show_warning(self, "Nie udało się wysłać zgłoszenia.")
             return
 
-        QMessageBox.information(
-            self,
-            "GameShelf",
-            "Zgłoszenie gry zostało wysłane do administratora."
-        )
-
+        show_info(self, "Zgłoszenie gry zostało wysłane do administratora.")
         self.accept()
-
-    def show_warning(self, message):
-        QMessageBox.warning(self, "GameShelf", message)

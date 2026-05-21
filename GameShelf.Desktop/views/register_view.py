@@ -2,11 +2,12 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QPixmap, QIcon, QFontDatabase
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QMessageBox, QFrame
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QFrame
 
 from utils.window_corners import disable_windows_11_rounded_corners
 
 from services.auth_service import register
+from views.styled_dialog import show_info, show_warning
 
 
 class RegisterView(QWidget):
@@ -235,17 +236,17 @@ class RegisterView(QWidget):
         repeat_password = self.repeat_password_input.text()
 
         if not email or not username or not password or not repeat_password:
-            QMessageBox.warning(self, "Błąd", "Wszystkie pola są wymagane.")
+            show_warning(self, "Wszystkie pola są wymagane.")
             return
 
         if password != repeat_password:
-            QMessageBox.warning(self, "Błąd", "Hasła nie są takie same.")
+            show_warning(self, "Hasła nie są takie same.")
             return
 
         success, error = register(email, username, password)
 
         if success:
-            QMessageBox.information(self, "Sukces", "Konto zostało utworzone.")
+            show_info(self, "Konto zostało utworzone.")
             self.controller.show_login()
         else:
-            QMessageBox.warning(self, "Błąd", error)
+            show_warning(self, error)

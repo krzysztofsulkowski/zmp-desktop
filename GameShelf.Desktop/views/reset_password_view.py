@@ -2,11 +2,12 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QPixmap, QFontDatabase
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QMessageBox, QFrame
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QFrame
 
 from utils.window_corners import disable_windows_11_rounded_corners
 
 from services.auth_service import reset_password
+from views.styled_dialog import show_info, show_warning
 
 
 class ResetPasswordView(QWidget):
@@ -220,14 +221,14 @@ class ResetPasswordView(QWidget):
         password = self.password_input.text().strip()
 
         if not email or not token or not password:
-            QMessageBox.warning(self, "GameShelf", "Wszystkie pola są wymagane.")
+            show_warning(self, "Wszystkie pola są wymagane.")
             return
 
         success, error = reset_password(email, token, password)
 
         if not success:
-            QMessageBox.warning(self, "GameShelf", f"Nie udało się ustawić nowego hasła.\n\n{error}")
+            show_warning(self, f"Nie udało się ustawić nowego hasła.\n\n{error}")
             return
 
-        QMessageBox.information(self, "GameShelf", "Hasło zostało zmienione.")
+        show_info(self, "Hasło zostało zmienione.")
         self.on_back_to_login()

@@ -1,28 +1,18 @@
-from PySide6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QLabel,
-    QComboBox,
-    QPushButton
-)
+from PySide6.QtWidgets import QLabel, QComboBox, QPushButton
+
+from views.styled_dialog import StyledDialog
 
 
-class RateGameDialog(QDialog):
+class RateGameDialog(StyledDialog):
     def __init__(self, current_rating=None):
-        super().__init__()
-
-        self.setWindowTitle("Oceń grę")
-        self.setMinimumWidth(300)
-
+        super().__init__("Oceń grę")
+        self.setMinimumWidth(340)
         self.current_rating = current_rating
-
         self.setup_ui()
 
     def setup_ui(self):
-        layout = QVBoxLayout()
-
         title = QLabel("Wybierz ocenę gry")
-        layout.addWidget(title)
+        self.body_layout.addWidget(title)
 
         self.rating_select = QComboBox()
 
@@ -35,14 +25,11 @@ class RateGameDialog(QDialog):
             if index >= 0:
                 self.rating_select.setCurrentIndex(index)
 
-        layout.addWidget(self.rating_select)
+        self.body_layout.addWidget(self.rating_select)
 
         self.submit_button = QPushButton("Zapisz ocenę")
         self.submit_button.clicked.connect(self.accept)
-
-        layout.addWidget(self.submit_button)
-
-        self.setLayout(layout)
+        self.body_layout.addWidget(self.submit_button)
 
     def get_rating(self):
         return self.rating_select.currentData()

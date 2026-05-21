@@ -1,16 +1,12 @@
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QCheckBox, QPushButton
-)
+from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QLineEdit, QPushButton
+
+from views.styled_dialog import StyledDialog
 
 
-class CreateCollectionDialog(QDialog):
+class CreateCollectionDialog(StyledDialog):
     def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle("Create Collection")
-
-        layout = QVBoxLayout()
+        super().__init__("Utwórz kolekcję")
+        self.setMinimumWidth(400)
 
         self.name_label = QLabel("Nazwa kolekcji")
         self.name_input = QLineEdit()
@@ -20,19 +16,18 @@ class CreateCollectionDialog(QDialog):
         self.public_checkbox.setChecked(True)
 
         buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch()
 
-        self.create_button = QPushButton("Create")
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton("Anuluj")
+        self.create_button = QPushButton("Utwórz")
 
-        buttons_layout.addWidget(self.create_button)
         buttons_layout.addWidget(self.cancel_button)
+        buttons_layout.addWidget(self.create_button)
 
-        layout.addWidget(self.name_label)
-        layout.addWidget(self.name_input)
-        layout.addWidget(self.public_checkbox)
-        layout.addLayout(buttons_layout)
-
-        self.setLayout(layout)
+        self.body_layout.addWidget(self.name_label)
+        self.body_layout.addWidget(self.name_input)
+        self.body_layout.addWidget(self.public_checkbox)
+        self.body_layout.addLayout(buttons_layout)
 
         self.create_button.clicked.connect(self.accept)
         self.cancel_button.clicked.connect(self.reject)

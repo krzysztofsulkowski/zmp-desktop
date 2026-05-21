@@ -1,21 +1,104 @@
-QWidget#statsView,
-QWidget#globalStatsView,
-QWidget#friendsView,
-QWidget#chatView,
-QWidget#profileView,
-QWidget#settingsView,
-QWidget#notificationsView {
+QWidget#statsView {
     background: transparent;
 }
 
-QLabel#statValue {
+QLabel#statsPageTitle {
+    background: transparent;
     color: #ffffff;
-    font-size: 24px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 29px;
     font-weight: 900;
 }
 
-QLabel#statLabel {
-    color: #a1a1aa;
-    font-size: 13px;
+QScrollArea#statsScrollArea {
+    background: transparent;
+    border: none;
+}
+
+QWidget#statsScrollWidget {
+    background: transparent;
+}
+
+QFrame#statsCard {
+    background-color: rgba(9, 4, 17, 0.18);
+    border: 1px solid #8B5CF6;
+    border-radius: 22px;
+}
+
+QLabel#statsCardTitle {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 17px;
+    font-weight: 800;
+}
+
+QLabel#statsNumber {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 68px;
+    font-weight: 900;
+}
+
+QLabel#chartTooltip {
+    background-color: rgba(47, 47, 47, 0.92);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 12px;
     font-weight: 700;
+}
+
+QWidget#globalStatsView {
+    background: transparent;
+}
+
+QLabel#globalStatsPageTitle {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 29px;
+    font-weight: 900;
+}
+
+QScrollArea#globalStatsScrollArea {
+    background: transparent;
+    border: none;
+}
+
+QWidget#globalStatsScrollWidget {
+    background: transparent;
+}
+
+QFrame#globalStatsCard {
+    background-color: rgba(9, 4, 17, 0.18);
+    border: 1px solid #8B5CF6;
+    border-radius: 22px;
+}
+
+QLabel#globalStatsCardTitle {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 17px;
+    font-weight: 800;
+}
+
+QLabel#globalStatsNumber {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 68px;
+    font-weight: 900;
+}
+
+QLabel#globalStatsListItem {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 15px;
+    font-weight: 500;
 }

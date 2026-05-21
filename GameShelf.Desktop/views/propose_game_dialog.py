@@ -1,7 +1,8 @@
-from PySide6.QtWidgets import QLabel, QLineEdit, QTextEdit, QComboBox, QPushButton, QFileDialog
+from PySide6.QtWidgets import QLabel, QLineEdit, QTextEdit, QComboBox, QPushButton, QDialog
 
 from services.game_service import get_game_genres, get_game_platforms, propose_game
 from views.styled_dialog import StyledDialog, show_info, show_warning
+from views.styled_file_dialog import StyledFileDialog
 
 
 class ProposeGameDialog(StyledDialog):
@@ -64,12 +65,13 @@ class ProposeGameDialog(StyledDialog):
             self.platform_select.addItem(platform_name, platform_id)
 
     def select_image(self):
-        file_dialog = QFileDialog(self, "Wybierz miniaturkę gry")
-        file_dialog.setNameFilter("Obrazy (*.png *.jpg *.jpeg *.webp)")
-        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
+        file_dialog = StyledFileDialog(
+            self,
+            "Wybierz miniaturkę gry",
+            "Obrazy (*.png *.jpg *.jpeg *.webp)",
+        )
 
-        if file_dialog.exec() != QFileDialog.DialogCode.Accepted:
+        if file_dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
         selected_files = file_dialog.selectedFiles()

@@ -289,3 +289,135 @@ QLabel#styledMessageInfoIcon {
     font-size: 20px;
     font-weight: 900;
 }
+
+QFileDialog#styledFileDialog {
+    background-color: #111120;
+    border: 1px solid #8B5CF6;
+    border-radius: 22px;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+}
+
+QWidget#styledFileDialogHeader {
+    background-color: #111120;
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+}
+
+QLabel#styledFileDialogTitle {
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 20px;
+    font-weight: 900;
+}
+
+QPushButton#styledFileDialogCloseButton {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 11px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 20px;
+    font-weight: 900;
+    padding: 0px;
+}
+
+QPushButton#styledFileDialogCloseButton:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+QFileDialog#styledFileDialog QLabel {
+    color: #D8CCFF;
+    font-family: "Figtree SemiBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 700;
+}
+
+QFileDialog#styledFileDialog QLineEdit,
+QFileDialog#styledFileDialog QComboBox {
+    background-color: #ffffff;
+    color: #18181b;
+    border: 1px solid #8B5CF6;
+    border-radius: 14px;
+    padding: 9px 12px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+}
+
+QFileDialog#styledFileDialog QListView,
+QFileDialog#styledFileDialog QTreeView {
+    background-color: #151527;
+    color: #ffffff;
+    border: 1px solid rgba(124, 58, 237, 0.35);
+    border-radius: 14px;
+    padding: 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 13px;
+    selection-background-color: #7C3AED;
+    selection-color: #ffffff;
+}
+
+QFileDialog#styledFileDialog QHeaderView::section {
+    background-color: #21153B;
+    color: #ffffff;
+    border: none;
+    padding: 8px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-weight: 900;
+}
+
+QFileDialog#styledFileDialog QPushButton {
+    background-color: #7C3AED;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 900;
+}
+
+QFileDialog#styledFileDialog QPushButton:hover {
+    background-color: #8B5CF6;
+}
+
+QFileDialog#styledFileDialog QPushButton:disabled {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.45);
+}
+
+QLabel#styledFileDialogPreview {
+    background-color: rgba(9, 4, 17, 0.28);
+    color: #A78BFA;
+    border: 1px dashed rgba(167, 139, 250, 0.45);
+    border-radius: 16px;
+    font-family: "Figtree SemiBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px;
+}
+
+QFileDialog#styledFileDialog QScrollBar:vertical {
+    background: transparent;
+    width: 10px;
+    margin: 4px 2px 4px 2px;
+}
+
+QFileDialog#styledFileDialog QScrollBar::handle:vertical {
+    background: #7C3AED;
+    border-radius: 5px;
+    min-height: 28px;
+}
+
+QFileDialog#styledFileDialog QScrollBar:horizontal {
+    background: transparent;
+    height: 10px;
+    margin: 2px 4px 2px 4px;
+}
+
+QFileDialog#styledFileDialog QScrollBar::handle:horizontal {
+    background: #7C3AED;
+    border-radius: 5px;
+    min-width: 28px;
+}

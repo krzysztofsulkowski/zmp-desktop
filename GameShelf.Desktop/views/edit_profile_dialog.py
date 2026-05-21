@@ -9,12 +9,12 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QTextEdit,
     QPushButton,
-    QFileDialog,
     QFrame
 )
 
 from utils.window_corners import disable_windows_11_rounded_corners
 from views.styled_dialog import show_warning
+from views.styled_file_dialog import StyledFileDialog
 
 
 class EditProfileDialog(QDialog):
@@ -94,12 +94,13 @@ class EditProfileDialog(QDialog):
         self.save_button.clicked.connect(self.validate_and_accept)
 
     def select_avatar(self):
-        file_dialog = QFileDialog(self, "Wybierz avatar")
-        file_dialog.setNameFilter("Obrazy (*.png *.jpg *.jpeg *.webp)")
-        file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
+        file_dialog = StyledFileDialog(
+            self,
+            "Wybierz avatar",
+            "Obrazy (*.png *.jpg *.jpeg *.webp)",
+        )
 
-        if file_dialog.exec() != QFileDialog.DialogCode.Accepted:
+        if file_dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
         selected_files = file_dialog.selectedFiles()

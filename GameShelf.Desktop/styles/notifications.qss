@@ -1,0 +1,105 @@
+QWidget#notificationsView {
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+}
+
+QLabel#notificationsPageTitle {
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 29px;
+    font-weight: 900;
+}
+
+QPushButton#markAllNotificationsButton {
+    background-color: #8B3CF6;
+    color: #ffffff;
+    border: none;
+    border-radius: 11px;
+    padding: 0 16px;
+    min-height: 40px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 900;
+}
+
+QPushButton#markAllNotificationsButton:hover {
+    background-color: #9A55FF;
+}
+
+QScrollArea#notificationsScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+QWidget#notificationsScrollWidget {
+    background-color: transparent;
+}
+
+QFrame#notificationCard {
+    border: 1px solid rgba(139, 92, 246, 0.72);
+    border-radius: 16px;
+    background-color: transparent;
+}
+
+QFrame#notificationCard[unread="true"] {
+    background-color: rgba(92, 78, 126, 0.72);
+    border: 1px solid rgba(203, 195, 223, 0.72);
+}
+
+QFrame#notificationCard:hover {
+    border: 1px solid #8B5CF6;
+}
+
+QLabel#notificationCardTitle {
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 16px;
+    font-weight: 800;
+}
+
+QLabel#notificationCardContent {
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+}
+
+QLabel#notificationStatus {
+    background-color: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 13px;
+    font-weight: 800;
+}
+
+QFrame#emptyNotificationsCard {
+    background-color: rgba(9, 4, 17, 0.18);
+    border: 1px solid #8B5CF6;
+    border-radius: 22px;
+}
+
+QLabel#emptyNotificationsLabel {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.76);
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 16px;
+}
+
+QLabel#notificationsBadge {
+    background-color: #EF4444;
+    color: #ffffff;
+    border: 1px solid #21153B;
+    border-radius: 9px;
+    min-width: 19px;
+    max-width: 22px;
+    min-height: 19px;
+    max-height: 19px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 11px;
+    font-weight: 900;
+}

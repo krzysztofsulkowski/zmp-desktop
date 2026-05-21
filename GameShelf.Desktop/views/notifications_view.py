@@ -17,11 +17,11 @@ from services.friends_service import get_pending_requests
 
 
 class NotificationCard(QFrame):
-    def __init__(self, notification_id, title, content, is_unread, on_read):
+    def __init__(self, notification_id, title, content, is_unread, on_toggle):
         super().__init__()
 
         self.notification_id = notification_id
-        self.on_read = on_read
+        self.on_toggle = on_toggle
         self.is_unread = is_unread
 
         self.setObjectName("notificationCard")
@@ -32,29 +32,35 @@ class NotificationCard(QFrame):
         layout.setContentsMargins(22, 18, 22, 18)
         layout.setSpacing(8)
 
-        title_label = QLabel(title)
-        title_label.setObjectName("notificationCardTitle")
-        title_label.setWordWrap(True)
+        self.title_label = QLabel(title)
+        self.title_label.setObjectName("notificationCardTitle")
+        self.title_label.setWordWrap(True)
 
-        content_label = QLabel(content)
-        content_label.setObjectName("notificationCardContent")
-        content_label.setWordWrap(True)
+        self.content_label = QLabel(content)
+        self.content_label.setObjectName("notificationCardContent")
+        self.content_label.setWordWrap(True)
 
-        status_label = QLabel("Nowe" if is_unread else "Przeczytane")
-        status_label.setObjectName("notificationStatus")
-        status_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.status_label = QLabel()
+        self.status_label.setObjectName("notificationStatus")
+        self.status_label.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        layout.addWidget(title_label)
-        layout.addWidget(content_label)
-        layout.addWidget(status_label)
+        layout.addWidget(self.title_label)
+        layout.addWidget(self.content_label)
+        layout.addWidget(self.status_label)
+
+        self.refresh_state()
+
+    def refresh_state(self):
+        self.setProperty("unread", self.is_unread)
+        self.status_label.setText("Nowe" if self.is_unread else "Przeczytane")
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     def mousePressEvent(self, event):
-        if self.is_unread and event.button() == Qt.MouseButton.LeftButton:
-            self.is_unread = False
-            self.setProperty("unread", False)
-            self.style().unpolish(self)
-            self.style().polish(self)
-            self.on_read(self.notification_id)
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.is_unread = not self.is_unread
+            self.refresh_state()
+            self.on_toggle(self.notification_id, self.is_unread)
 
         super().mousePressEvent(event)
 
@@ -68,6 +74,7 @@ class NotificationsView(QWidget):
         self.setObjectName("notificationsView")
         self.storage_path = Path(__file__).resolve().parents[1] / "notifications_read.json"
         self.read_notifications = self.load_read_notifications()
+        self.session_read_notifications = set()
         self.notifications = []
 
         self.setup_ui()
@@ -160,8 +167,9 @@ class NotificationsView(QWidget):
 
     def render_notifications(self):
         self.clear_layout()
+        visible_notifications = self.get_visible_notifications()
 
-        if not self.notifications:
+        if not visible_notifications:
             empty_card = QFrame()
             empty_card.setObjectName("emptyNotificationsCard")
 
@@ -178,7 +186,7 @@ class NotificationsView(QWidget):
             self.notifications_layout.addStretch()
             return
 
-        for notification in self.notifications:
+        for notification in visible_notifications:
             notification_id = notification["id"]
             is_unread = notification_id not in self.read_notifications
 
@@ -187,7 +195,7 @@ class NotificationsView(QWidget):
                 notification["title"],
                 notification["content"],
                 is_unread,
-                self.mark_as_read
+                self.toggle_notification_state
             )
             card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
@@ -195,14 +203,28 @@ class NotificationsView(QWidget):
 
         self.notifications_layout.addStretch()
 
-    def mark_as_read(self, notification_id):
-        self.read_notifications.add(notification_id)
+    def get_visible_notifications(self):
+        return [
+            notification
+            for notification in self.notifications
+            if notification["id"] not in self.read_notifications or notification["id"] in self.session_read_notifications
+        ]
+
+    def toggle_notification_state(self, notification_id, is_unread):
+        if is_unread:
+            self.read_notifications.discard(notification_id)
+            self.session_read_notifications.discard(notification_id)
+        else:
+            self.read_notifications.add(notification_id)
+            self.session_read_notifications.add(notification_id)
+
         self.save_read_notifications()
         self.emit_unread_count()
 
     def mark_all_as_read(self):
         for notification in self.notifications:
             self.read_notifications.add(notification["id"])
+            self.session_read_notifications.add(notification["id"])
 
         self.save_read_notifications()
         self.render_notifications()

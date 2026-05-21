@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QSizePolicy
 )
-from PySide6.QtCore import Qt, QSize, QPoint
+from PySide6.QtCore import Qt, QSize, QPoint, QTimer
 from PySide6.QtGui import QPixmap, QFontDatabase, QIcon
 import requests
 
@@ -190,6 +190,8 @@ class MainView(QWidget):
         self.notifications_view = NotificationsView()
         self.profile_view = ProfileView(self.logout_view)
 
+        self.setup_notifications_counter()
+
         self.stacked_layout.addWidget(self.profile_view)
         self.stacked_layout.addWidget(self.home_widget)
         self.stacked_layout.addWidget(self.friends_view)
@@ -212,6 +214,41 @@ class MainView(QWidget):
 
         outer_layout.addWidget(self.main_frame)
         self.setLayout(outer_layout)
+
+
+    def setup_notifications_counter(self):
+        self.notifications_badge = QLabel(self.notifications_button)
+        self.notifications_badge.setObjectName("notificationsBadge")
+        self.notifications_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.notifications_badge.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self.notifications_badge.setFixedSize(19, 19)
+        self.notifications_badge.move(33, 1)
+        self.notifications_badge.hide()
+
+        self.notifications_view.unread_count_changed.connect(self.update_notifications_badge)
+        self.update_notifications_badge(self.notifications_view.get_unread_count())
+
+        self.notifications_timer = QTimer(self)
+        self.notifications_timer.setInterval(15000)
+        self.notifications_timer.timeout.connect(self.notifications_view.refresh_notifications)
+        self.notifications_timer.start()
+
+    def update_notifications_badge(self, count):
+        if count <= 0:
+            self.notifications_badge.hide()
+            return
+
+        if count <= 9:
+            self.notifications_badge.setText(str(count))
+            self.notifications_badge.setFixedSize(19, 19)
+            self.notifications_badge.move(33, 1)
+        else:
+            self.notifications_badge.setText("9+")
+            self.notifications_badge.setFixedSize(22, 19)
+            self.notifications_badge.move(30, 1)
+
+        self.notifications_badge.show()
+        self.notifications_badge.raise_()
 
     def create_window_controls_bar(self):
         controls_bar = QHBoxLayout()

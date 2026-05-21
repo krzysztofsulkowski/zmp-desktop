@@ -21,8 +21,6 @@ from PySide6.QtCore import Qt, QSize, QPoint, QTimer
 from PySide6.QtGui import QPixmap, QFontDatabase, QIcon
 import requests
 
-from utils.window_corners import disable_windows_11_rounded_corners
-
 from config import API_URL, VERIFY_SSL
 
 from services.collection_service import (
@@ -152,10 +150,6 @@ class MainView(QWidget):
         self.load_games()
         self.switch_view(self.HOME_VIEW_INDEX)
         self.set_active_button(self.home_button)
-
-    def showEvent(self, event):
-        super().showEvent(event)
-        disable_windows_11_rounded_corners(self)
 
     def load_fonts(self):
         font_dir = self.base_dir / "assets"
@@ -728,10 +722,12 @@ class MainView(QWidget):
         layout.setContentsMargins(20, 24, 20, 24)
         layout.setSpacing(14)
 
-        plus_circle = QLabel("+")
+        plus_circle = QLabel()
         plus_circle.setObjectName("addGamePlus")
         plus_circle.setAlignment(Qt.AlignCenter)
-        plus_circle.setFixedSize(56, 56)
+        plus_circle.setFixedSize(58, 58)
+        plus_icon = QPixmap(str(self.base_dir / "assets" / "AddCollectionIcon.svg"))
+        plus_circle.setPixmap(plus_icon.scaled(58, 58, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         text = QLabel("dodaj kolejną grę")
         text.setObjectName("addGameText")
@@ -792,12 +788,12 @@ class MainView(QWidget):
         rating_btn = QPushButton()
         rating_btn.setObjectName("gameCardActionBtn")
         rating_btn.setToolTip("Oceń grę")
-        rating_btn.setFixedSize(30, 24)
+        rating_btn.setFixedSize(32, 24)
         rating_btn.setIcon(QIcon(str(assets / "GameCardStarIcon.svg")))
-        rating_btn.setIconSize(QSize(14, 14))
+        rating_btn.setIconSize(QSize(13, 13))
         if game.rating:
-            rating_btn.setText(f" {game.rating}")
-            rating_btn.setFixedSize(46, 24)
+            rating_btn.setText(str(game.rating))
+            rating_btn.setFixedSize(62, 24)
         rating_btn.clicked.connect(lambda checked=False, g=game: self.handle_rate_game(g))
 
         move_btn = QPushButton()

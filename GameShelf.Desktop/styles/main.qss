@@ -304,12 +304,8 @@ QPushButton#addGameCard:hover {
 }
 
 QLabel#addGamePlus {
-    background-color: #CBC3DF;
-    color: #5C4E7E;
-    border-radius: 30px;
-    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
-    font-size: 42px;
-    font-weight: 900;
+    background-color: transparent;
+    border: none;
 }
 
 QLabel#addGameText {
@@ -337,7 +333,10 @@ QLabel#gameCover {
 
 QFrame#gameInfoPanel {
     background-color: #5C4E7E;
-    border-radius: 0px 0px 14px 14px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
 }
 
 QLabel#libraryGamePlatform {
@@ -379,8 +378,8 @@ QPushButton#gameCardActionBtn {
     font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
     font-size: 11px;
     font-weight: 900;
-    padding: 0 6px;
-    text-align: left;
+    padding: 0 4px;
+    text-align: center;
 }
 
 QPushButton#gameCardActionBtn:hover {

@@ -1,0 +1,50 @@
+QWidget#settingsView {
+    background: transparent;
+}
+
+QFrame#settingsContentFrame {
+    background-color: transparent;
+    border: none;
+}
+
+QLabel#settingsPageTitle {
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 29px;
+    font-weight: 900;
+}
+
+QFrame#settingsOptionCard {
+    background-color: rgba(9, 4, 17, 0.18);
+    border: 1px solid #8B5CF6;
+    border-radius: 22px;
+    min-height: 78px;
+}
+
+QCheckBox#settingsCheckbox {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree SemiBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 16px;
+    font-weight: 700;
+    spacing: 12px;
+}
+
+QCheckBox#settingsCheckbox::indicator {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1px solid #8B5CF6;
+    background-color: rgba(9, 4, 17, 0.35);
+}
+
+QCheckBox#settingsCheckbox::indicator:hover {
+    border: 1px solid #A78BFA;
+    background-color: rgba(139, 92, 246, 0.18);
+}
+
+QCheckBox#settingsCheckbox::indicator:checked {
+    background-color: #8B5CF6;
+    border: 1px solid #A78BFA;
+    image: none;
+}

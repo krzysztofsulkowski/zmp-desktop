@@ -1122,12 +1122,10 @@ class MainView(QWidget):
             )
             return
 
-        share_link = f"{API_URL}/api/collections/share/{share_code}"
-
-        QApplication.clipboard().setText(share_link)
+        QApplication.clipboard().setText(share_code)
 
         QMessageBox.information(
             self,
             "GameShelf",
-            f"Link do kolekcji został skopiowany do schowka:\n\n{share_link}"
+            f"Kod udostępniania kolekcji został skopiowany do schowka:\n\n{share_code}"
         )

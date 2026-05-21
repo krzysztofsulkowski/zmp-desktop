@@ -4,3 +4,4 @@ __pycache__/
 .idea/
 .env
 app_settings.json
+share_codes.json

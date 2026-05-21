@@ -13,6 +13,8 @@ from PySide6.QtWidgets import (
 )
 
 
+from utils.window_corners import disable_windows_11_rounded_corners
+
 class LandingView(QWidget):
     def __init__(self, controller):
         super().__init__()
@@ -33,6 +35,10 @@ class LandingView(QWidget):
 
         self.setup_ui()
         self.connect_signals()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        disable_windows_11_rounded_corners(self)
 
     def load_fonts(self):
         font_dir = self.base_dir / "assets"

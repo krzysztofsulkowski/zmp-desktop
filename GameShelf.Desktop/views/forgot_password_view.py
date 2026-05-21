@@ -4,6 +4,8 @@ from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QPixmap, QFontDatabase
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QFrame
 
+from utils.window_corners import disable_windows_11_rounded_corners
+
 from services.auth_service import forgot_password
 
 
@@ -26,6 +28,10 @@ class ForgotPasswordView(QWidget):
 
         self.setup_ui()
         self.connect_signals()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        disable_windows_11_rounded_corners(self)
 
     def load_fonts(self):
         font_dir = self.base_dir / "assets"

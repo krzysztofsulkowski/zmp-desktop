@@ -102,3 +102,38 @@ QLabel#globalStatsListItem {
     font-size: 15px;
     font-weight: 500;
 }
+
+QChartView#globalStatsChartView {
+    background: transparent;
+    border: none;
+}
+
+QWidget#podiumBarWrapper {
+    background: transparent;
+}
+
+QLabel#podiumValue {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 15px;
+    font-weight: 800;
+}
+
+QLabel#podiumName {
+    background: transparent;
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 11px;
+    font-weight: 600;
+}
+
+QToolTip {
+    background-color: rgba(47, 47, 47, 0.92);
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 9px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 12px;
+}

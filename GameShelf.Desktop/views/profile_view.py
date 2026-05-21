@@ -1,18 +1,20 @@
 import requests
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt, QRect
+from PySide6.QtGui import QPixmap, QPainter, QPainterPath
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QPushButton,
-    QMessageBox
+    QMessageBox,
+    QFrame,
+    QSizePolicy
 )
 
 from config import API_URL, VERIFY_SSL
 from services.api_client import get_me
-from services.session import clear_token
 from services.profile_service import update_profile
 from views.edit_profile_dialog import EditProfileDialog
 
@@ -26,48 +28,91 @@ class ProfileView(QWidget):
         self.user_data = {}
 
         self.title_label = QLabel("Profil użytkownika")
-        self.title_label.setObjectName("pageTitle")
+        self.title_label.setObjectName("profilePageTitle")
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         self.avatar_label = QLabel("Brak avatara")
-        self.email_label = QLabel("Email: ładowanie...")
-        self.username_label = QLabel("Nazwa użytkownika: ładowanie...")
-        self.bio_label = QLabel("Bio: ładowanie...")
+        self.avatar_label.setObjectName("profileAvatar")
+        self.avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.avatar_label.setFixedSize(150, 150)
+
+        self.email_label = QLabel("ładowanie...")
+        self.email_label.setObjectName("profileEmail")
+        self.email_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.username_label = QLabel("ładowanie...")
+        self.username_label.setObjectName("profileUsername")
+        self.username_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         self.edit_profile_button = QPushButton("Edytuj profil")
-        self.edit_profile_button.setObjectName("secondaryButton")
-        self.logout_button = QPushButton("Wyloguj")
-        self.logout_button.setObjectName("dangerButton")
+        self.edit_profile_button.setObjectName("profileEditButton")
+        self.edit_profile_button.setFixedWidth(180)
+
+        self.bio_title_label = QLabel("Bio")
+        self.bio_title_label.setObjectName("profileBioTitle")
+        self.bio_title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.bio_label = QLabel("ładowanie...")
+        self.bio_label.setObjectName("profileBioText")
+        self.bio_label.setWordWrap(True)
+        self.bio_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
         self.setup_ui()
         self.connect_signals()
         self.load_user_data()
 
     def setup_ui(self):
-        layout = QVBoxLayout()
+        outer_layout = QVBoxLayout()
+        outer_layout.setContentsMargins(42, 24, 42, 32)
+        outer_layout.setSpacing(22)
 
-        self.avatar_label.setFixedSize(120, 120)
-        self.avatar_label.setAlignment(Qt.AlignCenter)
+        self.content_frame = QFrame()
+        self.content_frame.setObjectName("profileContentFrame")
+        self.content_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
-        layout.addWidget(self.title_label)
-        layout.addWidget(self.avatar_label)
-        layout.addWidget(self.email_label)
-        layout.addWidget(self.username_label)
-        layout.addWidget(self.bio_label)
-        layout.addWidget(self.edit_profile_button)
-        layout.addStretch()
-        layout.addWidget(self.logout_button)
+        content_layout = QVBoxLayout(self.content_frame)
+        content_layout.setContentsMargins(34, 22, 34, 26)
+        content_layout.setSpacing(14)
 
-        self.setLayout(layout)
+        avatar_row = QHBoxLayout()
+        avatar_row.setContentsMargins(0, 0, 0, 0)
+        avatar_row.addStretch()
+        avatar_row.addWidget(self.avatar_label)
+        avatar_row.addStretch()
+
+        edit_row = QHBoxLayout()
+        edit_row.setContentsMargins(0, 6, 0, 8)
+        edit_row.addStretch()
+        edit_row.addWidget(self.edit_profile_button)
+
+        bio_box = QFrame()
+        bio_box.setObjectName("profileBioBox")
+        bio_box_layout = QVBoxLayout(bio_box)
+        bio_box_layout.setContentsMargins(22, 18, 22, 22)
+        bio_box_layout.setSpacing(14)
+        bio_box_layout.addWidget(self.bio_title_label)
+        bio_box_layout.addWidget(self.bio_label, 1)
+
+        content_layout.addWidget(self.title_label)
+        content_layout.addLayout(avatar_row)
+        content_layout.addWidget(self.email_label)
+        content_layout.addWidget(self.username_label)
+        content_layout.addLayout(edit_row)
+        content_layout.addWidget(bio_box, 1)
+
+        outer_layout.addWidget(self.content_frame)
+        self.setLayout(outer_layout)
 
     def connect_signals(self):
-        self.logout_button.clicked.connect(self.logout)
         self.edit_profile_button.clicked.connect(self.open_edit_profile_dialog)
 
     def load_user_data(self):
         response = get_me()
 
         if response is None or response.status_code != 200:
-            self.email_label.setText("Email: brak danych")
-            self.username_label.setText("Nazwa użytkownika: brak danych")
-            self.bio_label.setText("Bio: brak danych")
+            self.email_label.setText("brak danych")
+            self.username_label.setText("brak danych")
+            self.bio_label.setText("brak danych")
             self.avatar_label.setText("Brak avatara")
             return
 
@@ -78,15 +123,16 @@ class ProfileView(QWidget):
         bio = self.user_data.get("bio", "brak danych")
         avatar_url = self.user_data.get("avatarUrl")
 
-        self.email_label.setText(f"Email: {email}")
-        self.username_label.setText(f"Nazwa użytkownika: {username}")
-        self.bio_label.setText(f"Bio: {bio or 'brak danych'}")
+        self.email_label.setText(email)
+        self.username_label.setText(username)
+        self.bio_label.setText(bio or "brak danych")
 
         self.load_avatar(avatar_url)
 
     def load_avatar(self, avatar_url):
         if not avatar_url:
             self.avatar_label.setText("Brak avatara")
+            self.avatar_label.setPixmap(QPixmap())
             return
 
         if avatar_url.startswith("/"):
@@ -101,21 +147,48 @@ class ProfileView(QWidget):
 
             if response.status_code != 200:
                 self.avatar_label.setText("Brak avatara")
+                self.avatar_label.setPixmap(QPixmap())
                 return
 
             pixmap = QPixmap()
             pixmap.loadFromData(response.content)
 
-            scaled_pixmap = pixmap.scaled(
-                120,
-                120,
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation
-            )
+            if pixmap.isNull():
+                self.avatar_label.setText("Brak avatara")
+                self.avatar_label.setPixmap(QPixmap())
+                return
 
-            self.avatar_label.setPixmap(scaled_pixmap)
+            self.avatar_label.setText("")
+            self.avatar_label.setPixmap(self.create_round_avatar(pixmap, 150))
         except requests.RequestException:
             self.avatar_label.setText("Brak avatara")
+            self.avatar_label.setPixmap(QPixmap())
+
+    def create_round_avatar(self, pixmap, size):
+        scaled = pixmap.scaled(
+            size,
+            size,
+            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+            Qt.TransformationMode.SmoothTransformation
+        )
+
+        x = max(0, (scaled.width() - size) // 2)
+        y = max(0, (scaled.height() - size) // 2)
+        cropped = scaled.copy(QRect(x, y, size, size))
+
+        rounded = QPixmap(size, size)
+        rounded.fill(Qt.GlobalColor.transparent)
+
+        painter = QPainter(rounded)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        path = QPainterPath()
+        path.addEllipse(0, 0, size, size)
+        painter.setClipPath(path)
+        painter.drawPixmap(0, 0, cropped)
+        painter.end()
+
+        return rounded
 
     def open_edit_profile_dialog(self):
         username = self.user_data.get("userName", "")
@@ -124,7 +197,7 @@ class ProfileView(QWidget):
         dialog = EditProfileDialog(username, bio)
         result = dialog.exec()
 
-        if result != EditProfileDialog.Accepted:
+        if result != EditProfileDialog.DialogCode.Accepted:
             return
 
         success, error = update_profile(
@@ -148,7 +221,3 @@ class ProfileView(QWidget):
         )
 
         self.load_user_data()
-
-    def logout(self):
-        clear_token()
-        self.on_logout()

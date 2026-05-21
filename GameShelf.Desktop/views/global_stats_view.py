@@ -5,9 +5,13 @@ from PySide6.QtWidgets import (
     QFrame,
     QGridLayout,
     QScrollArea,
-    QSizePolicy
+    QHBoxLayout,
+    QSizePolicy,
+    QToolTip
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCharts import QChart, QChartView, QPieSeries
+from PySide6.QtGui import QColor, QPainter
+from PySide6.QtCore import Qt, QMargins
 
 from services.statistics_service import get_global_statistics
 
@@ -20,7 +24,7 @@ class GlobalStatsCard(QFrame):
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(20, 18, 20, 18)
-        self.layout.setSpacing(14)
+        self.layout.setSpacing(12)
 
         self.title_label = QLabel(title)
         self.title_label.setObjectName("globalStatsCardTitle")
@@ -28,6 +32,36 @@ class GlobalStatsCard(QFrame):
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.layout.addWidget(self.title_label)
+
+
+class PodiumBar(QWidget):
+    def __init__(self, name, value, color, height):
+        super().__init__()
+        self.setObjectName("podiumBarWrapper")
+
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(6)
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
+
+        self.value_label = QLabel(str(value))
+        self.value_label.setObjectName("podiumValue")
+        self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.bar = QFrame()
+        self.bar.setObjectName("podiumBar")
+        self.bar.setFixedSize(54, height)
+        self.bar.setStyleSheet(f"QFrame#podiumBar {{ background-color: {color}; border-radius: 10px 10px 4px 4px; }}")
+
+        self.name_label = QLabel(name)
+        self.name_label.setObjectName("podiumName")
+        self.name_label.setWordWrap(True)
+        self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.name_label.setFixedWidth(86)
+
+        self.layout.addWidget(self.value_label)
+        self.layout.addWidget(self.bar, alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.layout.addWidget(self.name_label)
 
 
 class GlobalStatsView(QWidget):
@@ -69,10 +103,10 @@ class GlobalStatsView(QWidget):
         self.total_library_games_card = self.create_number_card("liczba gier w bibliotece globalnej:")
         self.total_user_games_card = self.create_number_card("liczba gier w kolekcjach użytkowników:")
 
-        self.popular_games_card = self.create_list_card("najpopularniejsze gry:")
-        self.popular_platforms_card = self.create_list_card("najpopularniejsze platformy:")
-        self.popular_genres_card = self.create_list_card("najpopularniejsze gatunki:")
-        self.highest_rated_games_card = self.create_list_card("najwyżej oceniane gry:")
+        self.popular_games_card, self.popular_games_chart = self.create_chart_card("najpopularniejsze gry:")
+        self.popular_platforms_card, self.popular_platforms_chart = self.create_chart_card("najpopularniejsze platformy:")
+        self.popular_genres_card, self.popular_genres_chart = self.create_chart_card("najpopularniejsze gatunki:")
+        self.highest_rated_games_card = self.create_podium_card("najwyżej oceniane gry:")
 
         self.cards = [
             self.total_users_card,
@@ -102,17 +136,35 @@ class GlobalStatsView(QWidget):
 
         return card
 
-    def create_list_card(self, title):
+    def create_chart_card(self, title):
         card = GlobalStatsCard(title)
 
-        list_container = QVBoxLayout()
-        list_container.setContentsMargins(0, 8, 0, 0)
-        list_container.setSpacing(10)
+        chart = QChart()
+        chart.legend().hide()
+        chart.setBackgroundVisible(False)
+        chart.setPlotAreaBackgroundVisible(False)
+        chart.setMargins(QMargins(0, 0, 0, 0))
 
-        card.layout.addLayout(list_container)
-        card.layout.addStretch(1)
+        chart_view = QChartView(chart)
+        chart_view.setObjectName("globalStatsChartView")
+        chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+        chart_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        chart_view.setMinimumHeight(210)
 
-        card.items_layout = list_container
+        card.layout.addWidget(chart_view)
+
+        return card, chart
+
+    def create_podium_card(self, title):
+        card = GlobalStatsCard(title)
+
+        podium_layout = QHBoxLayout()
+        podium_layout.setContentsMargins(0, 8, 0, 0)
+        podium_layout.setSpacing(10)
+        podium_layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
+
+        card.layout.addLayout(podium_layout)
+        card.podium_layout = podium_layout
 
         return card
 
@@ -140,8 +192,6 @@ class GlobalStatsView(QWidget):
         window_width = self.window().width() - 210 if self.window() else 0
         available_width = max(viewport_width, window_width)
 
-        columns = max(1, min(3, (available_width + gap) // (card_width + gap)))
-
         if available_width >= 1000:
             columns = 3
         elif available_width >= 660:
@@ -166,43 +216,114 @@ class GlobalStatsView(QWidget):
             self.total_users_card.value_label.setText("—")
             self.total_library_games_card.value_label.setText("—")
             self.total_user_games_card.value_label.setText("—")
-            self.fill_list_card(self.popular_games_card, [])
-            self.fill_list_card(self.popular_platforms_card, [])
-            self.fill_list_card(self.popular_genres_card, [])
-            self.fill_list_card(self.highest_rated_games_card, [])
+            self.build_pie_chart(self.popular_games_chart, [])
+            self.build_pie_chart(self.popular_platforms_chart, [])
+            self.build_pie_chart(self.popular_genres_chart, [])
+            self.build_podium([])
             return
 
         self.total_users_card.value_label.setText(str(stats.get("totalUsers", 0)))
         self.total_library_games_card.value_label.setText(str(stats.get("totalGamesInLibrary", 0)))
         self.total_user_games_card.value_label.setText(str(stats.get("totalUserGames", 0)))
 
-        self.fill_list_card(self.popular_games_card, stats.get("mostPopularGames", []))
-        self.fill_list_card(self.popular_platforms_card, stats.get("popularPlatforms", []))
-        self.fill_list_card(self.popular_genres_card, stats.get("popularGenres", []))
-        self.fill_list_card(self.highest_rated_games_card, stats.get("highestRatedGames", []))
+        self.build_pie_chart(self.popular_games_chart, stats.get("mostPopularGames", []))
+        self.build_pie_chart(self.popular_platforms_chart, stats.get("popularPlatforms", []))
+        self.build_pie_chart(self.popular_genres_chart, stats.get("popularGenres", []))
+        self.build_podium(stats.get("highestRatedGames", []))
 
-    def fill_list_card(self, card, items):
-        while card.items_layout.count():
-            item = card.items_layout.takeAt(0)
+    def build_pie_chart(self, chart, items):
+        chart.removeAllSeries()
+
+        series = QPieSeries()
+        series.setHoleSize(0.48)
+        series.setPieSize(0.84)
+
+        colors = [
+            "#5C4E7E",
+            "#7D6EA1",
+            "#9C8BC5",
+            "#BFB2DE",
+            "#DED6F0",
+            "#FFFFFF"
+        ]
+
+        for index, item in enumerate(items[:6]):
+            label = item.get("label", "Brak")
+            value = item.get("value", 0)
+
+            slice_item = series.append(label, value)
+            color = QColor(colors[index % len(colors)])
+
+            slice_item.setBrush(color)
+            slice_item.setBorderColor(color)
+            slice_item.setLabelVisible(False)
+            slice_item.hovered.connect(
+                lambda state, s=slice_item, l=label, v=value:
+                self.on_slice_hover(state, s, l, v)
+            )
+
+        chart.addSeries(series)
+
+    def on_slice_hover(self, state, slice_item, label, value):
+        if state:
+            QToolTip.showText(self.cursor().pos(), f"{label}: {value}", self)
+        else:
+            QToolTip.hideText()
+
+    def clear_podium(self):
+        while self.highest_rated_games_card.podium_layout.count():
+            item = self.highest_rated_games_card.podium_layout.takeAt(0)
             widget = item.widget()
 
             if widget:
                 widget.deleteLater()
 
-        if not items:
+    def build_podium(self, items):
+        self.clear_podium()
+
+        podium_items = items
+
+        if not podium_items:
             empty_label = QLabel("Brak danych")
             empty_label.setObjectName("globalStatsListItem")
             empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            card.items_layout.addWidget(empty_label)
+            self.highest_rated_games_card.podium_layout.addWidget(empty_label)
             return
 
-        for item in items[:6]:
-            label = item.get("label", "Brak")
+        sorted_items = sorted(
+            podium_items,
+            key=lambda item: item.get("value", 0),
+            reverse=True
+        )
+
+        colors_by_place = ["#D6B35A", "#BFB7D6", "#B8734A"]
+        heights_by_place = [132, 104, 82]
+
+        for item in sorted_items:
+            name = item.get("label", "Brak")
             value = item.get("value", 0)
 
-            item_label = QLabel(f"{label}: {value}")
-            item_label.setObjectName("globalStatsListItem")
-            item_label.setWordWrap(True)
-            item_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            higher_scores_count = len({
+                other.get("value", 0)
+                for other in sorted_items
+                if other.get("value", 0) > value
+            })
 
-            card.items_layout.addWidget(item_label)
+            same_or_higher_items_count = len([
+                other
+                for other in sorted_items
+                if other.get("value", 0) > value
+            ])
+
+            place_index = same_or_higher_items_count
+
+            if place_index > 2:
+                continue
+
+            bar = PodiumBar(
+                name,
+                value,
+                colors_by_place[place_index],
+                heights_by_place[place_index]
+            )
+            self.highest_rated_games_card.podium_layout.addWidget(bar)

@@ -29,3 +29,164 @@ QDialog QListWidget {
     border: 1px solid rgba(124, 58, 237, 0.35);
     border-radius: 14px;
 }
+
+QWidget#profileView {
+    background: transparent;
+}
+
+QFrame#profileContentFrame {
+    background-color: transparent;
+    border: none;
+}
+
+QLabel#profilePageTitle {
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 29px;
+    font-weight: 900;
+}
+
+QLabel#profileAvatar {
+    background-color: #21153B;
+    color: #CBC3DF;
+    border: 1px solid #8B5CF6;
+    border-radius: 75px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 13px;
+}
+
+QLabel#profileEmail {
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 17px;
+    font-weight: 500;
+}
+
+QLabel#profileUsername {
+    color: #CBC3DF;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 21px;
+    font-weight: 800;
+}
+
+QPushButton#profileEditButton {
+    background-color: #5C4E7E;
+    color: #ffffff;
+    border: none;
+    border-radius: 9px;
+    padding: 9px 14px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 800;
+}
+
+QPushButton#profileEditButton:hover {
+    background-color: #66558d;
+}
+
+QFrame#profileBioBox {
+    background-color: rgba(9, 4, 17, 0.18);
+    border: 1px solid #8B5CF6;
+    border-radius: 22px;
+}
+
+QLabel#profileBioTitle {
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 27px;
+    font-weight: 900;
+}
+
+QLabel#profileBioText {
+    color: #ffffff;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+}
+
+QDialog#editProfileDialog {
+    background: transparent;
+}
+
+QFrame#editProfileDialogFrame {
+    background-color: #111120;
+    border: 1px solid #8B5CF6;
+    border-radius: 22px;
+}
+
+QLabel#editProfileDialogTitle {
+    color: #ffffff;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 24px;
+    font-weight: 900;
+}
+
+QPushButton#editProfileCloseButton {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 11px;
+    font-size: 20px;
+    font-weight: 900;
+    padding: 0px;
+}
+
+QPushButton#editProfileCloseButton:hover {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+QLineEdit#editProfileInput,
+QTextEdit#editProfileTextArea {
+    background-color: #ffffff;
+    color: #18181b;
+    border: 1px solid #8B5CF6;
+    border-radius: 18px;
+    padding: 10px 14px 16px 14px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+}
+
+QLabel#editProfileFileLabel {
+    color: #CBC3DF;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 13px;
+}
+
+QPushButton#editProfilePrimaryButton,
+QPushButton#editProfileSecondaryButton {
+    background-color: #7C3AED;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 11px 16px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 900;
+}
+
+QPushButton#editProfilePrimaryButton:hover,
+QPushButton#editProfileSecondaryButton:hover {
+    background-color: #8B5CF6;
+}
+
+
+QDialog#editProfileDialog QLabel {
+    color: #D8CCFF;
+    font-family: "Figtree SemiBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 14px;
+    font-weight: 700;
+}
+
+QLabel#editProfileDialogTitle {
+    color: #ffffff;
+}
+
+QLabel#editProfileFileLabel {
+    color: #A78BFA;
+    font-family: "Figtree SemiBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}

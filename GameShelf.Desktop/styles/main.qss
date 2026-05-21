@@ -263,20 +263,34 @@ QWidget#gamesScrollWidget {
 }
 
 QScrollBar:vertical {
-    background-color: rgba(139, 92, 246, 0.21);
+    background-color: transparent;
     width: 13px;
-    border-radius: 8px;
+    border-radius: 6px;
+    margin: 4px 0px 4px 0px;
+}
+
+QScrollBar::groove:vertical {
+    background-color: rgba(139, 92, 246, 0.21);
+    border-radius: 6px;
+    width: 13px;
 }
 
 QScrollBar::handle:vertical {
     background-color: #8B5CF6;
-    border-radius: 8px;
+    border-radius: 6px;
     min-height: 43px;
+    margin: 0px;
 }
 
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: rgba(139, 92, 246, 0.21);
+    border-radius: 6px;
 }
 
 QPushButton#addGameCard {
@@ -307,8 +321,9 @@ QLabel#addGameText {
 }
 
 QFrame#libraryGameCard {
-    background-color: transparent;
+    background-color: #5C4E7E;
     border: none;
+    border-radius: 14px;
 }
 
 QLabel#gameCover {
@@ -323,6 +338,68 @@ QLabel#gameCover {
 QFrame#gameInfoPanel {
     background-color: #5C4E7E;
     border-radius: 0px 0px 14px 14px;
+}
+
+QLabel#libraryGamePlatform {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.60);
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 11px;
+    font-weight: 400;
+}
+
+QScrollArea#tabsScrollArea {
+    background: transparent;
+    border: none;
+}
+
+QWidget#tabsScrollWidget {
+    background: transparent;
+}
+
+QWidget#tabsScrollContainer {
+    background: transparent;
+}
+
+/* Fade overlay — shown when more tabs exist to the right */
+QLabel#tabsFadeOverlay {
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 0,
+        stop: 0 rgba(15, 10, 28, 0),
+        stop: 1 rgba(15, 10, 28, 220)
+    );
+    border: none;
+}
+
+QPushButton#gameCardActionBtn {
+    background-color: rgba(124, 58, 237, 0.70);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 11px;
+    font-weight: 900;
+    padding: 0 6px;
+    text-align: left;
+}
+
+QPushButton#gameCardActionBtn:hover {
+    background-color: #7C3AED;
+}
+
+QPushButton#gameCardDeleteBtn {
+    background-color: rgba(239, 68, 68, 0.22);
+    color: #fca5a5;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 0 4px;
+}
+
+QPushButton#gameCardDeleteBtn:hover {
+    background-color: rgba(239, 68, 68, 0.55);
+    color: #ffffff;
 }
 
 QLabel#libraryGameTitle {

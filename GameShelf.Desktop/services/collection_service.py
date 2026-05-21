@@ -36,6 +36,22 @@ def get_available_game_images():
     return images
 
 
+def get_game_rating(game_id):
+    """Fetch the average (user's own) rating for a game via API."""
+    response = api_get(f"/api/games/{game_id}/average-rating")
+
+    if response is None or response.status_code != 200:
+        return None
+
+    try:
+        value = response.json()
+        if value and float(value) > 0:
+            return round(float(value), 1)
+        return None
+    except Exception:
+        return None
+
+
 def get_my_collection():
     game_images = get_available_game_images()
 
@@ -63,15 +79,18 @@ def get_my_collection():
 
     for collection in result.get("data", []):
         for game in collection.get("games", []):
+            game_id = game.get("gameId")
+            # API doesn't return user rating in this endpoint — fetch separately
+            rating = get_game_rating(game_id)
             games.append(
                 Game(
-                    game_id=game.get("gameId"),
+                    game_id=game_id,
                     title=game.get("title"),
                     genre=game.get("genreName"),
                     platform=game.get("platformName"),
-                    image_url=game.get("imageUrl") or game_images.get(game.get("gameId")),
+                    image_url=game.get("imageUrl") or game_images.get(game_id),
                     collection_id=collection.get("collectionId"),
-                    rating=game.get("rating") or game.get("userRating")
+                    rating=rating
                 )
             )
 

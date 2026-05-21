@@ -14,7 +14,8 @@ from PySide6.QtWidgets import (
     QComboBox,
     QApplication,
     QFrame,
-    QSizePolicy
+    QSizePolicy,
+    QScrollBar
 )
 from PySide6.QtCore import Qt, QSize, QPoint, QTimer
 from PySide6.QtGui import QPixmap, QFontDatabase, QIcon
@@ -405,9 +406,54 @@ class MainView(QWidget):
         panel_layout.setContentsMargins(56, 32, 42, 26)
         panel_layout.setSpacing(20)
 
+        # Tabs row: scrollable area + fixed add button on the right
+        tabs_row_layout = QHBoxLayout()
+        tabs_row_layout.setContentsMargins(0, 0, 0, 0)
+        tabs_row_layout.setSpacing(12)
+
+        # Scrollable tabs area with fade-right visual clue
+        self.tabs_scroll_container = QWidget()
+        self.tabs_scroll_container.setObjectName("tabsScrollContainer")
+        tabs_scroll_container_layout = QHBoxLayout()
+        tabs_scroll_container_layout.setContentsMargins(0, 0, 0, 0)
+        tabs_scroll_container_layout.setSpacing(0)
+
+        self.tabs_scroll_area = QScrollArea()
+        self.tabs_scroll_area.setObjectName("tabsScrollArea")
+        self.tabs_scroll_area.setFixedHeight(40)
+        self.tabs_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.tabs_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.tabs_scroll_area.setWidgetResizable(True)
+
+        self.tabs_scroll_widget = QWidget()
+        self.tabs_scroll_widget.setObjectName("tabsScrollWidget")
+
         self.tabs_layout = QHBoxLayout()
         self.tabs_layout.setContentsMargins(0, 0, 0, 0)
         self.tabs_layout.setSpacing(26)
+
+        self.tabs_scroll_widget.setLayout(self.tabs_layout)
+        self.tabs_scroll_area.setWidget(self.tabs_scroll_widget)
+
+        # Fade overlay label — visual clue for more tabs
+        self.tabs_fade_label = QLabel()
+        self.tabs_fade_label.setObjectName("tabsFadeOverlay")
+        self.tabs_fade_label.setFixedWidth(48)
+        self.tabs_fade_label.setFixedHeight(40)
+
+        tabs_scroll_container_layout.addWidget(self.tabs_scroll_area, 1)
+        tabs_scroll_container_layout.addWidget(self.tabs_fade_label)
+        self.tabs_scroll_container.setLayout(tabs_scroll_container_layout)
+
+        # Enable horizontal wheel scrolling for tabs
+        def tabs_wheel_event(event):
+            scroll_bar = self.tabs_scroll_area.horizontalScrollBar()
+            scroll_bar.setValue(scroll_bar.value() - event.angleDelta().y())
+            self._update_tabs_fade()
+        self.tabs_scroll_area.wheelEvent = tabs_wheel_event
+        self.tabs_scroll_area.horizontalScrollBar().valueChanged.connect(
+            lambda: self._update_tabs_fade()
+        )
 
         self.tab_all = QPushButton("Biblioteka")
         self.tab_all.setObjectName("collectionTab")
@@ -420,6 +466,10 @@ class MainView(QWidget):
         self.edit_collection_button.setFixedSize(36, 36)
         self.delete_collection_button.setFixedSize(36, 36)
         self.share_collection_button.setFixedSize(48, 36)
+
+        # Place scroll area + fade + add button in one row
+        tabs_row_layout.addWidget(self.tabs_scroll_container, 1)
+        tabs_row_layout.addWidget(self.add_collection_button, 0, Qt.AlignVCenter)
 
         self.filters_layout = QHBoxLayout()
         self.filters_layout.setContentsMargins(0, 0, 0, 0)
@@ -470,7 +520,7 @@ class MainView(QWidget):
         self.scroll_widget.setLayout(self.grid_layout)
         self.scroll_area.setWidget(self.scroll_widget)
 
-        panel_layout.addLayout(self.tabs_layout)
+        panel_layout.addLayout(tabs_row_layout)
         panel_layout.addLayout(self.filters_layout)
         panel_layout.addWidget(self.scroll_area)
 
@@ -634,11 +684,14 @@ class MainView(QWidget):
     def render_games(self, games):
         self.clear_games_grid()
 
-        add_card = self.create_add_game_card()
-        self.grid_layout.addWidget(add_card, 0, 0)
-
         row = 0
-        col = 1
+        col = 0
+
+        # Only show "add game" card for specific collections, not Biblioteka (all)
+        if self.current_filter != "all":
+            add_card = self.create_add_game_card()
+            self.grid_layout.addWidget(add_card, 0, 0)
+            col = 1
 
         for game in games:
             card = self.create_game_card(game)
@@ -661,7 +714,7 @@ class MainView(QWidget):
     def create_add_game_card(self):
         card = QPushButton()
         card.setObjectName("addGameCard")
-        card.setFixedSize(252, 204)
+        card.setFixedSize(252, 218)
         card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         card.clicked.connect(self.handle_add_game)
 
@@ -691,8 +744,9 @@ class MainView(QWidget):
     def create_game_card(self, game):
         card = QFrame()
         card.setObjectName("libraryGameCard")
-        card.setFixedSize(252, 204)
+        card.setFixedSize(252, 218)
         card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        card.setAttribute(Qt.WA_StyledBackground, True)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -700,58 +754,84 @@ class MainView(QWidget):
 
         cover = QLabel()
         cover.setObjectName("gameCover")
-        cover.setFixedSize(252, 142)
+        cover.setFixedSize(252, 140)
         cover.setAlignment(Qt.AlignCenter)
         self.set_cover_image(cover, game)
 
         info = QFrame()
         info.setObjectName("gameInfoPanel")
-        info.setFixedSize(252, 62)
+        info.setFixedSize(252, 78)
 
         info_layout = QVBoxLayout()
-        info_layout.setContentsMargins(10, 7, 10, 7)
-        info_layout.setSpacing(2)
+        info_layout.setContentsMargins(10, 6, 10, 6)
+        info_layout.setSpacing(3)
 
         title = QLabel(game.title)
         title.setObjectName("libraryGameTitle")
         title.setAlignment(Qt.AlignLeft)
         title.setWordWrap(False)
 
-        platform_text = game.platform or "brak"
-        date_text = "dodano do biblioteki"
+        # Platform label under title
+        platform_label = QLabel(game.platform or "")
+        platform_label.setObjectName("libraryGamePlatform")
+        platform_label.setAlignment(Qt.AlignLeft)
 
-        bottom_row = QHBoxLayout()
-        bottom_row.setContentsMargins(0, 0, 0, 0)
-        bottom_row.setSpacing(4)
+        # Action buttons row using SVG icons
+        actions_row = QHBoxLayout()
+        actions_row.setContentsMargins(0, 0, 0, 0)
+        actions_row.setSpacing(5)
 
-        date = QLabel(date_text)
-        date.setObjectName("libraryGameDate")
+        assets = self.base_dir / "assets"
 
-        rating_text = str(game.rating) if game.rating else ""
+        rating_btn = QPushButton()
+        rating_btn.setObjectName("gameCardActionBtn")
+        rating_btn.setToolTip("Oceń grę")
+        rating_btn.setFixedSize(30, 24)
+        rating_btn.setIcon(QIcon(str(assets / "GameCardStarIcon.svg")))
+        rating_btn.setIconSize(QSize(14, 14))
+        if game.rating:
+            rating_btn.setText(f" {game.rating}")
+            rating_btn.setFixedSize(46, 24)
+        rating_btn.clicked.connect(lambda checked=False, g=game: self.handle_rate_game(g))
 
-        rating = QLabel(rating_text)
-        rating.setObjectName("libraryGameRating")
+        move_btn = QPushButton()
+        move_btn.setObjectName("gameCardActionBtn")
+        move_btn.setToolTip("Przenieś do kolekcji")
+        move_btn.setFixedSize(30, 24)
+        move_btn.setIcon(QIcon(str(assets / "GameCardMoveIcon.svg")))
+        move_btn.setIconSize(QSize(14, 14))
+        move_btn.clicked.connect(lambda checked=False, g=game: self.handle_move_game(g))
 
-        star = QLabel("★" if game.rating else "")
-        star.setObjectName("libraryGameStar")
+        del_btn = QPushButton()
+        del_btn.setObjectName("gameCardDeleteBtn")
+        del_btn.setToolTip("Usuń z kolekcji")
+        del_btn.setFixedSize(30, 24)
+        del_btn.setIcon(QIcon(str(assets / "GameCardDeleteIcon.svg")))
+        del_btn.setIconSize(QSize(14, 14))
+        del_btn.clicked.connect(lambda checked=False, gid=game.game_id: self.handle_remove_game(gid))
 
-        bottom_row.addWidget(date)
-        bottom_row.addStretch()
-        bottom_row.addWidget(rating)
-        bottom_row.addWidget(star)
+        actions_row.addWidget(rating_btn)
+        actions_row.addWidget(move_btn)
+        actions_row.addStretch()
+        actions_row.addWidget(del_btn)
 
         info_layout.addWidget(title)
-        info_layout.addLayout(bottom_row)
+        info_layout.addWidget(platform_label)
+        info_layout.addLayout(actions_row)
 
         info.setLayout(info_layout)
 
-        badge = QLabel(platform_text)
-        badge.setObjectName("platformBadge")
-        badge.setAlignment(Qt.AlignCenter)
-        badge.setParent(card)
-        badge.adjustSize()
-        badge.resize(max(38, badge.width() + 18), 22)
-        badge.move(12, 10)
+        # Platform badge — overlaid on top of cover
+        platform_text = game.platform or ""
+        if platform_text:
+            badge = QLabel(platform_text)
+            badge.setObjectName("platformBadge")
+            badge.setAlignment(Qt.AlignCenter)
+            badge.setParent(card)
+            badge.adjustSize()
+            badge.resize(max(40, badge.sizeHint().width() + 16), 22)
+            badge.move(10, 10)
+            badge.raise_()
 
         layout.addWidget(cover)
         layout.addWidget(info)
@@ -761,6 +841,7 @@ class MainView(QWidget):
         return card
 
     def set_cover_image(self, cover, game):
+        from PySide6.QtGui import QPainter, QPainterPath, QBrush
         image_url = getattr(game, "image_url", None)
 
         if not image_url:
@@ -774,7 +855,29 @@ class MainView(QWidget):
             cover.setText(game.title)
             return
 
-        cover.setPixmap(self.crop_pixmap(pixmap, 252, 142))
+        cropped = self.crop_pixmap(pixmap, 252, 140)
+
+        # Apply rounded top corners (14px radius) by clipping
+        rounded = QPixmap(cropped.size())
+        rounded.fill(Qt.transparent)
+        painter = QPainter(rounded)
+        painter.setRenderHint(QPainter.Antialiasing)
+        path = QPainterPath()
+        r = 14.0
+        w, h = cropped.width(), cropped.height()
+        path.moveTo(r, 0)
+        path.lineTo(w - r, 0)
+        path.quadTo(w, 0, w, r)
+        path.lineTo(w, h)
+        path.lineTo(0, h)
+        path.lineTo(0, r)
+        path.quadTo(0, 0, r, 0)
+        path.closeSubpath()
+        painter.setClipPath(path)
+        painter.drawPixmap(0, 0, cropped)
+        painter.end()
+
+        cover.setPixmap(rounded)
 
     def normalize_image_url(self, image_url):
         if image_url.startswith("http://") or image_url.startswith("https://"):
@@ -862,6 +965,13 @@ class MainView(QWidget):
                 button.style().polish(button)
                 return
 
+    def _update_tabs_fade(self):
+        """Show/hide the fade overlay based on whether there's more content to scroll."""
+        bar = self.tabs_scroll_area.horizontalScrollBar()
+        at_end = bar.value() >= bar.maximum() - 2
+        content_overflows = self.tabs_scroll_widget.sizeHint().width() > self.tabs_scroll_area.width()
+        self.tabs_fade_label.setVisible(content_overflows and not at_end)
+
     def handle_add_collection(self):
         dialog = CreateCollectionDialog()
         result = dialog.exec()
@@ -891,6 +1001,9 @@ class MainView(QWidget):
 
         collections = get_collections_lookup()
 
+        # Sort alphabetically by name, Biblioteka always first
+        collections = sorted(collections, key=lambda c: c.get("name", "").lower())
+
         for collection in collections:
             collection_id = collection.get("id")
             collection_name = collection.get("name", "Bez nazwy")
@@ -905,18 +1018,13 @@ class MainView(QWidget):
             self.collection_buttons.append(button)
             self.tabs_layout.addWidget(button)
 
-        self.tabs_layout.addWidget(
-            self.add_collection_button,
-            alignment=Qt.AlignTop
-        )
-        self.tabs_layout.setContentsMargins(0, 0, 0, 0)
         self.tabs_layout.addStretch()
         self.refresh_active_collection_tab()
+        QTimer.singleShot(50, self._update_tabs_fade)
 
     def clear_collection_tabs(self):
         widgets = [
             self.tab_all,
-            self.add_collection_button
         ]
 
         for widget in widgets:

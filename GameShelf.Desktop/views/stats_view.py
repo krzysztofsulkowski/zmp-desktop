@@ -261,6 +261,7 @@ class StatsView(QWidget):
     def showEvent(self, event):
         super().showEvent(event)
         self.update_grid_columns()
+        self.load_statistics()
 
     def update_grid_columns(self):
         card_width = 320

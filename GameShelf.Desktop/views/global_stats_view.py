@@ -208,6 +208,7 @@ class GlobalStatsView(QWidget):
     def showEvent(self, event):
         super().showEvent(event)
         self.update_grid_columns()
+        self.load_statistics()
 
     def load_statistics(self):
         stats = get_global_statistics()

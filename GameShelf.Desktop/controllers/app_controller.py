@@ -9,7 +9,6 @@ from views.forgot_password_view import ForgotPasswordView
 from views.reset_password_view import ResetPasswordView
 
 
-
 class AppController:
     def __init__(self):
         self.landing_view = None
@@ -19,7 +18,7 @@ class AppController:
         self.forgot_password_view = None
         self.reset_password_view = None
 
-    def close_all_views(self):
+    def _close_all_views(self):
         for view in [
             self.landing_view,
             self.login_view,
@@ -32,42 +31,36 @@ class AppController:
                 view.close()
 
     def show_landing(self):
-        self.close_all_views()
+        self._close_all_views()
         self.landing_view = LandingView(self)
         self.landing_view.show()
 
     def show_login(self):
-        self.close_all_views()
+        self._close_all_views()
         self.login_view = LoginView(self)
         self.login_view.show()
 
     def show_register(self):
-        self.close_all_views()
+        self._close_all_views()
         self.register_view = RegisterView(self)
         self.register_view.show()
 
     def show_main(self):
-        if not get_token():
+        if not get_token() or not get_user_profile():
             self.show_login()
             return
 
-        user_profile = get_user_profile()
-
-        if not user_profile:
-            self.show_login()
-            return
-
-        self.close_all_views()
+        self._close_all_views()
         self.main_view = MainView(self)
         self.main_view.show()
 
     def show_forgot_password(self):
-        self.close_all_views()
+        self._close_all_views()
         self.forgot_password_view = ForgotPasswordView(self)
         self.forgot_password_view.show()
 
     def show_reset_password(self):
-        self.close_all_views()
+        self._close_all_views()
         self.reset_password_view = ResetPasswordView(
             self.show_login
         )

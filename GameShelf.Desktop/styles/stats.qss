@@ -128,12 +128,4 @@ QLabel#podiumName {
     font-weight: 600;
 }
 
-QToolTip {
-    background-color: rgba(47, 47, 47, 0.92);
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 9px;
-    font-family: "Figtree", "Segoe UI", "Arial";
-    font-size: 12px;
-}
+

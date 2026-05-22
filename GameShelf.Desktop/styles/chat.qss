@@ -198,28 +198,3 @@ QLabel#messageBodyOther {
     font-size: 14px;
     font-weight: 500;
 }
-
-QScrollBar:vertical {
-    background: transparent;
-    width: 10px;
-    margin: 4px 0px 4px 0px;
-}
-
-QScrollBar::handle:vertical {
-    background: rgba(139, 92, 246, 0.55);
-    border-radius: 5px;
-    min-height: 28px;
-}
-
-QScrollBar::handle:vertical:hover {
-    background: rgba(167, 139, 250, 0.75);
-}
-
-QScrollBar::add-line:vertical,
-QScrollBar::sub-line:vertical,
-QScrollBar::add-page:vertical,
-QScrollBar::sub-page:vertical {
-    background: transparent;
-    border: none;
-    height: 0px;
-}

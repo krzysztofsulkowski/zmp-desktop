@@ -148,11 +148,6 @@ QTextEdit#editProfileTextArea {
     font-size: 14px;
 }
 
-QLabel#editProfileFileLabel {
-    color: #CBC3DF;
-    font-family: "Figtree", "Segoe UI", "Arial";
-    font-size: 13px;
-}
 
 QPushButton#editProfilePrimaryButton,
 QPushButton#editProfileSecondaryButton {

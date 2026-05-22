@@ -2,69 +2,6 @@ QWidget#authPage {
     background-color: #0f0f1a;
 }
 
-QFrame#authCard {
-    background-color: #ffffff;
-    border-radius: 24px;
-    border: 1px solid rgba(124, 58, 237, 0.35);
-}
-
-QLabel#authLogo {
-    color: #7C3AED;
-    font-size: 28px;
-    font-weight: 900;
-}
-
-QLabel#authTitle {
-    color: #111827;
-    font-size: 26px;
-    font-weight: 900;
-}
-
-QLabel#authSubtitle {
-    color: #71717a;
-    font-size: 13px;
-}
-
-QLabel#authStatusError {
-    color: #b91c1c;
-    background-color: #fee2e2;
-    border: 1px solid #fecaca;
-    border-radius: 10px;
-    padding: 9px 12px;
-}
-
-QLabel#authStatusSuccess {
-    color: #166534;
-    background-color: #dcfce7;
-    border: 1px solid #bbf7d0;
-    border-radius: 10px;
-    padding: 9px 12px;
-}
-
-QPushButton#authPrimaryButton {
-    background-color: #7C3AED;
-    color: #ffffff;
-    border-radius: 12px;
-    padding: 11px 16px;
-    font-weight: 900;
-}
-
-QPushButton#authPrimaryButton:hover {
-    background-color: #6D28D9;
-}
-
-QPushButton#authSecondaryButton {
-    background-color: #ffffff;
-    color: #18181b;
-    border: 1px solid #d4d4d8;
-    border-radius: 12px;
-    padding: 11px 16px;
-    font-weight: 800;
-}
-
-QPushButton#authSecondaryButton:hover {
-    background-color: #f4f4f5;
-}
 
 QPushButton#authLinkButton {
     background-color: transparent;

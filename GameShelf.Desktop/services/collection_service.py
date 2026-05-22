@@ -1,122 +1,113 @@
-from services.api_client import api_get, api_post, api_put, api_delete
 from models.game import Game
+from services.api_client import api_delete, api_get, api_post, api_put
 from services.share_code_store import save_share_code
+
+DEFAULT_TABLE_REQUEST = {
+    "draw": 1,
+    "start": 0,
+    "searchValue": "",
+    "orderColumn": 0,
+    "orderDir": "asc",
+    "extraFilters": {},
+}
+
+
+def _build_table_request(length):
+    return {**DEFAULT_TABLE_REQUEST, "length": length}
+
+
+def _get_json(response, fallback):
+    if response is None or response.status_code != 200:
+        return fallback
+
+    try:
+        return response.json()
+    except Exception:
+        return fallback
 
 
 def get_available_game_images():
-    data = {
-        "draw": 1,
-        "start": 0,
-        "length": 1000,
-        "searchValue": "",
-        "orderColumn": 0,
-        "orderDir": "asc",
-        "extraFilters": {}
+    response = api_post("/api/games/available-table", _build_table_request(1000))
+    result = _get_json(response, {})
+
+    return {
+        game.get("id"): game.get("imageUrl")
+        for game in result.get("data", [])
+        if game.get("id") is not None and game.get("imageUrl")
     }
-
-    response = api_post("/api/games/available-table", data)
-
-    if response is None or response.status_code != 200:
-        return {}
-
-    try:
-        result = response.json()
-    except Exception:
-        return {}
-
-    images = {}
-
-    for game in result.get("data", []):
-        game_id = game.get("id")
-        image_url = game.get("imageUrl")
-
-        if game_id is not None and image_url:
-            images[game_id] = image_url
-
-    return images
 
 
 def get_game_rating(game_id):
-    """Fetch the average (user's own) rating for a game via API."""
     response = api_get(f"/api/games/{game_id}/average-rating")
 
     if response is None or response.status_code != 200:
         return None
 
     try:
-        value = response.json()
-        if value and float(value) > 0:
-            return round(float(value), 1)
-        return None
+        rating = float(response.json())
     except Exception:
         return None
+
+    if rating <= 0:
+        return None
+
+    return round(rating, 1)
 
 
 def get_my_collection():
     game_images = get_available_game_images()
+    response = api_post("/api/collections/grouped-with-games", _build_table_request(50))
+    result = _get_json(response, {})
 
-    data = {
-        "draw": 1,
-        "start": 0,
-        "length": 50,
-        "searchValue": "",
-        "orderColumn": 0,
-        "orderDir": "asc",
-        "extraFilters": {}
-    }
+    return [
+        _build_game(game, collection, game_images)
+        for collection in result.get("data", [])
+        for game in collection.get("games", [])
+    ]
 
-    response = api_post("/api/collections/grouped-with-games", data)
 
-    if response is None or response.status_code != 200:
-        return []
+def _build_game(game, collection, game_images):
+    game_id = game.get("gameId")
 
-    try:
-        result = response.json()
-    except Exception:
-        return []
-
-    games = []
-
-    for collection in result.get("data", []):
-        for game in collection.get("games", []):
-            game_id = game.get("gameId")
-            # API doesn't return user rating in this endpoint — fetch separately
-            rating = get_game_rating(game_id)
-            games.append(
-                Game(
-                    game_id=game_id,
-                    title=game.get("title"),
-                    genre=game.get("genreName"),
-                    platform=game.get("platformName"),
-                    image_url=game.get("imageUrl") or game_images.get(game_id),
-                    collection_id=collection.get("collectionId"),
-                    rating=rating
-                )
-            )
-
-    return games
+    return Game(
+        game_id=game_id,
+        title=game.get("title"),
+        genre=game.get("genreName"),
+        platform=game.get("platformName"),
+        image_url=game.get("imageUrl") or game_images.get(game_id),
+        collection_id=collection.get("collectionId"),
+        rating=get_game_rating(game_id),
+    )
 
 
 def get_collections_lookup():
     response = api_get("/api/collections/lookup")
+    return _get_json(response, [])
 
-    if response is None or response.status_code != 200:
-        return []
 
-    try:
-        return response.json()
-    except Exception:
-        return []
+def get_current_collection(collection_id):
+    return next(
+        (collection for collection in get_collections_lookup() if collection.get("id") == collection_id),
+        None,
+    )
+
+
+def get_sorted_collections():
+    return sorted(
+        get_collections_lookup(),
+        key=lambda collection: collection.get("name", "").lower(),
+    )
 
 
 def create_collection(name, is_public):
-    data = {
-        "id": 0,
-        "name": name,
-        "isPublic": is_public
-    }
-
-    response = api_post("/api/collections/create", data)
+    response = api_post(
+        "/api/collections/create",
+        {
+            "id": 0,
+            "name": name,
+            "isPublic": is_public,
+        },
+    )
 
     if response is None or response.status_code != 200:
         return False
@@ -131,18 +122,18 @@ def create_collection(name, is_public):
 
 
 def update_collection(collection_id, name, is_public=True):
-    data = {
-        "id": collection_id,
-        "name": name,
-        "isPublic": is_public
-    }
-
-    response = api_put("/api/collections/update", data)
+    response = api_put(
+        "/api/collections/update",
+        {
+            "id": collection_id,
+            "name": name,
+            "isPublic": is_public,
+        },
+    )
 
     return response is not None and response.status_code == 200
 
 
 def delete_collection(collection_id):
     response = api_delete(f"/api/collections/delete/{collection_id}")
-
     return response is not None and response.status_code == 200

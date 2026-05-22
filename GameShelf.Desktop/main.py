@@ -5,37 +5,36 @@ from PySide6.QtWidgets import QApplication
 
 from controllers.app_controller import AppController
 
+BASE_DIR = Path(__file__).resolve().parent
+STYLE_FILES = (
+    "theme.qss",
+    "landing_view.qss",
+    "auth.qss",
+    "main.qss",
+    "dialogs.qss",
+    "cards.qss",
+    "stats.qss",
+    "friends.qss",
+    "settings.qss",
+    "notifications.qss",
+    "chat.qss",
+)
+
 
 def load_styles(app):
-    base_dir = Path(__file__).resolve().parent
+    styles = []
 
-    style_files = [
-        base_dir / "styles" / "theme.qss",
-        base_dir / "styles" / "landing_view.qss",
-        base_dir / "styles" / "auth.qss",
-        base_dir / "styles" / "main.qss",
-        base_dir / "styles" / "dialogs.qss",
-        base_dir / "styles" / "cards.qss",
-        base_dir / "styles" / "stats.qss",
-        base_dir / "styles" / "friends.qss",
-        base_dir / "styles" / "settings.qss",
-        base_dir / "styles" / "notifications.qss",
-        base_dir / "styles" / "chat.qss",
-    ]
+    for style_file in STYLE_FILES:
+        file_path = BASE_DIR / "styles" / style_file
 
-    combined_styles = ""
-
-    for file_path in style_files:
         if file_path.exists():
-            with open(file_path, "r", encoding="utf-8") as file:
-                combined_styles += file.read() + "\n"
+            styles.append(file_path.read_text(encoding="utf-8"))
 
-    app.setStyleSheet(combined_styles)
+    app.setStyleSheet("\n".join(styles))
 
 
 def main():
     app = QApplication(sys.argv)
-
     load_styles(app)
 
     controller = AppController()

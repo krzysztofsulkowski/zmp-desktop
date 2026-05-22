@@ -70,16 +70,12 @@ from constants.view_indices import (
 from services.cover_image_service import CoverImageService
 from utils.game_filters import filter_games, get_unique_genres, get_unique_platforms, sort_games
 
-class MainView(QWidget):
-    PROFILE_VIEW_INDEX = PROFILE_VIEW_INDEX
-    HOME_VIEW_INDEX = HOME_VIEW_INDEX
-    FRIENDS_VIEW_INDEX = FRIENDS_VIEW_INDEX
-    CHAT_VIEW_INDEX = CHAT_VIEW_INDEX
-    NOTIFICATIONS_VIEW_INDEX = NOTIFICATIONS_VIEW_INDEX
-    STATS_VIEW_INDEX = STATS_VIEW_INDEX
-    GLOBAL_STATS_VIEW_INDEX = GLOBAL_STATS_VIEW_INDEX
-    SETTINGS_VIEW_INDEX = SETTINGS_VIEW_INDEX
+NOTIFICATIONS_REFRESH_INTERVAL_MS = 15000
+WINDOW_DRAG_AREA_HEIGHT = 90
+MAX_BADGE_NUMBER = 9
 
+
+class MainView(QWidget):
     def __init__(self, controller):
         super().__init__()
 
@@ -106,7 +102,7 @@ class MainView(QWidget):
         self.connect_signals()
         self.load_collection_tabs()
         self.load_games()
-        self.switch_view(self.HOME_VIEW_INDEX)
+        self.switch_view(HOME_VIEW_INDEX)
         self.set_active_button(self.home_button)
 
     def showEvent(self, event):
@@ -192,7 +188,7 @@ class MainView(QWidget):
         self.update_notifications_badge(self.notifications_view.get_unread_count())
 
         self.notifications_timer = QTimer(self)
-        self.notifications_timer.setInterval(15000)
+        self.notifications_timer.setInterval(NOTIFICATIONS_REFRESH_INTERVAL_MS)
         self.notifications_timer.timeout.connect(self.notifications_view.refresh_notifications)
         self.notifications_timer.start()
 
@@ -201,7 +197,7 @@ class MainView(QWidget):
             self.notifications_badge.hide()
             return
 
-        if count <= 9:
+        if count <= MAX_BADGE_NUMBER:
             self.notifications_badge.setText(str(count))
             self.notifications_badge.setFixedSize(19, 19)
             self.notifications_badge.move(33, 1)
@@ -247,7 +243,7 @@ class MainView(QWidget):
             self.showMaximized()
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton and event.position().y() <= 90:
+        if event.button() == Qt.LeftButton and event.position().y() <= WINDOW_DRAG_AREA_HEIGHT:
             self.is_dragging = True
             self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
@@ -426,28 +422,28 @@ class MainView(QWidget):
 
     def connect_signals(self):
         self.profile_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(self.PROFILE_VIEW_INDEX, self.profile_button)
+            lambda: self.switch_view_with_highlight(PROFILE_VIEW_INDEX, self.profile_button)
         )
         self.home_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(self.HOME_VIEW_INDEX, self.home_button)
+            lambda: self.switch_view_with_highlight(HOME_VIEW_INDEX, self.home_button)
         )
         self.stats_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(self.STATS_VIEW_INDEX, self.stats_button)
+            lambda: self.switch_view_with_highlight(STATS_VIEW_INDEX, self.stats_button)
         )
         self.friends_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(self.FRIENDS_VIEW_INDEX, self.friends_button)
+            lambda: self.switch_view_with_highlight(FRIENDS_VIEW_INDEX, self.friends_button)
         )
         self.chat_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(self.CHAT_VIEW_INDEX, self.chat_button)
+            lambda: self.switch_view_with_highlight(CHAT_VIEW_INDEX, self.chat_button)
         )
         self.global_stats_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(self.GLOBAL_STATS_VIEW_INDEX, self.global_stats_button)
+            lambda: self.switch_view_with_highlight(GLOBAL_STATS_VIEW_INDEX, self.global_stats_button)
         )
         self.notifications_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(self.NOTIFICATIONS_VIEW_INDEX, self.notifications_button)
+            lambda: self.switch_view_with_highlight(NOTIFICATIONS_VIEW_INDEX, self.notifications_button)
         )
         self.settings_button.clicked.connect(
-            lambda: self.switch_view_with_highlight(self.SETTINGS_VIEW_INDEX, self.settings_button)
+            lambda: self.switch_view_with_highlight(SETTINGS_VIEW_INDEX, self.settings_button)
         )
 
         self.logout_button.clicked.connect(self.logout_view)
@@ -589,7 +585,11 @@ class MainView(QWidget):
 
 
     def set_active_button(self, active_button):
-        buttons = [
+        for button in self.get_sidebar_buttons():
+            self._set_button_active(button, button is active_button)
+
+    def get_sidebar_buttons(self):
+        return (
             self.profile_button,
             self.home_button,
             self.stats_button,
@@ -597,17 +597,13 @@ class MainView(QWidget):
             self.chat_button,
             self.global_stats_button,
             self.notifications_button,
-            self.settings_button
-        ]
+            self.settings_button,
+        )
 
-        for button in buttons:
-            button.setProperty("active", False)
-            button.style().unpolish(button)
-            button.style().polish(button)
-
-        active_button.setProperty("active", True)
-        active_button.style().unpolish(active_button)
-        active_button.style().polish(active_button)
+    def _set_button_active(self, button, is_active):
+        button.setProperty("active", is_active)
+        button.style().unpolish(button)
+        button.style().polish(button)
 
     def refresh_active_collection_tab(self):
         tabs = [self.tab_all] + self.collection_buttons
@@ -646,13 +642,13 @@ class MainView(QWidget):
         name, is_public = dialog.get_collection_data()
 
         if not name:
-            self.show_warning("Nazwa kolekcji jest wymagana.")
+            self._show_warning("Nazwa kolekcji jest wymagana.")
             return
 
         success = create_collection(name, is_public)
 
         if not success:
-            self.show_warning("Nie udało się utworzyć kolekcji.")
+            self._show_warning("Nie udało się utworzyć kolekcji.")
             return
 
         self.load_collection_tabs()
@@ -699,13 +695,13 @@ class MainView(QWidget):
 
     def handle_add_game(self):
         if self.current_filter == ALL_COLLECTION_ID:
-            self.show_warning("Najpierw wybierz konkretną kolekcję.")
+            self._show_warning("Najpierw wybierz konkretną kolekcję.")
             return
 
         games = get_available_games()
 
         if not games:
-            self.show_warning("Nie znaleziono dostępnych gier do dodania.")
+            self._show_warning("Nie znaleziono dostępnych gier do dodania.")
             return
 
         dialog = AddGameDialog(games)
@@ -723,7 +719,7 @@ class MainView(QWidget):
         success = add_game_to_collection(game_id, self.current_filter)
 
         if not success:
-            self.show_warning("Nie udało się dodać gry do kolekcji.")
+            self._show_warning("Nie udało się dodać gry do kolekcji.")
             return
 
         self.load_games()
@@ -735,20 +731,20 @@ class MainView(QWidget):
         success = remove_game_from_collection(game_id)
 
         if not success:
-            self.show_warning("Nie udało się usunąć gry z kolekcji.")
+            self._show_warning("Nie udało się usunąć gry z kolekcji.")
             return
 
         self.load_games()
 
     def handle_edit_collection(self):
         if self.current_filter == ALL_COLLECTION_ID:
-            self.show_warning("Najpierw wybierz kolekcję do edycji.")
+            self._show_warning("Najpierw wybierz kolekcję do edycji.")
             return
 
         selected_collection = self.get_current_collection()
 
         if not selected_collection:
-            self.show_warning("Nie znaleziono wybranej kolekcji.")
+            self._show_warning("Nie znaleziono wybranej kolekcji.")
             return
 
         dialog = EditCollectionDialog(
@@ -764,13 +760,13 @@ class MainView(QWidget):
         name, is_public = dialog.get_collection_data()
 
         if not name:
-            self.show_warning("Nazwa kolekcji jest wymagana.")
+            self._show_warning("Nazwa kolekcji jest wymagana.")
             return
 
         success = update_collection(self.current_filter, name, is_public)
 
         if not success:
-            self.show_warning("Nie udało się zaktualizować kolekcji.")
+            self._show_warning("Nie udało się zaktualizować kolekcji.")
             return
 
         self.load_collection_tabs()
@@ -778,17 +774,17 @@ class MainView(QWidget):
 
     def handle_delete_collection(self):
         if self.current_filter == ALL_COLLECTION_ID:
-            self.show_warning("Nie można usunąć głównej biblioteki.")
+            self._show_warning("Nie można usunąć głównej biblioteki.")
             return
 
         selected_collection = self.get_current_collection()
 
         if not selected_collection:
-            self.show_warning("Nie znaleziono wybranej kolekcji.")
+            self._show_warning("Nie znaleziono wybranej kolekcji.")
             return
 
         if self.is_protected_collection(selected_collection.get("name")):
-            self.show_warning("Nie można usunąć domyślnej kolekcji.")
+            self._show_warning("Nie można usunąć domyślnej kolekcji.")
             return
 
         if not ask_confirmation(
@@ -801,7 +797,7 @@ class MainView(QWidget):
         success = delete_collection(self.current_filter)
 
         if not success:
-            self.show_warning("Nie udało się usunąć kolekcji.")
+            self._show_warning("Nie udało się usunąć kolekcji.")
             return
 
         self.current_filter = ALL_COLLECTION_ID
@@ -816,7 +812,7 @@ class MainView(QWidget):
         return collection_name in PROTECTED_COLLECTION_NAMES
 
 
-    def show_warning(self, message):
+    def _show_warning(self, message):
         show_warning(self, message)
 
     def handle_move_game(self, game):
@@ -835,7 +831,7 @@ class MainView(QWidget):
         target_collection_id = dialog.get_selected_collection_id()
 
         if not target_collection_id:
-            self.show_warning("Wybierz kolekcję docelową.")
+            self._show_warning("Wybierz kolekcję docelową.")
             return
 
         success = move_game(
@@ -845,7 +841,7 @@ class MainView(QWidget):
         )
 
         if not success:
-            self.show_warning("Nie udało się przenieść gry.")
+            self._show_warning("Nie udało się przenieść gry.")
             return
 
         self.load_games()
@@ -866,7 +862,7 @@ class MainView(QWidget):
         )
 
         if not success:
-            self.show_warning(f"Nie udało się zapisać oceny.\n\n{error}")
+            self._show_warning(f"Nie udało się zapisać oceny.\n\n{error}")
             return
 
         for existing_game in self.all_games:
@@ -879,23 +875,23 @@ class MainView(QWidget):
 
     def handle_share_collection(self):
         if self.current_filter == ALL_COLLECTION_ID:
-            self.show_warning("Najpierw wybierz konkretną kolekcję.")
+            self._show_warning("Najpierw wybierz konkretną kolekcję.")
             return
 
         selected_collection = self.get_current_collection()
 
         if not selected_collection:
-            self.show_warning("Nie znaleziono wybranej kolekcji.")
+            self._show_warning("Nie znaleziono wybranej kolekcji.")
             return
 
         if not selected_collection.get("isPublic", False):
-            self.show_warning("Kolekcja musi być publiczna, żeby można było ją udostępnić.")
+            self._show_warning("Kolekcja musi być publiczna, żeby można było ją udostępnić.")
             return
 
         share_code = get_share_code(self.current_filter)
 
         if not share_code:
-            self.show_warning(
+            self._show_warning(
                 "Nie udało się pobrać kodu udostępniania dla tej kolekcji. "
                 "API zwraca shareCode tylko przy tworzeniu kolekcji, więc działa to dla kolekcji utworzonych od teraz w desktopie."
             )

@@ -112,3 +112,47 @@ def test_reset_password_sends_token_and_new_password(monkeypatch):
         },
         "auth_required": False,
     }
+
+
+def test_register_returns_default_error_when_response_json_is_invalid(monkeypatch):
+    import services.auth_service as auth_service
+
+    monkeypatch.setattr(auth_service, "api_post", lambda endpoint, data, auth_required=False: FakeResponse(400, ValueError("bad")))
+
+    assert auth_service.register("user@example.com", "user", "Password1") == (False, "Rejestracja nie powiodła się.")
+
+
+def test_forgot_password_returns_false_on_non_200_response(monkeypatch):
+    import services.auth_service as auth_service
+
+    monkeypatch.setattr(auth_service, "api_post", lambda endpoint, data, auth_required=False: FakeResponse(400, {}))
+
+    assert auth_service.forgot_password("user@example.com") is False
+
+
+def test_reset_password_returns_text_when_error_json_is_invalid(monkeypatch):
+    import services.auth_service as auth_service
+
+    monkeypatch.setattr(
+        auth_service,
+        "api_post",
+        lambda endpoint, data, auth_required=False: FakeResponse(400, ValueError("bad"), text="Token invalid"),
+    )
+
+    assert auth_service.reset_password("user@example.com", "token", "Password1") == (False, "Token invalid")
+
+
+def test_logout_calls_api_logout_endpoint(monkeypatch):
+    import services.auth_service as auth_service
+
+    captured = {}
+
+    def fake_post(endpoint):
+        captured["endpoint"] = endpoint
+        return FakeResponse(200, {})
+
+    monkeypatch.setattr(auth_service, "api_post", fake_post)
+
+    auth_service.logout()
+
+    assert captured["endpoint"] == "/api/authentication/logout"

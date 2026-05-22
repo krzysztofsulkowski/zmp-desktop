@@ -68,3 +68,47 @@ def test_api_request_returns_none_on_connection_error(monkeypatch):
     monkeypatch.setattr(api_client.requests, "request", fake_request)
 
     assert api_client.api_get("/api/protected") is None
+
+
+def test_build_url_joins_api_url_and_endpoint():
+    assert api_client.build_url("/api/test").endswith("/api/test")
+
+
+def test_get_headers_returns_empty_dict_when_no_token():
+    session.clear_token()
+    assert api_client.get_headers() == {}
+
+
+def test_get_headers_returns_empty_dict_when_auth_not_required():
+    session.set_token("jwt-token")
+    assert api_client.get_headers(auth_required=False) == {}
+
+
+def test_api_put_and_delete_use_expected_methods(monkeypatch):
+    methods = []
+
+    def fake_request(method, url, json, headers, verify, timeout):
+        methods.append((method, json))
+        return FakeResponse(200, {})
+
+    monkeypatch.setattr(api_client.requests, "request", fake_request)
+
+    api_client.api_put("/api/item", {"id": 1})
+    api_client.api_delete("/api/item/1")
+
+    assert methods == [("PUT", {"id": 1}), ("DELETE", None)]
+
+
+def test_get_me_calls_authentication_me_endpoint(monkeypatch):
+    captured = {}
+
+    def fake_request(method, url, json, headers, verify, timeout):
+        captured["url"] = url
+        return FakeResponse(200, {"email": "user@example.com"})
+
+    monkeypatch.setattr(api_client.requests, "request", fake_request)
+
+    response = api_client.get_me()
+
+    assert response.status_code == 200
+    assert captured["url"].endswith("/api/authentication/me")

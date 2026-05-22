@@ -2,6 +2,9 @@ from pathlib import Path
 
 from utils.security_validators import (
     MAX_AVATAR_SIZE_BYTES,
+    MAX_BIO_LENGTH,
+    MAX_GROUP_NAME_LENGTH,
+    MAX_MESSAGE_LENGTH,
     validate_avatar_file,
     validate_bio,
     validate_email,
@@ -60,3 +63,48 @@ def test_validate_avatar_file_rejects_missing_wrong_extension_and_too_large_file
     large_path = tmp_path / "avatar.jpg"
     large_path.write_bytes(b"0" * (MAX_AVATAR_SIZE_BYTES + 1))
     assert validate_avatar_file(large_path)[0] is False
+
+
+def test_validate_email_rejects_empty_whitespace_and_missing_domain_parts():
+    assert validate_email("") is False
+    assert validate_email("   ") is False
+    assert validate_email("user@") is False
+    assert validate_email("user@example") is False
+    assert validate_email("user example@example.com") is False
+
+
+def test_validate_email_accepts_trimmed_email():
+    assert validate_email("  user@example.com  ") is True
+
+
+def test_validate_password_rejects_password_without_lowercase_digit_or_uppercase():
+    assert validate_password("PASSWORD1")[0] is False
+    assert validate_password("Password")[0] is False
+    assert validate_password("password1")[0] is False
+
+
+def test_validate_username_accepts_allowed_special_characters():
+    assert validate_username("user.name_123-test")[0] is True
+
+
+def test_validate_username_rejects_too_short_too_long_and_polish_characters():
+    assert validate_username("ab")[0] is False
+    assert validate_username("a" * 41)[0] is False
+    assert validate_username("zażółć")[0] is False
+
+
+def test_validate_bio_allows_exact_limit_and_rejects_over_limit():
+    assert validate_bio("a" * MAX_BIO_LENGTH)[0] is True
+    assert validate_bio("a" * (MAX_BIO_LENGTH + 1))[0] is False
+
+
+def test_validate_message_rejects_exactly_empty_string_and_allows_limit():
+    assert validate_message("")[0] is False
+    assert validate_message("a" * MAX_MESSAGE_LENGTH)[0] is True
+    assert validate_message("a" * (MAX_MESSAGE_LENGTH + 1))[0] is False
+
+
+def test_validate_group_name_allows_empty_and_rejects_over_limit():
+    assert validate_group_name("")[0] is True
+    assert validate_group_name("a" * MAX_GROUP_NAME_LENGTH)[0] is True
+    assert validate_group_name("a" * (MAX_GROUP_NAME_LENGTH + 1))[0] is False

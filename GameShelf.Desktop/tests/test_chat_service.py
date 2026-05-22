@@ -55,3 +55,34 @@ def test_create_chat_returns_message_when_api_is_unavailable(monkeypatch):
 
     assert success is False
     assert message == "Brak połączenia z API."
+
+
+def test_get_my_chats_returns_empty_list_when_json_is_invalid(monkeypatch):
+    import services.chat_service as chat_service
+
+    monkeypatch.setattr(chat_service, "api_get", lambda endpoint: FakeResponse(200, ValueError("bad")))
+
+    assert chat_service.get_my_chats() == []
+
+
+def test_get_chat_messages_uses_group_id_in_endpoint(monkeypatch):
+    import services.chat_service as chat_service
+
+    captured = {}
+
+    def fake_get(endpoint):
+        captured["endpoint"] = endpoint
+        return FakeResponse(200, [{"content": "Hej"}])
+
+    monkeypatch.setattr(chat_service, "api_get", fake_get)
+
+    assert chat_service.get_chat_messages(77) == [{"content": "Hej"}]
+    assert captured["endpoint"] == "/api/chat/77/messages"
+
+
+def test_create_chat_returns_text_error_when_json_is_invalid(monkeypatch):
+    import services.chat_service as chat_service
+
+    monkeypatch.setattr(chat_service, "api_post", lambda endpoint, data: FakeResponse(400, ValueError("bad"), text="Bad request"))
+
+    assert chat_service.create_chat("Team", [1]) == (False, "Bad request")

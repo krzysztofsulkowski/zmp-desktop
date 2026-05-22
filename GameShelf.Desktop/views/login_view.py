@@ -164,6 +164,7 @@ class LoginView(QWidget):
 
         self.status_label = QLabel("")
         self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setWordWrap(True)
         self.status_label.hide()
 
         layout.addWidget(self.title_label)
@@ -251,6 +252,10 @@ class LoginView(QWidget):
     def handle_login(self):
         email = self.email_input.text().strip()
         password = self.password_input.text()
+
+        if not email:
+            self.set_status("Podaj adres e-mail.")
+            return
 
         if not validate_email(email):
             self.set_status("Podaj poprawny adres e-mail.")

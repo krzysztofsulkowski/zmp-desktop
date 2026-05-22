@@ -190,9 +190,34 @@ QLabel#authInfoLabel {
 }
 
 QLabel#authStatusText {
-    color: #0F0F14;
-    background-color: transparent;
+    color: #7f1d1d;
+    background-color: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    padding: 6px 8px;
     font-family: "Figtree", "Segoe UI", "Arial";
     font-size: 10px;
-    font-weight: 400;
+    font-weight: 700;
+}
+
+QLabel#authStatusError {
+    color: #b91c1c;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 700;
+}
+
+QLabel#authStatusSuccess {
+    color: #166534;
+    background-color: #dcfce7;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 700;
 }

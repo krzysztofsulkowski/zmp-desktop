@@ -153,6 +153,8 @@ class ForgotPasswordView(QWidget):
         self.status_label.setObjectName("authStatusText")
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setWordWrap(True)
+        self.status_label.setMinimumHeight(32)
+        self.status_label.hide()
 
         layout.addWidget(self.back_button, alignment=Qt.AlignLeft)
         layout.addStretch()
@@ -228,25 +230,29 @@ class ForgotPasswordView(QWidget):
         self.is_dragging = False
         event.accept()
 
+    def set_status(self, text):
+        self.status_label.setText(text)
+        self.status_label.show()
+
     def handle_send_link(self):
         email = self.email_input.text().strip()
 
         if not email:
-            self.status_label.setText("Podaj adres e-mail.")
+            self.set_status("Podaj adres e-mail.")
             return
 
         if not validate_email(email):
-            self.status_label.setText("Podaj poprawny adres e-mail.")
+            self.set_status("Podaj poprawny adres e-mail.")
             return
 
         with disabled_while_running(self.send_button):
             success = forgot_password(email)
 
         if success:
-            self.status_label.setText("Jeśli konto istnieje, link do zmiany hasła został wysłany na podany adres e-mail.")
+            self.set_status("Jeśli konto istnieje, link do zmiany hasła został wysłany na podany adres e-mail.")
             return
 
-        self.status_label.setText("Nie udało się wysłać żądania resetu hasła.")
+        self.set_status("Nie udało się wysłać żądania resetu hasła.")
 
     def open_reset_password(self):
         self.controller.show_reset_password()

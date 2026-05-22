@@ -1,13 +1,14 @@
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlparse
 
 from PySide6.QtCore import Qt, QPoint
-from PySide6.QtGui import QPixmap, QFontDatabase
+from PySide6.QtGui import QPixmap, QIcon, QFontDatabase
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QFrame
 
 from utils.window_corners import disable_windows_11_rounded_corners
 
 from services.auth_service import reset_password
-from views.styled_dialog import show_info, show_warning
+from views.styled_dialog import show_info
 from utils.action_guard import disabled_while_running
 from utils.security_validators import validate_email, validate_password
 
@@ -73,9 +74,13 @@ class ResetPasswordView(QWidget):
         controls_bar.setContentsMargins(0, 0, 6, 0)
         controls_bar.setSpacing(10)
 
-        self.minimize_button = QPushButton("—")
-        self.maximize_button = QPushButton("□")
-        self.close_button = QPushButton("×")
+        self.minimize_button = QPushButton()
+        self.maximize_button = QPushButton()
+        self.close_button = QPushButton()
+
+        self.minimize_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowMinimizeIcon.svg")))
+        self.maximize_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowMaximizeIcon.svg")))
+        self.close_button.setIcon(QIcon(str(self.base_dir / "assets" / "WindowCloseIcon.svg")))
 
         self.minimize_button.setObjectName("windowControlButton")
         self.maximize_button.setObjectName("windowControlButton")
@@ -117,7 +122,7 @@ class ResetPasswordView(QWidget):
     def create_card(self):
         card = QFrame()
         card.setObjectName("authCard")
-        card.setFixedSize(360, 430)
+        card.setFixedSize(390, 470)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(44, 28, 44, 30)
@@ -128,11 +133,11 @@ class ResetPasswordView(QWidget):
         self.title_label.setAlignment(Qt.AlignCenter)
 
         self.email_input = self.create_input("adres e-mail")
-        self.token_input = self.create_input("token resetujący")
+        self.token_input = self.create_input("pełny link z maila lub token")
         self.password_input = self.create_input("nowe hasło")
         self.password_input.setEchoMode(QLineEdit.Password)
 
-        self.info_label = QLabel("Wpisz adres e-mail, token resetujący oraz nowe hasło.")
+        self.info_label = QLabel("Wklej pełny link z maila albo sam token. Jeśli link zawiera adres e-mail, pole e-mail uzupełni się automatycznie.")
         self.info_label.setObjectName("authInfoLabel")
         self.info_label.setWordWrap(True)
         self.info_label.setAlignment(Qt.AlignCenter)
@@ -149,9 +154,16 @@ class ResetPasswordView(QWidget):
         layout.addWidget(self.title_label)
         layout.addSpacing(18)
         layout.addWidget(self.create_field("adres e-mail", self.email_input))
-        layout.addWidget(self.create_field("token resetujący", self.token_input))
+        layout.addWidget(self.create_field("pełny link z maila lub token", self.token_input))
         layout.addWidget(self.create_field("nowe hasło", self.password_input))
+        self.status_label = QLabel("")
+        self.status_label.setObjectName("authStatusText")
+        self.status_label.setAlignment(Qt.AlignCenter)
+        self.status_label.setWordWrap(True)
+        self.status_label.hide()
+
         layout.addWidget(self.info_label)
+        layout.addWidget(self.status_label)
         layout.addSpacing(10)
         layout.addWidget(self.reset_button)
         layout.addWidget(self.back_button)
@@ -191,6 +203,7 @@ class ResetPasswordView(QWidget):
 
     def connect_signals(self):
         self.reset_button.clicked.connect(self.handle_reset_password)
+        self.token_input.editingFinished.connect(self.fill_email_from_reset_link)
         self.back_button.clicked.connect(self.on_back_to_login)
         self.minimize_button.clicked.connect(self.showMinimized)
         self.maximize_button.clicked.connect(self.toggle_maximized)
@@ -217,31 +230,71 @@ class ResetPasswordView(QWidget):
         self.is_dragging = False
         event.accept()
 
-    def handle_reset_password(self):
+    def set_status(self, text):
+        self.status_label.setText(text)
+        self.status_label.show()
+
+    def extract_reset_data(self):
+        raw_token_value = self.token_input.text().strip()
         email = self.email_input.text().strip()
-        token = self.token_input.text().strip()
+
+        if not raw_token_value:
+            return email, ""
+
+        parsed_url = urlparse(raw_token_value)
+
+        if parsed_url.query:
+            query_params = parse_qs(parsed_url.query)
+            token_from_link = query_params.get("token", [""])[0]
+            email_from_link = query_params.get("email", [""])[0]
+
+            if token_from_link:
+                raw_token_value = token_from_link
+
+            if email_from_link and not email:
+                email = email_from_link
+                self.email_input.setText(email)
+
+        return unquote(email), unquote(raw_token_value)
+
+    def fill_email_from_reset_link(self):
+        self.extract_reset_data()
+
+    def handle_reset_password(self):
+        email, token = self.extract_reset_data()
         password = self.password_input.text().strip()
 
         if not email or not token or not password:
-            show_warning(self, "Wszystkie pola są wymagane.")
+            self.set_status("Wszystkie pola są wymagane.")
             return
 
         if not validate_email(email):
-            show_warning(self, "Podaj poprawny adres e-mail.")
+            self.set_status("Podaj poprawny adres e-mail.")
             return
 
         password_valid, password_error = validate_password(password)
 
         if not password_valid:
-            show_warning(self, password_error)
+            self.set_status(password_error)
             return
 
         with disabled_while_running(self.reset_button):
             success, error = reset_password(email, token, password)
 
         if not success:
-            show_warning(self, f"Nie udało się ustawić nowego hasła.\n\n{error}")
+            self.set_status(f"Nie udało się ustawić nowego hasła. {self.format_error(error)}")
             return
 
         show_info(self, "Hasło zostało zmienione.")
         self.on_back_to_login()
+
+    def format_error(self, error):
+        if isinstance(error, dict):
+            if error.get("detail"):
+                return error["detail"]
+            if error.get("title"):
+                return error["title"]
+            if error.get("errors"):
+                return str(error["errors"])
+
+        return str(error or "Sprawdź link resetujący i spróbuj ponownie.")

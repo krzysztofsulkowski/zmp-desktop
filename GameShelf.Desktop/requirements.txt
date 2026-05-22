@@ -1,2 +1,5 @@
 PySide6
 signalrcore
+pytest
+requests
+python-dotenv

@@ -1,3 +1,4 @@
+import mimetypes
 import os
 import requests
 
@@ -52,7 +53,7 @@ def build_profile_files(username, bio, avatar_path):
                 (
                     os.path.basename(avatar_path),
                     avatar_file,
-                    "application/octet-stream",
+                    mimetypes.guess_type(avatar_path)[0] or "application/octet-stream",
                 ),
             )
         )

@@ -14,6 +14,7 @@ from services.user_service import get_current_user
 from services.profile_service import update_profile
 from views.edit_profile_dialog import EditProfileDialog
 from views.styled_dialog import show_info, show_warning
+from utils.action_guard import disabled_while_running
 
 
 class ProfileView(QWidget):
@@ -125,11 +126,12 @@ class ProfileView(QWidget):
         if result != EditProfileDialog.DialogCode.Accepted:
             return
 
-        success, error = update_profile(
-            dialog.get_username(),
-            dialog.get_bio(),
-            dialog.get_avatar_path()
-        )
+        with disabled_while_running(dialog.save_button):
+            success, error = update_profile(
+                dialog.get_username(),
+                dialog.get_bio(),
+                dialog.get_avatar_path()
+            )
 
         if not success:
             show_warning(self, f"Nie udało się zaktualizować profilu.\n\n{error}")

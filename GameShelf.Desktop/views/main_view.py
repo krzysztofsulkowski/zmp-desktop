@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QApplication,
     QFrame
 )
-from PySide6.QtCore import Qt, QSize, QPoint, QTimer
+from PySide6.QtCore import Qt, QSize, QPoint, QTimer, QEvent
 from PySide6.QtGui import QFontDatabase, QIcon
 
 from utils.window_corners import disable_windows_11_rounded_corners
@@ -73,6 +73,13 @@ from utils.game_filters import filter_games, get_unique_genres, get_unique_platf
 NOTIFICATIONS_REFRESH_INTERVAL_MS = 15000
 WINDOW_DRAG_AREA_HEIGHT = 90
 MAX_BADGE_NUMBER = 9
+IDLE_TIMEOUT_MS = 30 * 60 * 1000
+USER_ACTIVITY_EVENTS = {
+    QEvent.Type.MouseMove,
+    QEvent.Type.MouseButtonPress,
+    QEvent.Type.KeyPress,
+    QEvent.Type.Wheel,
+}
 
 
 class MainView(QWidget):
@@ -100,6 +107,7 @@ class MainView(QWidget):
 
         self.setup_ui()
         self.connect_signals()
+        self.setup_idle_logout_timer()
         self.load_collection_tabs()
         self.load_games()
         self.switch_view(HOME_VIEW_INDEX)
@@ -420,6 +428,25 @@ class MainView(QWidget):
 
         return widget
 
+    def setup_idle_logout_timer(self):
+        self.idle_timer = QTimer(self)
+        self.idle_timer.setInterval(IDLE_TIMEOUT_MS)
+        self.idle_timer.timeout.connect(self.logout_after_inactivity)
+        self.idle_timer.start()
+        QApplication.instance().installEventFilter(self)
+
+    def eventFilter(self, watched, event):
+        if event.type() in USER_ACTIVITY_EVENTS:
+            self.idle_timer.start()
+
+        return super().eventFilter(watched, event)
+
+    def logout_after_inactivity(self):
+        logout()
+        clear_token()
+        show_info(self, "Sesja wygasła z powodu braku aktywności. Zaloguj się ponownie.")
+        self.controller.show_login()
+
     def connect_signals(self):
         self.profile_button.clicked.connect(
             lambda: self.switch_view_with_highlight(PROFILE_VIEW_INDEX, self.profile_button)
@@ -465,6 +492,7 @@ class MainView(QWidget):
         self.set_active_button(button)
 
     def logout_view(self):
+        self.idle_timer.stop()
         dialog = LogoutDialog()
         result = dialog.exec()
 

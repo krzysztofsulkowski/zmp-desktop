@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 from utils.window_corners import disable_windows_11_rounded_corners
 from views.styled_dialog import show_warning
 from views.styled_file_dialog import StyledFileDialog
+from utils.security_validators import validate_avatar_file, validate_bio, validate_username
 
 
 class EditProfileDialog(QDialog):
@@ -108,12 +109,27 @@ class EditProfileDialog(QDialog):
         if not selected_files:
             return
 
-        self.avatar_path = selected_files[0]
+        avatar_path = selected_files[0]
+        is_valid, error = validate_avatar_file(avatar_path)
+
+        if not is_valid:
+            show_warning(self, error)
+            return
+
+        self.avatar_path = avatar_path
         self.avatar_label.setText(Path(self.avatar_path).name)
 
     def validate_and_accept(self):
-        if not self.get_username():
-            show_warning(self, "Nazwa użytkownika jest wymagana.")
+        username_valid, username_error = validate_username(self.get_username())
+
+        if not username_valid:
+            show_warning(self, username_error)
+            return
+
+        bio_valid, bio_error = validate_bio(self.get_bio())
+
+        if not bio_valid:
+            show_warning(self, bio_error)
             return
 
         self.accept()

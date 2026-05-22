@@ -8,6 +8,8 @@ from utils.window_corners import disable_windows_11_rounded_corners
 
 from services.auth_service import login, login_with_google
 from services.session import set_token
+from utils.action_guard import disabled_while_running
+from utils.security_validators import validate_email
 
 
 class LoginView(QWidget):
@@ -250,7 +252,16 @@ class LoginView(QWidget):
         email = self.email_input.text().strip()
         password = self.password_input.text()
 
-        token = login(email, password)
+        if not validate_email(email):
+            self.set_status("Podaj poprawny adres e-mail.")
+            return
+
+        if not password:
+            self.set_status("Podaj hasło.")
+            return
+
+        with disabled_while_running(self.login_button):
+            token = login(email, password)
 
         if not token:
             self.set_status("Nie udało się zalogować.")
@@ -262,11 +273,9 @@ class LoginView(QWidget):
 
     def handle_google_login(self):
         self.set_status("Otwieram logowanie Google w przeglądarce...")
-        self.google_login_button.setEnabled(False)
 
-        token, error = login_with_google()
-
-        self.google_login_button.setEnabled(True)
+        with disabled_while_running(self.google_login_button):
+            token, error = login_with_google()
 
         if not token:
             self.set_status(error or "Logowanie przez Google nie powiodło się.")

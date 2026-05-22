@@ -22,6 +22,8 @@ from services.chat_realtime_service import ChatRealtimeService
 from services.friends_service import get_my_friends
 from services.user_service import get_current_user
 from components.chat_widgets import ChatListItemWidget, MessageBubbleWidget
+from utils.action_guard import disabled_while_running
+from utils.security_validators import validate_group_name, validate_message
 
 
 class ChatView(QWidget):
@@ -297,11 +299,14 @@ class ChatView(QWidget):
 
         content = self.message_input.toPlainText().strip()
 
-        if not content:
-            self.set_status("Wpisz treść wiadomości.")
+        message_valid, message_error = validate_message(content)
+
+        if not message_valid:
+            self.set_status(message_error)
             return
 
-        success = self.realtime_service.send_message(self.current_group_id, content)
+        with disabled_while_running(self.send_button):
+            success = self.realtime_service.send_message(self.current_group_id, content)
 
         if not success:
             self.set_status("Nie udało się wysłać wiadomości przez real-time. Sprawdź połączenie z API i hubem SignalR.")
@@ -314,6 +319,12 @@ class ChatView(QWidget):
 
         group_name = self.group_name_input.text().strip()
         usernames_text = self.friend_username_input.text().strip()
+
+        group_name_valid, group_name_error = validate_group_name(group_name)
+
+        if not group_name_valid:
+            self.set_status(group_name_error)
+            return
 
         if not usernames_text:
             self.set_status("Podaj username znajomego albo kilka username'ów po przecinku.")
@@ -330,7 +341,8 @@ class ChatView(QWidget):
             self.set_status("Nie znaleziono poprawnych znajomych do dodania.")
             return
 
-        success, result = create_chat(group_name, user_ids)
+        with disabled_while_running(self.create_button):
+            success, result = create_chat(group_name, user_ids)
 
         if not success:
             self.set_status(f"Nie udało się utworzyć czatu: {result}")
@@ -370,7 +382,8 @@ class ChatView(QWidget):
         return user_ids, missing_usernames
 
     def handle_refresh(self):
-        self.load_chats(select_group_id=self.current_group_id)
+        with disabled_while_running(self.refresh_button):
+            self.load_chats(select_group_id=self.current_group_id)
         self.set_status("Odświeżono czat.", temporary=True)
 
     def refresh_current_chat_if_needed(self):

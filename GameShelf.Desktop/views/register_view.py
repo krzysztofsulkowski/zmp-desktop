@@ -8,6 +8,8 @@ from utils.window_corners import disable_windows_11_rounded_corners
 
 from services.auth_service import register
 from views.styled_dialog import show_info, show_warning
+from utils.action_guard import disabled_while_running
+from utils.security_validators import validate_email, validate_password, validate_username
 
 
 class RegisterView(QWidget):
@@ -239,11 +241,28 @@ class RegisterView(QWidget):
             show_warning(self, "Wszystkie pola są wymagane.")
             return
 
+        if not validate_email(email):
+            show_warning(self, "Podaj poprawny adres e-mail.")
+            return
+
+        username_valid, username_error = validate_username(username)
+
+        if not username_valid:
+            show_warning(self, username_error)
+            return
+
+        password_valid, password_error = validate_password(password)
+
+        if not password_valid:
+            show_warning(self, password_error)
+            return
+
         if password != repeat_password:
             show_warning(self, "Hasła nie są takie same.")
             return
 
-        success, error = register(email, username, password)
+        with disabled_while_running(self.register_button):
+            success, error = register(email, username, password)
 
         if success:
             show_info(self, "Konto zostało utworzone.")

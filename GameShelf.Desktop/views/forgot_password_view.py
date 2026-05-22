@@ -7,6 +7,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPus
 from utils.window_corners import disable_windows_11_rounded_corners
 
 from services.auth_service import forgot_password
+from utils.action_guard import disabled_while_running
+from utils.security_validators import validate_email
 
 
 class ForgotPasswordView(QWidget):
@@ -233,7 +235,12 @@ class ForgotPasswordView(QWidget):
             self.status_label.setText("Podaj adres e-mail.")
             return
 
-        success = forgot_password(email)
+        if not validate_email(email):
+            self.status_label.setText("Podaj poprawny adres e-mail.")
+            return
+
+        with disabled_while_running(self.send_button):
+            success = forgot_password(email)
 
         if success:
             self.status_label.setText("Jeśli konto istnieje, link do zmiany hasła został wysłany na podany adres e-mail.")

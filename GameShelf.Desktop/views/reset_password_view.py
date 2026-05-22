@@ -8,6 +8,8 @@ from utils.window_corners import disable_windows_11_rounded_corners
 
 from services.auth_service import reset_password
 from views.styled_dialog import show_info, show_warning
+from utils.action_guard import disabled_while_running
+from utils.security_validators import validate_email, validate_password
 
 
 class ResetPasswordView(QWidget):
@@ -224,7 +226,18 @@ class ResetPasswordView(QWidget):
             show_warning(self, "Wszystkie pola są wymagane.")
             return
 
-        success, error = reset_password(email, token, password)
+        if not validate_email(email):
+            show_warning(self, "Podaj poprawny adres e-mail.")
+            return
+
+        password_valid, password_error = validate_password(password)
+
+        if not password_valid:
+            show_warning(self, password_error)
+            return
+
+        with disabled_while_running(self.reset_button):
+            success, error = reset_password(email, token, password)
 
         if not success:
             show_warning(self, f"Nie udało się ustawić nowego hasła.\n\n{error}")

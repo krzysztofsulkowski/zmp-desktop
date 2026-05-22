@@ -10,23 +10,20 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QStackedLayout,
     QDialog,
-    QComboBox,
     QApplication,
-    QFrame,
-    QSizePolicy,
-    QScrollBar
+    QFrame
 )
 from PySide6.QtCore import Qt, QSize, QPoint, QTimer
-from PySide6.QtGui import QPixmap, QFontDatabase, QIcon
-import requests
+from PySide6.QtGui import QFontDatabase, QIcon
 
 from utils.window_corners import disable_windows_11_rounded_corners
 
-from config import API_URL, VERIFY_SSL
 
-from services.collection_service import (
+from services.collections_service import (
     get_my_collection,
+    get_sorted_collections,
     get_collections_lookup,
+    get_current_collection as find_current_collection,
     create_collection,
     update_collection,
     delete_collection
@@ -56,64 +53,12 @@ from views.move_game_dialog import MoveGameDialog
 from views.rate_game_dialog import RateGameDialog
 from views.styled_dialog import ask_confirmation, show_info, show_warning
 from views.chat_view import ChatView
-
-class MainFilterComboBox(QComboBox):
-    def __init__(self, assets_dir):
-        super().__init__()
-
-        self.assets_dir = Path(assets_dir)
-        self.setObjectName("mainFilter")
-        self.set_arrow_icon("ArrowDownIcon.svg")
-
-    def showPopup(self):
-        self.set_arrow_icon("ArrowUpIcon.svg")
-        super().showPopup()
-
-    def hidePopup(self):
-        super().hidePopup()
-        self.set_arrow_icon("ArrowDownIcon.svg")
-
-    def set_arrow_icon(self, icon_name):
-        icon_path = (self.assets_dir / icon_name).as_posix()
-        self.setStyleSheet(f"""
-            QComboBox#mainFilter {{
-                background-color: #261C40;
-                color: #ffffff;
-                border: none;
-                border-radius: 7px;
-                padding-left: 10px;
-                padding-right: 34px;
-                padding-top: 0px;
-                padding-bottom: 0px;
-                font-family: "Figtree Light", "Figtree", "Segoe UI", "Arial";
-                font-size: 16px;
-                font-weight: 300;
-                min-height: 36px;
-                max-height: 36px;
-            }}
-
-            QComboBox#mainFilter::drop-down {{
-                border: none;
-                width: 34px;
-                subcontrol-origin: padding;
-                subcontrol-position: top right;
-            }}
-
-            QComboBox#mainFilter::down-arrow {{
-                image: url({icon_path});
-                width: 12px;
-                height: 12px;
-                margin-right: 10px;
-            }}
-
-            QComboBox#mainFilter QAbstractItemView {{
-                background-color: #21153B;
-                color: #ffffff;
-                border: 1px solid #8B5CF6;
-                selection-background-color: #7C3AED;
-            }}
-        """)
-
+from components.main_filter_combo_box import MainFilterComboBox
+from components.sidebar_widget import SidebarWidget
+from components.game_card import AddGameCard, GameCard
+from constants.collection_tabs import ALL_COLLECTION_ID, MAIN_COLLECTION_NAME, PROTECTED_COLLECTION_NAMES
+from services.cover_image_service import CoverImageService
+from utils.game_filters import filter_games, get_unique_genres, get_unique_platforms, sort_games
 
 class MainView(QWidget):
     PROFILE_VIEW_INDEX = 0
@@ -129,11 +74,12 @@ class MainView(QWidget):
         super().__init__()
 
         self.controller = controller
-        self.current_filter = "all"
+        self.current_filter = ALL_COLLECTION_ID
         self.collection_buttons = []
         self.all_games = []
-        self.cover_cache = {}
         self.base_dir = Path(__file__).resolve().parents[1]
+        self.assets_dir = self.base_dir / "assets"
+        self.cover_image_service = CoverImageService()
 
         self.drag_position = QPoint()
         self.is_dragging = False
@@ -306,84 +252,18 @@ class MainView(QWidget):
         event.accept()
 
     def create_sidebar(self):
-        sidebar_frame = QFrame()
-        sidebar_frame.setObjectName("mainSidebar")
-        sidebar_frame.setFixedWidth(102)
-
-        sidebar = QVBoxLayout()
-        sidebar.setContentsMargins(12, 22, 12, 22)
-        sidebar.setSpacing(18)
-
-        self.logo_label = QLabel()
-        self.logo_label.setObjectName("mainLogo")
-        self.logo_label.setFixedSize(78, 52)
-        self.logo_label.setAlignment(Qt.AlignCenter)
-
-        logo_path = self.base_dir / "assets" / "logo.svg"
-        logo_pixmap = QPixmap(str(logo_path))
-
-        if logo_pixmap.isNull():
-            self.logo_label.setText("GS")
-        else:
-            self.logo_label.setPixmap(
-                logo_pixmap.scaled(
-                    76,
-                    48,
-                    Qt.KeepAspectRatio,
-                    Qt.SmoothTransformation
-                )
-            )
-
-        self.profile_button = self.create_sidebar_icon_button("ProfileIcon.svg")
-        self.home_button = self.create_sidebar_icon_button("HomeIcon.svg")
-        self.stats_button = self.create_sidebar_icon_button("StatsIcon.svg")
-        self.friends_button = self.create_sidebar_icon_button("FriendsIcon.svg")
-        self.chat_button = self.create_sidebar_icon_button("ChatIcon.svg")
-        self.global_stats_button = self.create_sidebar_icon_button("GlobalStatsIcon.svg")
-        self.notifications_button = self.create_sidebar_icon_button("NotificationsIcon.svg")
-        self.settings_button = self.create_sidebar_icon_button("SettingsIcon.svg")
-        self.logout_button = self.create_sidebar_icon_button("LogOutIcon.svg")
-
-        buttons = [
-            self.profile_button,
-            self.home_button,
-            self.stats_button,
-            self.friends_button,
-            self.chat_button,
-            self.global_stats_button,
-            self.notifications_button,
-            self.settings_button,
-            self.logout_button
-        ]
-
-        for button in buttons:
-            button.setFixedSize(52, 52)
-
-        sidebar.addWidget(self.logo_label, alignment=Qt.AlignCenter)
-        sidebar.addSpacing(20)
-        sidebar.addWidget(self.profile_button, alignment=Qt.AlignCenter)
-        sidebar.addWidget(self.home_button, alignment=Qt.AlignCenter)
-        sidebar.addWidget(self.stats_button, alignment=Qt.AlignCenter)
-        sidebar.addWidget(self.friends_button, alignment=Qt.AlignCenter)
-        sidebar.addWidget(self.chat_button, alignment=Qt.AlignCenter)
-        sidebar.addWidget(self.global_stats_button, alignment=Qt.AlignCenter)
-        sidebar.addWidget(self.notifications_button, alignment=Qt.AlignCenter)
-        sidebar.addWidget(self.settings_button, alignment=Qt.AlignCenter)
-        sidebar.addStretch()
-        sidebar.addWidget(self.logout_button, alignment=Qt.AlignCenter)
-
-        sidebar_frame.setLayout(sidebar)
-
-        return sidebar_frame
-
-    def create_sidebar_icon_button(self, icon_name):
-        button = QPushButton()
-        button.setObjectName("mainSidebarButton")
-        button.setFixedSize(52, 52)
-        button.setIcon(QIcon(str(self.base_dir / "assets" / icon_name)))
-        button.setIconSize(QSize(30, 30))
-
-        return button
+        self.sidebar_widget = SidebarWidget(self.assets_dir)
+        self.logo_label = self.sidebar_widget.logo_label
+        self.profile_button = self.sidebar_widget.profile_button
+        self.home_button = self.sidebar_widget.home_button
+        self.stats_button = self.sidebar_widget.stats_button
+        self.friends_button = self.sidebar_widget.friends_button
+        self.chat_button = self.sidebar_widget.chat_button
+        self.global_stats_button = self.sidebar_widget.global_stats_button
+        self.notifications_button = self.sidebar_widget.notifications_button
+        self.settings_button = self.sidebar_widget.settings_button
+        self.logout_button = self.sidebar_widget.logout_button
+        return self.sidebar_widget
 
     def create_collection_icon_button(self, icon_name, object_name):
         button = QPushButton()
@@ -412,12 +292,10 @@ class MainView(QWidget):
         panel_layout.setContentsMargins(56, 32, 42, 26)
         panel_layout.setSpacing(20)
 
-        # Tabs row: scrollable area + fixed add button on the right
         tabs_row_layout = QHBoxLayout()
         tabs_row_layout.setContentsMargins(0, 0, 0, 0)
         tabs_row_layout.setSpacing(12)
 
-        # Scrollable tabs area with fade-right visual clue
         self.tabs_scroll_container = QWidget()
         self.tabs_scroll_container.setObjectName("tabsScrollContainer")
         tabs_scroll_container_layout = QHBoxLayout()
@@ -441,7 +319,6 @@ class MainView(QWidget):
         self.tabs_scroll_widget.setLayout(self.tabs_layout)
         self.tabs_scroll_area.setWidget(self.tabs_scroll_widget)
 
-        # Fade overlay label — visual clue for more tabs
         self.tabs_fade_label = QLabel()
         self.tabs_fade_label.setObjectName("tabsFadeOverlay")
         self.tabs_fade_label.setFixedWidth(48)
@@ -451,7 +328,6 @@ class MainView(QWidget):
         tabs_scroll_container_layout.addWidget(self.tabs_fade_label)
         self.tabs_scroll_container.setLayout(tabs_scroll_container_layout)
 
-        # Enable horizontal wheel scrolling for tabs
         def tabs_wheel_event(event):
             scroll_bar = self.tabs_scroll_area.horizontalScrollBar()
             scroll_bar.setValue(scroll_bar.value() - event.angleDelta().y())
@@ -461,7 +337,7 @@ class MainView(QWidget):
             lambda: self._update_tabs_fade()
         )
 
-        self.tab_all = QPushButton("Biblioteka")
+        self.tab_all = QPushButton(MAIN_COLLECTION_NAME)
         self.tab_all.setObjectName("collectionTab")
         self.add_collection_button = self.create_collection_icon_button("AddGameIcon.svg", "addCollectionIconButton")
         self.edit_collection_button = self.create_collection_icon_button("EditCollectionIcon.svg", "smallIconButton")
@@ -473,7 +349,6 @@ class MainView(QWidget):
         self.delete_collection_button.setFixedSize(36, 36)
         self.share_collection_button.setFixedSize(48, 36)
 
-        # Place scroll area + fade + add button in one row
         tabs_row_layout.addWidget(self.tabs_scroll_container, 1)
         tabs_row_layout.addWidget(self.add_collection_button, 0, Qt.AlignVCenter)
 
@@ -481,9 +356,9 @@ class MainView(QWidget):
         self.filters_layout.setContentsMargins(0, 0, 0, 0)
         self.filters_layout.setSpacing(14)
 
-        self.genre_filter = MainFilterComboBox(self.base_dir / "assets")
-        self.platform_filter = MainFilterComboBox(self.base_dir / "assets")
-        self.sort_filter = MainFilterComboBox(self.base_dir / "assets")
+        self.genre_filter = MainFilterComboBox(self.assets_dir)
+        self.platform_filter = MainFilterComboBox(self.assets_dir)
+        self.sort_filter = MainFilterComboBox(self.assets_dir)
 
         for combo in [self.genre_filter, self.platform_filter, self.sort_filter]:
             combo.setFixedHeight(36)
@@ -492,8 +367,8 @@ class MainView(QWidget):
         self.platform_filter.setFixedWidth(196)
         self.sort_filter.setFixedWidth(226)
 
-        self.genre_filter.addItem("Wszystkie gatunki", "all")
-        self.platform_filter.addItem("Wszystkie platformy", "all")
+        self.genre_filter.addItem("Wszystkie gatunki", ALL_COLLECTION_ID)
+        self.platform_filter.addItem("Wszystkie platformy", ALL_COLLECTION_ID)
 
         self.sort_filter.addItem("Sortuj: tytuł A-Z", "title_asc")
         self.sort_filter.addItem("Sortuj: tytuł Z-A", "title_desc")
@@ -566,7 +441,7 @@ class MainView(QWidget):
         )
 
         self.logout_button.clicked.connect(self.logout_view)
-        self.tab_all.clicked.connect(lambda: self.change_tab("all"))
+        self.tab_all.clicked.connect(lambda: self.change_tab(ALL_COLLECTION_ID))
         self.add_collection_button.clicked.connect(self.handle_add_collection)
         self.edit_collection_button.clicked.connect(self.handle_edit_collection)
         self.delete_collection_button.clicked.connect(self.handle_delete_collection)
@@ -608,31 +483,19 @@ class MainView(QWidget):
         current_genre = self.genre_filter.currentData()
         current_platform = self.platform_filter.currentData()
 
-        genres = sorted({
-            game.genre
-            for game in self.all_games
-            if game.genre
-        })
-
-        platforms = sorted({
-            game.platform
-            for game in self.all_games
-            if game.platform
-        })
-
         self.genre_filter.blockSignals(True)
         self.platform_filter.blockSignals(True)
 
         self.genre_filter.clear()
         self.platform_filter.clear()
 
-        self.genre_filter.addItem("Wszystkie gatunki", "all")
-        self.platform_filter.addItem("Wszystkie platformy", "all")
+        self.genre_filter.addItem("Wszystkie gatunki", ALL_COLLECTION_ID)
+        self.platform_filter.addItem("Wszystkie platformy", ALL_COLLECTION_ID)
 
-        for genre in genres:
+        for genre in get_unique_genres(self.all_games):
             self.genre_filter.addItem(genre, genre)
 
-        for platform in platforms:
+        for platform in get_unique_platforms(self.all_games):
             self.platform_filter.addItem(platform, platform)
 
         self.restore_combo_value(self.genre_filter, current_genre)
@@ -640,6 +503,7 @@ class MainView(QWidget):
 
         self.genre_filter.blockSignals(False)
         self.platform_filter.blockSignals(False)
+
 
     def restore_combo_value(self, combo_box, value):
         index = combo_box.findData(value)
@@ -654,38 +518,17 @@ class MainView(QWidget):
         self.render_games(games)
 
     def get_filtered_games(self):
-        selected_genre = self.genre_filter.currentData()
-        selected_platform = self.platform_filter.currentData()
+        return filter_games(
+            self.all_games,
+            self.current_filter,
+            self.genre_filter.currentData(),
+            self.platform_filter.currentData()
+        )
 
-        games = []
-
-        for game in self.all_games:
-            if self.current_filter != "all" and game.collection_id != self.current_filter:
-                continue
-
-            if selected_genre != "all" and game.genre != selected_genre:
-                continue
-
-            if selected_platform != "all" and game.platform != selected_platform:
-                continue
-
-            games.append(game)
-
-        return games
 
     def get_sorted_games(self, games):
-        sort_value = self.sort_filter.currentData()
+        return sort_games(games, self.sort_filter.currentData())
 
-        if sort_value == "title_desc":
-            return sorted(games, key=lambda game: game.title.lower(), reverse=True)
-
-        if sort_value == "genre_asc":
-            return sorted(games, key=lambda game: (game.genre or "").lower())
-
-        if sort_value == "platform_asc":
-            return sorted(games, key=lambda game: (game.platform or "").lower())
-
-        return sorted(games, key=lambda game: game.title.lower())
 
     def render_games(self, games):
         self.clear_games_grid()
@@ -693,8 +536,7 @@ class MainView(QWidget):
         row = 0
         col = 0
 
-        # Only show "add game" card for specific collections, not Biblioteka (all)
-        if self.current_filter != "all":
+        if self.current_filter != ALL_COLLECTION_ID:
             add_card = self.create_add_game_card()
             self.grid_layout.addWidget(add_card, 0, 0)
             col = 1
@@ -718,218 +560,23 @@ class MainView(QWidget):
                 widget.setParent(None)
 
     def create_add_game_card(self):
-        card = QPushButton()
-        card.setObjectName("addGameCard")
-        card.setFixedSize(252, 218)
-        card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        card.clicked.connect(self.handle_add_game)
+        return AddGameCard(self.assets_dir, self.handle_add_game)
 
-        layout = QVBoxLayout()
-        layout.setContentsMargins(20, 24, 20, 24)
-        layout.setSpacing(14)
-
-        plus_circle = QLabel()
-        plus_circle.setObjectName("addGamePlus")
-        plus_circle.setAlignment(Qt.AlignCenter)
-        plus_circle.setFixedSize(58, 58)
-        plus_icon = QPixmap(str(self.base_dir / "assets" / "AddGameIcon.svg"))
-        plus_circle.setPixmap(plus_icon.scaled(58, 58, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-
-        text = QLabel("dodaj kolejną grę")
-        text.setObjectName("addGameText")
-        text.setAlignment(Qt.AlignCenter)
-        text.setWordWrap(True)
-
-        layout.addStretch()
-        layout.addWidget(plus_circle, alignment=Qt.AlignCenter)
-        layout.addWidget(text)
-        layout.addStretch()
-
-        card.setLayout(layout)
-
-        return card
 
     def create_game_card(self, game):
-        card = QFrame()
-        card.setObjectName("libraryGameCard")
-        card.setFixedSize(252, 218)
-        card.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        card.setAttribute(Qt.WA_StyledBackground, True)
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        cover = QLabel()
-        cover.setObjectName("gameCover")
-        cover.setFixedSize(252, 140)
-        cover.setAlignment(Qt.AlignCenter)
-        self.set_cover_image(cover, game)
-
-        info = QFrame()
-        info.setObjectName("gameInfoPanel")
-        info.setFixedSize(252, 78)
-
-        info_layout = QVBoxLayout()
-        info_layout.setContentsMargins(10, 6, 10, 6)
-        info_layout.setSpacing(3)
-
-        title = QLabel(game.title)
-        title.setObjectName("libraryGameTitle")
-        title.setAlignment(Qt.AlignLeft)
-        title.setWordWrap(False)
-
-        # Platform label under title
-        platform_label = QLabel(game.platform or "")
-        platform_label.setObjectName("libraryGamePlatform")
-        platform_label.setAlignment(Qt.AlignLeft)
-
-        # Action buttons row using SVG icons
-        actions_row = QHBoxLayout()
-        actions_row.setContentsMargins(0, 0, 0, 0)
-        actions_row.setSpacing(5)
-
-        assets = self.base_dir / "assets"
-
-        rating_btn = QPushButton()
-        rating_btn.setObjectName("gameCardActionBtn")
-        rating_btn.setToolTip("Oceń grę")
-        rating_btn.setFixedSize(32, 24)
-        rating_btn.setIcon(QIcon(str(assets / "GameCardStarIcon.svg")))
-        rating_btn.setIconSize(QSize(13, 13))
-        if game.rating:
-            rating_btn.setText(str(game.rating))
-            rating_btn.setFixedSize(62, 24)
-        rating_btn.clicked.connect(lambda checked=False, g=game: self.handle_rate_game(g))
-
-        move_btn = QPushButton()
-        move_btn.setObjectName("gameCardActionBtn")
-        move_btn.setToolTip("Przenieś do kolekcji")
-        move_btn.setFixedSize(30, 24)
-        move_btn.setIcon(QIcon(str(assets / "GameCardMoveIcon.svg")))
-        move_btn.setIconSize(QSize(14, 14))
-        move_btn.clicked.connect(lambda checked=False, g=game: self.handle_move_game(g))
-
-        del_btn = QPushButton()
-        del_btn.setObjectName("gameCardDeleteBtn")
-        del_btn.setToolTip("Usuń z kolekcji")
-        del_btn.setFixedSize(30, 24)
-        del_btn.setIcon(QIcon(str(assets / "GameCardDeleteIcon.svg")))
-        del_btn.setIconSize(QSize(14, 14))
-        del_btn.clicked.connect(lambda checked=False, gid=game.game_id: self.handle_remove_game(gid))
-
-        actions_row.addWidget(rating_btn)
-        actions_row.addWidget(move_btn)
-        actions_row.addStretch()
-        actions_row.addWidget(del_btn)
-
-        info_layout.addWidget(title)
-        info_layout.addWidget(platform_label)
-        info_layout.addLayout(actions_row)
-
-        info.setLayout(info_layout)
-
-        # Platform badge — overlaid on top of cover
-        platform_text = game.platform or ""
-        if platform_text:
-            badge = QLabel(platform_text)
-            badge.setObjectName("platformBadge")
-            badge.setAlignment(Qt.AlignCenter)
-            badge.setParent(card)
-            badge.adjustSize()
-            badge.resize(max(40, badge.sizeHint().width() + 16), 22)
-            badge.move(10, 10)
-            badge.raise_()
-
-        layout.addWidget(cover)
-        layout.addWidget(info)
-
-        card.setLayout(layout)
-
-        return card
-
-    def set_cover_image(self, cover, game):
-        from PySide6.QtGui import QPainter, QPainterPath, QBrush
-        image_url = getattr(game, "image_url", None)
-
-        if not image_url:
-            cover.setText(game.title)
-            return
-
-        normalized_url = self.normalize_image_url(image_url)
-        pixmap = self.get_cached_cover(normalized_url)
-
-        if pixmap is None or pixmap.isNull():
-            cover.setText(game.title)
-            return
-
-        cropped = self.crop_pixmap(pixmap, 252, 140)
-
-        # Apply rounded top corners (14px radius) by clipping
-        rounded = QPixmap(cropped.size())
-        rounded.fill(Qt.transparent)
-        painter = QPainter(rounded)
-        painter.setRenderHint(QPainter.Antialiasing)
-        path = QPainterPath()
-        r = 14.0
-        w, h = cropped.width(), cropped.height()
-        path.moveTo(r, 0)
-        path.lineTo(w - r, 0)
-        path.quadTo(w, 0, w, r)
-        path.lineTo(w, h)
-        path.lineTo(0, h)
-        path.lineTo(0, r)
-        path.quadTo(0, 0, r, 0)
-        path.closeSubpath()
-        painter.setClipPath(path)
-        painter.drawPixmap(0, 0, cropped)
-        painter.end()
-
-        cover.setPixmap(rounded)
-
-    def normalize_image_url(self, image_url):
-        if image_url.startswith("http://") or image_url.startswith("https://"):
-            return image_url
-
-        if image_url.startswith("/"):
-            return f"{API_URL}{image_url}"
-
-        return f"{API_URL}/{image_url}"
-
-    def get_cached_cover(self, image_url):
-        if image_url in self.cover_cache:
-            return self.cover_cache[image_url]
-
-        pixmap = QPixmap()
-
-        try:
-            response = requests.get(
-                image_url,
-                verify=VERIFY_SSL,
-                timeout=8
-            )
-
-            if response.status_code == 200:
-                pixmap.loadFromData(response.content)
-        except requests.RequestException:
-            pass
-
-        self.cover_cache[image_url] = pixmap
-
-        return pixmap
-
-    def crop_pixmap(self, pixmap, width, height):
-        scaled = pixmap.scaled(
-            width,
-            height,
-            Qt.KeepAspectRatioByExpanding,
-            Qt.SmoothTransformation
+        return GameCard(
+            game,
+            self.assets_dir,
+            self.cover_image_service,
+            self.handle_rate_game,
+            self.handle_move_game,
+            self.handle_remove_game
         )
 
-        x = max(0, (scaled.width() - width) // 2)
-        y = max(0, (scaled.height() - height) // 2)
 
-        return scaled.copy(x, y, width, height)
+
+
+
 
     def set_active_button(self, active_button):
         buttons = [
@@ -960,7 +607,7 @@ class MainView(QWidget):
             button.style().unpolish(button)
             button.style().polish(button)
 
-        if self.current_filter == "all":
+        if self.current_filter == ALL_COLLECTION_ID:
             self.tab_all.setProperty("active", True)
             self.tab_all.style().unpolish(self.tab_all)
             self.tab_all.style().polish(self.tab_all)
@@ -974,7 +621,6 @@ class MainView(QWidget):
                 return
 
     def _update_tabs_fade(self):
-        """Show/hide the fade overlay based on whether there's more content to scroll."""
         bar = self.tabs_scroll_area.horizontalScrollBar()
         at_end = bar.value() >= bar.maximum() - 2
         content_overflows = self.tabs_scroll_widget.sizeHint().width() > self.tabs_scroll_area.width()
@@ -1007,10 +653,7 @@ class MainView(QWidget):
 
         self.tabs_layout.addWidget(self.tab_all)
 
-        collections = get_collections_lookup()
-
-        # Sort alphabetically by name, Biblioteka always first
-        collections = sorted(collections, key=lambda c: c.get("name", "").lower())
+        collections = get_sorted_collections()
 
         for collection in collections:
             collection_id = collection.get("id")
@@ -1045,7 +688,7 @@ class MainView(QWidget):
         self.collection_buttons.clear()
 
     def handle_add_game(self):
-        if self.current_filter == "all":
+        if self.current_filter == ALL_COLLECTION_ID:
             self.show_warning("Najpierw wybierz konkretną kolekcję.")
             return
 
@@ -1088,7 +731,7 @@ class MainView(QWidget):
         self.load_games()
 
     def handle_edit_collection(self):
-        if self.current_filter == "all":
+        if self.current_filter == ALL_COLLECTION_ID:
             self.show_warning("Najpierw wybierz kolekcję do edycji.")
             return
 
@@ -1124,7 +767,7 @@ class MainView(QWidget):
         self.load_games()
 
     def handle_delete_collection(self):
-        if self.current_filter == "all":
+        if self.current_filter == ALL_COLLECTION_ID:
             self.show_warning("Nie można usunąć głównej biblioteki.")
             return
 
@@ -1151,30 +794,17 @@ class MainView(QWidget):
             self.show_warning("Nie udało się usunąć kolekcji.")
             return
 
-        self.current_filter = "all"
+        self.current_filter = ALL_COLLECTION_ID
         self.load_collection_tabs()
         self.load_games()
 
     def get_current_collection(self):
-        collections = get_collections_lookup()
+        return find_current_collection(self.current_filter)
 
-        for collection in collections:
-            if collection.get("id") == self.current_filter:
-                return collection
-
-        return None
 
     def is_protected_collection(self, collection_name):
-        protected_collections = [
-            "Ulubione",
-            "Planowane",
-            "Lista życzeń",
-            "W trakcie",
-            "Ukończone",
-            "Porzucone"
-        ]
+        return collection_name in PROTECTED_COLLECTION_NAMES
 
-        return collection_name in protected_collections
 
     def show_warning(self, message):
         show_warning(self, message)
@@ -1238,7 +868,7 @@ class MainView(QWidget):
         show_info(self, "Ocena została zapisana.")
 
     def handle_share_collection(self):
-        if self.current_filter == "all":
+        if self.current_filter == ALL_COLLECTION_ID:
             self.show_warning("Najpierw wybierz konkretną kolekcję.")
             return
 

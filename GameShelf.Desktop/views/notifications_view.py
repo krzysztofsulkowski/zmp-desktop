@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
@@ -13,7 +12,7 @@ from PySide6.QtWidgets import (
     QSizePolicy
 )
 
-from services.friends_service import get_pending_requests
+from services.notifications_service import NotificationsService
 
 
 class NotificationCard(QFrame):
@@ -73,7 +72,8 @@ class NotificationsView(QWidget):
 
         self.setObjectName("notificationsView")
         self.storage_path = Path(__file__).resolve().parents[1] / "notifications_read.json"
-        self.read_notifications = self.load_read_notifications()
+        self.notifications_service = NotificationsService(self.storage_path)
+        self.read_notifications = self.notifications_service.load_read_notifications()
         self.session_read_notifications = set()
         self.notifications = []
 
@@ -120,24 +120,8 @@ class NotificationsView(QWidget):
         root_layout.addLayout(header_layout)
         root_layout.addWidget(self.scroll_area, 1)
 
-    def load_read_notifications(self):
-        if not self.storage_path.exists():
-            return set()
-
-        try:
-            with open(self.storage_path, "r", encoding="utf-8") as file:
-                data = json.load(file)
-        except Exception:
-            return set()
-
-        if not isinstance(data, list):
-            return set()
-
-        return set(data)
-
     def save_read_notifications(self):
-        with open(self.storage_path, "w", encoding="utf-8") as file:
-            json.dump(sorted(self.read_notifications), file, ensure_ascii=False, indent=2)
+        self.notifications_service.save_read_notifications(self.read_notifications)
 
     def clear_layout(self):
         while self.notifications_layout.count():
@@ -148,20 +132,7 @@ class NotificationsView(QWidget):
                 widget.deleteLater()
 
     def refresh_notifications(self):
-        pending_requests = get_pending_requests()
-        self.notifications = []
-
-        for request in pending_requests:
-            username = request.get("userName") or request.get("username") or "Nieznany użytkownik"
-            user_id = request.get("userId") or request.get("id") or username
-            notification_id = f"friend_request:{user_id}"
-
-            self.notifications.append({
-                "id": notification_id,
-                "title": "Zaproszenie do znajomych",
-                "content": f"Użytkownik {username} wysłał Ci zaproszenie do znajomych."
-            })
-
+        self.notifications = self.notifications_service.get_notifications()
         self.render_notifications()
         self.emit_unread_count()
 

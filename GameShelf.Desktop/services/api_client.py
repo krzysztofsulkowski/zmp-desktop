@@ -11,17 +11,15 @@ def build_url(endpoint):
 
 
 def get_headers(auth_required=True):
-    headers = {}
-
     if not auth_required:
-        return headers
+        return {}
 
     token = get_token()
 
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
+    if not token:
+        return {}
 
-    return headers
+    return {"Authorization": f"Bearer {token}"}
 
 
 def handle_unauthorized(response):
@@ -29,70 +27,37 @@ def handle_unauthorized(response):
         clear_token()
 
 
-def api_get(endpoint, auth_required=True):
+def api_request(method, endpoint, data=None, auth_required=True):
     try:
-        response = requests.get(
+        response = requests.request(
+            method,
             build_url(endpoint),
+            json=data,
             headers=get_headers(auth_required),
             verify=VERIFY_SSL,
             timeout=REQUEST_TIMEOUT
         )
 
         handle_unauthorized(response)
-
         return response
     except requests.RequestException:
         return None
+
+
+def api_get(endpoint, auth_required=True):
+    return api_request("GET", endpoint, auth_required=auth_required)
 
 
 def api_post(endpoint, data=None, auth_required=True):
-    try:
-        response = requests.post(
-            build_url(endpoint),
-            json=data,
-            headers=get_headers(auth_required),
-            verify=VERIFY_SSL,
-            timeout=REQUEST_TIMEOUT
-        )
-
-        handle_unauthorized(response)
-
-        return response
-    except requests.RequestException:
-        return None
+    return api_request("POST", endpoint, data, auth_required)
 
 
 def api_put(endpoint, data=None, auth_required=True):
-    try:
-        response = requests.put(
-            build_url(endpoint),
-            json=data,
-            headers=get_headers(auth_required),
-            verify=VERIFY_SSL,
-            timeout=REQUEST_TIMEOUT
-        )
-
-        handle_unauthorized(response)
-
-        return response
-    except requests.RequestException:
-        return None
+    return api_request("PUT", endpoint, data, auth_required)
 
 
 def api_delete(endpoint, auth_required=True):
-    try:
-        response = requests.delete(
-            build_url(endpoint),
-            headers=get_headers(auth_required),
-            verify=VERIFY_SSL,
-            timeout=REQUEST_TIMEOUT
-        )
-
-        handle_unauthorized(response)
-
-        return response
-    except requests.RequestException:
-        return None
+    return api_request("DELETE", endpoint, auth_required=auth_required)
 
 
 def get_me():

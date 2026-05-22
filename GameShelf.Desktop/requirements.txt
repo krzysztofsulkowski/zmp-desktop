@@ -3,5 +3,6 @@ signalrcore
 pytest
 pytest-html
 pytest-cov
+pytest-qt
 requests
 python-dotenv

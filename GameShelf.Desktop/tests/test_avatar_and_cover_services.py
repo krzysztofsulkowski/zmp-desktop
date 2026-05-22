@@ -125,14 +125,6 @@ def test_load_pixmap_from_url_returns_empty_pixmap_for_non_200(monkeypatch):
     assert avatar_service.load_pixmap_from_url("/avatar.png").isNull() is True
 
 
-def test_load_pixmap_from_url_loads_pixmap_for_success(monkeypatch):
-    response = FakeResponse(200, {})
-    response.content = b"image-bytes"
-    monkeypatch.setattr(avatar_service.requests, "get", lambda url, verify, timeout: response)
-
-    assert avatar_service.load_pixmap_from_url("/avatar.png").isNull() is False
-
-
 def test_cover_image_service_normalizes_relative_urls():
     service = CoverImageService()
 

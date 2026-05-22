@@ -1,0 +1,223 @@
+QWidget#authPage {
+    background-color: #0f0f1a;
+}
+
+
+QPushButton#authLinkButton {
+    background-color: transparent;
+    color: #7C3AED;
+    border: none;
+    padding: 6px;
+    font-weight: 800;
+}
+
+QPushButton#authLinkButton:hover {
+    color: #6D28D9;
+    background-color: rgba(124, 58, 237, 0.08);
+}
+
+QFrame#authFrame {
+    background: qlineargradient(
+        x1: 0,
+        y1: 0,
+        x2: 1,
+        y2: 1,
+        stop: 0 #10101c,
+        stop: 0.42 #151125,
+        stop: 0.72 #3b1d73,
+        stop: 1 #1a102f
+    );
+    border: 1px solid rgba(139, 92, 246, 0.95);
+    border-radius: 28px;
+}
+
+QLabel#authTopLogo {
+    background-color: transparent;
+}
+
+QFrame#authCard {
+    background-color: #ffffff;
+    border-radius: 18px;
+    border: none;
+}
+
+QLabel#authTitle {
+    color: #050816;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 18px;
+    font-weight: 900;
+}
+
+QWidget#authFieldWrapper {
+    background-color: transparent;
+    min-height: 57px;
+    max-height: 57px;
+}
+
+QLabel#authInputLabel {
+    color: #050816;
+    background-color: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 9px;
+    font-weight: 800;
+}
+
+QLineEdit#authInput {
+    background-color: #ffffff;
+    color: #050816;
+    border: 1px solid #484848;
+    border-radius: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 12px;
+    font-weight: 400;
+    min-height: 31px;
+    max-height: 31px;
+}
+
+QLineEdit#authInput:focus {
+    border: 1px solid #7C3AED;
+}
+
+QPushButton#authPrimaryButton {
+    background-color: #7C3AED;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 11px;
+    font-weight: 900;
+    padding: 0;
+}
+
+QPushButton#authPrimaryButton:hover {
+    background-color: #8B5CF6;
+}
+
+QLabel#authOrLabel {
+    color: #050816;
+    background-color: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 9px;
+    font-weight: 800;
+}
+
+QPushButton#authSecondaryButton {
+    background-color: #ffffff;
+    color: #050816;
+    border: 1px solid #71717a;
+    border-radius: 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 900;
+    padding: 0;
+}
+
+QPushButton#authSecondaryButton:hover {
+    background-color: #f4f4f5;
+}
+
+QLabel#authLoginLink {
+    color: #050816;
+    background-color: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 9px;
+    font-weight: 500;
+}
+
+QLabel#authLoginLink a {
+    color: #050816;
+    font-weight: 900;
+    text-decoration: underline;
+}
+
+QPushButton#authForgotButton {
+    background-color: transparent;
+    color: #0F0F14;
+    border: none;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 900;
+    text-decoration: underline;
+    padding: 0;
+    margin: 0;
+}
+
+QPushButton#authForgotButton:hover {
+    color: #7C3AED;
+    background-color: transparent;
+}
+
+QLabel#authRegisterLink {
+    color: #0F0F14;
+    background-color: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 9px;
+    font-weight: 400;
+}
+
+QLabel#authRegisterLink a {
+    color: #0F0F14;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-weight: 900;
+    text-decoration: underline;
+}
+
+QPushButton#authBackButton {
+    background-color: transparent;
+    color: #0F0F14;
+    border: none;
+    font-family: "Figtree ExtraBold", "Figtree", "Segoe UI", "Arial";
+    font-size: 22px;
+    font-weight: 900;
+    padding: 0;
+}
+
+QPushButton#authBackButton:hover {
+    color: #7C3AED;
+    background-color: transparent;
+}
+
+QLabel#authInfoLabel {
+    color: #0F0F14;
+    background-color: transparent;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 400;
+}
+
+QLabel#authStatusText {
+    color: #7f1d1d;
+    background-color: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 700;
+}
+
+QLabel#authStatusError {
+    color: #b91c1c;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 700;
+}
+
+QLabel#authStatusSuccess {
+    color: #166534;
+    background-color: #dcfce7;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: "Figtree", "Segoe UI", "Arial";
+    font-size: 10px;
+    font-weight: 700;
+}

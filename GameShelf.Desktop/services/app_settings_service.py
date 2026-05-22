@@ -1,27 +1,18 @@
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
-APP_NAME = "GameShelf"
+from utils.app_paths import APP_NAME, get_user_data_file
+
 APP_REGISTRY_NAME = "GameShelf"
 DEFAULT_SETTINGS = {
     "start_with_system": False
 }
 
 
-def get_settings_file():
-    if sys.platform.startswith("win"):
-        base_dir = Path(os.getenv("APPDATA", Path.home() / "AppData" / "Roaming"))
-    else:
-        base_dir = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config"))
-
-    settings_dir = base_dir / APP_NAME
-    settings_dir.mkdir(parents=True, exist_ok=True)
-    return settings_dir / "app_settings.json"
-
-
-SETTINGS_FILE = get_settings_file()
+SETTINGS_FILE = get_user_data_file("app_settings.json")
 
 
 def load_settings():
@@ -46,6 +37,14 @@ def save_settings(settings):
         json.dump(safe_settings, file, indent=4)
 
 
+def get_startup_command():
+    if getattr(sys, "frozen", False):
+        return f'"{sys.executable}"'
+
+    main_file = Path(__file__).resolve().parents[1] / "main.py"
+    return subprocess.list2cmdline([sys.executable, str(main_file)])
+
+
 def set_start_with_system(enabled):
     if not sys.platform.startswith("win"):
         return
@@ -61,13 +60,12 @@ def set_start_with_system(enabled):
         winreg.KEY_SET_VALUE
     ) as key:
         if enabled:
-            app_path = sys.executable
             winreg.SetValueEx(
                 key,
                 APP_REGISTRY_NAME,
                 0,
                 winreg.REG_SZ,
-                f'"{app_path}"'
+                get_startup_command()
             )
         else:
             try:

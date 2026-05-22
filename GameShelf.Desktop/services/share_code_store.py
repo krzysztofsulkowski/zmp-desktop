@@ -1,7 +1,8 @@
 import json
-from pathlib import Path
 
-STORE_PATH = Path("share_codes.json")
+from utils.app_paths import get_user_data_file
+
+STORE_PATH = get_user_data_file("share_codes.json")
 
 
 def load_share_codes():

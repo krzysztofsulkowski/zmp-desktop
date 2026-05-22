@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QWidget,
@@ -13,6 +11,7 @@ from PySide6.QtWidgets import (
 )
 
 from services.notifications_service import NotificationsService
+from utils.app_paths import get_user_data_file
 
 
 class NotificationCard(QFrame):
@@ -71,7 +70,7 @@ class NotificationsView(QWidget):
         super().__init__()
 
         self.setObjectName("notificationsView")
-        self.storage_path = Path(__file__).resolve().parents[1] / "notifications_read.json"
+        self.storage_path = get_user_data_file("notifications_read.json")
         self.notifications_service = NotificationsService(self.storage_path)
         self.read_notifications = self.notifications_service.load_read_notifications()
         self.session_read_notifications = set()

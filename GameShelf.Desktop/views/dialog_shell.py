@@ -2,6 +2,8 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QIcon
+
+from utils.app_identity import get_window_title
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame
 
 
@@ -13,7 +15,7 @@ class DialogShell(QDialog):
         self.drag_position = QPoint()
         self.is_dragging = False
 
-        self.setWindowTitle(title)
+        self.setWindowTitle(get_window_title(title))
         self.setObjectName("popupDialog")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)

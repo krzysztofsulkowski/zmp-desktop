@@ -3,7 +3,8 @@ import os
 import sys
 from pathlib import Path
 
-APP_NAME = "GameShelfDesktop"
+APP_NAME = "GameShelf"
+APP_REGISTRY_NAME = "GameShelf"
 DEFAULT_SETTINGS = {
     "start_with_system": False
 }
@@ -63,13 +64,13 @@ def set_start_with_system(enabled):
             app_path = sys.executable
             winreg.SetValueEx(
                 key,
-                APP_NAME,
+                APP_REGISTRY_NAME,
                 0,
                 winreg.REG_SZ,
                 f'"{app_path}"'
             )
         else:
             try:
-                winreg.DeleteValue(key, APP_NAME)
+                winreg.DeleteValue(key, APP_REGISTRY_NAME)
             except FileNotFoundError:
                 pass

@@ -3,6 +3,8 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QPixmap, QIcon, QFontDatabase
+
+from utils.app_identity import get_window_title
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QFrame
 
 from utils.window_corners import disable_windows_11_rounded_corners
@@ -23,7 +25,7 @@ class ResetPasswordView(QWidget):
         self.base_dir = Path(__file__).resolve().parents[1]
 
         self.load_fonts()
-        self.setWindowTitle("Ustaw nowe hasło")
+        self.setWindowTitle(get_window_title("Ustaw nowe hasło"))
         self.setObjectName("authPage")
         self.setMinimumSize(940, 620)
         self.resize(980, 660)

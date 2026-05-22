@@ -16,6 +16,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QSize, QPoint, QTimer, QEvent
 from PySide6.QtGui import QFontDatabase, QIcon
 
+from utils.app_identity import get_window_title
+
 from utils.window_corners import disable_windows_11_rounded_corners
 
 
@@ -98,7 +100,7 @@ class MainView(QWidget):
         self.is_dragging = False
 
         self.load_fonts()
-        self.setWindowTitle("GameShelf")
+        self.setWindowTitle(get_window_title())
         self.setObjectName("mainPage")
         self.setMinimumSize(1180, 720)
         self.resize(1280, 760)

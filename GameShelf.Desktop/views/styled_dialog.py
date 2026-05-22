@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from utils.app_identity import get_window_title
 from utils.window_corners import disable_windows_11_rounded_corners
 
 
@@ -73,7 +74,7 @@ class StyledDialog(DraggableFramelessDialog):
     def __init__(self, title, parent=None, show_close=True):
         super().__init__(parent)
 
-        self.setWindowTitle(title)
+        self.setWindowTitle(get_window_title(title))
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setModal(True)
@@ -132,7 +133,7 @@ class StyledMessageDialog(DraggableFramelessDialog):
         super().__init__(parent)
 
         self.clicked_role = None
-        self.setWindowTitle(title or "GameShelf")
+        self.setWindowTitle(get_window_title(title))
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setModal(True)

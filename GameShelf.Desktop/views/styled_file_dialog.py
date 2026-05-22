@@ -4,6 +4,7 @@ from PySide6.QtCore import QEvent, QPoint, Qt
 from PySide6.QtGui import QPainterPath, QPixmap, QRegion
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLabel, QPushButton, QWidget
 
+from utils.app_identity import get_window_title
 from utils.window_corners import disable_windows_11_rounded_corners
 
 
@@ -16,7 +17,7 @@ class StyledFileDialog(QFileDialog):
         self._drag_widgets = []
 
         self.setObjectName("styledFileDialog")
-        self.setWindowTitle(title)
+        self.setWindowTitle(get_window_title(title))
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Dialog)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
         self.setAutoFillBackground(True)

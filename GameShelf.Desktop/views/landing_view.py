@@ -2,6 +2,8 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QPixmap, QIcon, QFontDatabase
+
+from utils.app_identity import get_window_title
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -27,7 +29,7 @@ class LandingView(QWidget):
         self.base_dir = Path(__file__).resolve().parents[1]
 
         self.load_fonts()
-        self.setWindowTitle("GameShelf")
+        self.setWindowTitle(get_window_title())
         self.setMinimumSize(1200, 720)
         self.resize(1440, 840)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)

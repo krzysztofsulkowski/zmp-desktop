@@ -4,6 +4,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 
 from controllers.app_controller import AppController
+from utils.app_identity import APP_NAME, get_app_icon, setup_windows_app_user_model_id
 
 BASE_DIR = Path(__file__).resolve().parent
 STYLE_FILES = (
@@ -34,7 +35,12 @@ def load_styles(app):
 
 
 def main():
+    setup_windows_app_user_model_id()
+
     app = QApplication(sys.argv)
+    app.setApplicationName(APP_NAME)
+    app.setApplicationDisplayName(APP_NAME)
+    app.setWindowIcon(get_app_icon())
     load_styles(app)
 
     controller = AppController()

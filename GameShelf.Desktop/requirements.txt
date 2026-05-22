@@ -1,5 +1,7 @@
 PySide6
 signalrcore
 pytest
+pytest-html
+pytest-cov
 requests
 python-dotenv

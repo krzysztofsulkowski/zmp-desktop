@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from config import WEB_REGISTER_URL
-from services.api_client import get_me
+from services.user_service import get_current_user
 from services.friends_service import (
     get_my_friends,
     search_users,
@@ -555,7 +555,4 @@ class FriendsView(QWidget):
         self.set_status("")
 
     def load_current_user(self):
-        response = get_me()
-
-        if response is not None and response.status_code == 200:
-            self.current_user = response.json()
+        self.current_user = get_current_user()

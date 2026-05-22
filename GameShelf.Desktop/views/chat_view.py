@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from PySide6.QtCore import Qt, Signal, QTimer
 from PySide6.QtWidgets import (
     QWidget,
@@ -13,7 +11,6 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QFrame,
     QScrollArea,
-    QSizePolicy,
 )
 
 from services.chat_service import (
@@ -23,69 +20,8 @@ from services.chat_service import (
 )
 from services.chat_realtime_service import ChatRealtimeService
 from services.friends_service import get_my_friends
-from services.api_client import get_me
-
-
-class ChatListItemWidget(QFrame):
-    def __init__(self, name, participants, last_message, last_message_time):
-        super().__init__()
-        self.setObjectName("chatListItem")
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 10, 12, 10)
-        layout.setSpacing(5)
-
-        title_row = QHBoxLayout()
-        title_row.setContentsMargins(0, 0, 0, 0)
-        title_row.setSpacing(8)
-
-        title = QLabel(name)
-        title.setObjectName("chatListItemTitle")
-        title.setWordWrap(True)
-
-        time_label = QLabel(format_datetime(last_message_time, compact=True))
-        time_label.setObjectName("chatListItemTime")
-        time_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
-        time_label.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
-
-        title_row.addWidget(title, 1)
-        title_row.addWidget(time_label)
-
-        members = QLabel(participants)
-        members.setObjectName("chatListItemMeta")
-        members.setWordWrap(True)
-
-        preview_text = last_message if last_message else "Brak wiadomości w tej konwersacji"
-        preview = QLabel(preview_text)
-        preview.setObjectName("chatListItemPreview")
-        preview.setWordWrap(True)
-
-        layout.addLayout(title_row)
-        layout.addWidget(members)
-        layout.addWidget(preview)
-
-
-class MessageBubbleWidget(QFrame):
-    def __init__(self, sender, content, timestamp, is_own):
-        super().__init__()
-        self.setObjectName("messageBubbleOwn" if is_own else "messageBubbleOther")
-        self.setMaximumWidth(560)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 10, 14, 10)
-        layout.setSpacing(6)
-
-        header = QLabel(f"{sender} • {format_datetime(timestamp)}")
-        header.setObjectName("messageHeaderOwn" if is_own else "messageHeaderOther")
-        header.setWordWrap(True)
-
-        body = QLabel(content)
-        body.setObjectName("messageBodyOwn" if is_own else "messageBodyOther")
-        body.setWordWrap(True)
-        body.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-
-        layout.addWidget(header)
-        layout.addWidget(body)
+from services.user_service import get_current_user
+from components.chat_widgets import ChatListItemWidget, MessageBubbleWidget
 
 
 class ChatView(QWidget):
@@ -266,16 +202,7 @@ class ChatView(QWidget):
         self.message_received.connect(self.add_received_message)
 
     def load_current_user(self):
-        response = get_me()
-
-        if response is None or response.status_code != 200:
-            self.current_user = {}
-            return
-
-        try:
-            self.current_user = response.json()
-        except Exception:
-            self.current_user = {}
+        self.current_user = get_current_user()
 
     def connect_realtime(self):
         connected = self.realtime_service.connect()
@@ -561,23 +488,3 @@ class ChatView(QWidget):
     def closeEvent(self, event):
         self.realtime_service.stop()
         event.accept()
-
-
-def format_datetime(value, compact=False):
-    if not value:
-        return ""
-
-    if isinstance(value, datetime):
-        parsed = value
-    else:
-        text = str(value).replace("Z", "+00:00")
-
-        try:
-            parsed = datetime.fromisoformat(text)
-        except ValueError:
-            return str(value)
-
-    if compact:
-        return parsed.strftime("%d.%m %H:%M")
-
-    return parsed.strftime("%d.%m.%Y %H:%M")

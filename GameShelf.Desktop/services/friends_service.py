@@ -1,18 +1,16 @@
 from urllib.parse import quote
 
-from services.api_client import api_get, api_post, api_delete
+from services.api_client import api_delete, api_get, api_post
+from services.response_helpers import error_message, is_success, response_data, response_json
 
 
 def get_my_friends():
     response = api_get("/api/friends/my-friends")
 
-    if response is None or response.status_code != 200:
+    if not is_success(response):
         return []
 
-    try:
-        return response.json()
-    except Exception:
-        return []
+    return response_json(response, []) or []
 
 
 def search_users(search_value):
@@ -23,45 +21,36 @@ def search_users(search_value):
         "searchValue": search_value,
         "orderColumn": 0,
         "orderDir": "asc",
-        "extraFilters": {}
+        "extraFilters": {},
     }
 
     response = api_post("/api/friends/search", data)
 
-    if response is None or response.status_code != 200:
+    if not is_success(response):
         return []
 
-    try:
-        result = response.json()
-    except Exception:
-        return []
-
-    return result.get("data", [])
+    return response_data(response, []) or []
 
 
 def add_friend_by_username(username):
-    encoded_username = quote(username)
-    response = api_post(f"/api/friends/add-by-username/{encoded_username}")
+    response = api_post(f"/api/friends/add-by-username/{quote(username)}")
 
     if response is None:
         return False, "Brak połączenia z API."
 
-    if response.status_code == 200:
+    if is_success(response):
         return True, "Zaproszenie zostało wysłane."
 
-    return False, get_error_message(response, "Nie udało się wysłać zaproszenia.")
+    return False, error_message(response, "Nie udało się wysłać zaproszenia.")
 
 
 def get_pending_requests():
     response = api_get("/api/friends/pending-requests")
 
-    if response is None or response.status_code != 200:
+    if not is_success(response):
         return []
 
-    try:
-        return response.json()
-    except Exception:
-        return []
+    return response_json(response, []) or []
 
 
 def accept_friend_request(requester_id):
@@ -70,10 +59,10 @@ def accept_friend_request(requester_id):
     if response is None:
         return False, "Brak połączenia z API."
 
-    if response.status_code == 200:
+    if is_success(response):
         return True, "Zaproszenie zaakceptowane."
 
-    return False, get_error_message(response, "Nie udało się zaakceptować zaproszenia.")
+    return False, error_message(response, "Nie udało się zaakceptować zaproszenia.")
 
 
 def reject_or_remove_friend(friend_id):
@@ -82,39 +71,25 @@ def reject_or_remove_friend(friend_id):
     if response is None:
         return False, "Brak połączenia z API."
 
-    if response.status_code == 200:
+    if is_success(response):
         return True, "Operacja zakończona."
 
-    return False, get_error_message(response, "Nie udało się wykonać operacji.")
+    return False, error_message(response, "Nie udało się wykonać operacji.")
 
 
 def get_friend_collections_with_games(friend_id):
     response = api_get(f"/api/friends/{friend_id}/collections-with-games")
 
-    if response is None or response.status_code != 200:
+    if not is_success(response):
         return []
 
-    try:
-        return response.json()
-    except Exception:
-        return []
+    return response_json(response, []) or []
 
 
 def compare_with_friend(friend_id):
     response = api_get(f"/api/friends/compare/{friend_id}")
 
-    if response is None or response.status_code != 200:
+    if not is_success(response):
         return []
 
-    try:
-        return response.json()
-    except Exception:
-        return []
-
-
-def get_error_message(response, default_message):
-    try:
-        error_data = response.json()
-        return error_data.get("detail") or error_data.get("title") or default_message
-    except Exception:
-        return default_message
+    return response_json(response, []) or []

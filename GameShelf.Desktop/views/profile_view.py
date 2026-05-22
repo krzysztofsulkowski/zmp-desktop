@@ -1,7 +1,4 @@
-import requests
-
-from PySide6.QtCore import Qt, QRect
-from PySide6.QtGui import QPixmap, QPainter, QPainterPath
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -12,8 +9,8 @@ from PySide6.QtWidgets import (
     QSizePolicy
 )
 
-from config import API_URL, VERIFY_SSL
-from services.api_client import get_me
+from components.profile_avatar_widget import ProfileAvatarWidget
+from services.user_service import get_current_user
 from services.profile_service import update_profile
 from views.edit_profile_dialog import EditProfileDialog
 from views.styled_dialog import show_info, show_warning
@@ -31,10 +28,7 @@ class ProfileView(QWidget):
         self.title_label.setObjectName("profilePageTitle")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.avatar_label = QLabel("Brak avatara")
-        self.avatar_label.setObjectName("profileAvatar")
-        self.avatar_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.avatar_label.setFixedSize(150, 150)
+        self.avatar_label = ProfileAvatarWidget(150)
 
         self.email_label = QLabel("ładowanie...")
         self.email_label.setObjectName("profileEmail")
@@ -107,88 +101,19 @@ class ProfileView(QWidget):
         self.edit_profile_button.clicked.connect(self.open_edit_profile_dialog)
 
     def load_user_data(self):
-        response = get_me()
+        self.user_data = get_current_user()
 
-        if response is None or response.status_code != 200:
+        if not self.user_data:
             self.email_label.setText("brak danych")
             self.username_label.setText("brak danych")
             self.bio_label.setText("brak danych")
-            self.avatar_label.setText("Brak avatara")
+            self.avatar_label.clear_avatar()
             return
 
-        self.user_data = response.json()
-
-        email = self.user_data.get("email", "brak danych")
-        username = self.user_data.get("userName", "brak danych")
-        bio = self.user_data.get("bio", "brak danych")
-        avatar_url = self.user_data.get("avatarUrl")
-
-        self.email_label.setText(email)
-        self.username_label.setText(username)
-        self.bio_label.setText(bio or "brak danych")
-
-        self.load_avatar(avatar_url)
-
-    def load_avatar(self, avatar_url):
-        if not avatar_url:
-            self.avatar_label.setText("Brak avatara")
-            self.avatar_label.setPixmap(QPixmap())
-            return
-
-        if avatar_url.startswith("/"):
-            avatar_url = f"{API_URL}{avatar_url}"
-
-        try:
-            response = requests.get(
-                avatar_url,
-                verify=VERIFY_SSL,
-                timeout=10
-            )
-
-            if response.status_code != 200:
-                self.avatar_label.setText("Brak avatara")
-                self.avatar_label.setPixmap(QPixmap())
-                return
-
-            pixmap = QPixmap()
-            pixmap.loadFromData(response.content)
-
-            if pixmap.isNull():
-                self.avatar_label.setText("Brak avatara")
-                self.avatar_label.setPixmap(QPixmap())
-                return
-
-            self.avatar_label.setText("")
-            self.avatar_label.setPixmap(self.create_round_avatar(pixmap, 150))
-        except requests.RequestException:
-            self.avatar_label.setText("Brak avatara")
-            self.avatar_label.setPixmap(QPixmap())
-
-    def create_round_avatar(self, pixmap, size):
-        scaled = pixmap.scaled(
-            size,
-            size,
-            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-            Qt.TransformationMode.SmoothTransformation
-        )
-
-        x = max(0, (scaled.width() - size) // 2)
-        y = max(0, (scaled.height() - size) // 2)
-        cropped = scaled.copy(QRect(x, y, size, size))
-
-        rounded = QPixmap(size, size)
-        rounded.fill(Qt.GlobalColor.transparent)
-
-        painter = QPainter(rounded)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        path = QPainterPath()
-        path.addEllipse(0, 0, size, size)
-        painter.setClipPath(path)
-        painter.drawPixmap(0, 0, cropped)
-        painter.end()
-
-        return rounded
+        self.email_label.setText(self.user_data.get("email", "brak danych"))
+        self.username_label.setText(self.user_data.get("userName", "brak danych"))
+        self.bio_label.setText(self.user_data.get("bio") or "brak danych")
+        self.avatar_label.set_avatar_url(self.user_data.get("avatarUrl"))
 
     def open_edit_profile_dialog(self):
         username = self.user_data.get("userName", "")

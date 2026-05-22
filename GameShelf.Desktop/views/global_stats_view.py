@@ -1,67 +1,14 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QLabel,
-    QFrame,
-    QGridLayout,
-    QScrollArea,
-    QHBoxLayout,
-    QSizePolicy,
-    QToolTip
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScrollArea
+
+from components.stats_widgets import (
+    GlobalStatsCard,
+    PodiumBar,
+    build_global_pie_chart,
+    create_global_pie_chart_view,
+    create_podium_layout,
 )
-from PySide6.QtCharts import QChart, QChartView, QPieSeries
-from PySide6.QtGui import QColor, QPainter
-from PySide6.QtCore import Qt, QMargins
-
 from services.statistics_service import get_global_statistics
-
-
-class GlobalStatsCard(QFrame):
-    def __init__(self, title):
-        super().__init__()
-        self.setObjectName("globalStatsCard")
-        self.setFixedSize(320, 320)
-
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(20, 18, 20, 18)
-        self.layout.setSpacing(12)
-
-        self.title_label = QLabel(title)
-        self.title_label.setObjectName("globalStatsCardTitle")
-        self.title_label.setWordWrap(True)
-        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.layout.addWidget(self.title_label)
-
-
-class PodiumBar(QWidget):
-    def __init__(self, name, value, color, height):
-        super().__init__()
-        self.setObjectName("podiumBarWrapper")
-
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(6)
-        self.layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
-
-        self.value_label = QLabel(str(value))
-        self.value_label.setObjectName("podiumValue")
-        self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.bar = QFrame()
-        self.bar.setObjectName("podiumBar")
-        self.bar.setFixedSize(54, height)
-        self.bar.setStyleSheet(f"QFrame#podiumBar {{ background-color: {color}; border-radius: 10px 10px 4px 4px; }}")
-
-        self.name_label = QLabel(name)
-        self.name_label.setObjectName("podiumName")
-        self.name_label.setWordWrap(True)
-        self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.name_label.setFixedWidth(86)
-
-        self.layout.addWidget(self.value_label)
-        self.layout.addWidget(self.bar, alignment=Qt.AlignmentFlag.AlignHCenter)
-        self.layout.addWidget(self.name_label)
 
 
 class GlobalStatsView(QWidget):
@@ -138,34 +85,15 @@ class GlobalStatsView(QWidget):
 
     def create_chart_card(self, title):
         card = GlobalStatsCard(title)
-
-        chart = QChart()
-        chart.legend().hide()
-        chart.setBackgroundVisible(False)
-        chart.setPlotAreaBackgroundVisible(False)
-        chart.setMargins(QMargins(0, 0, 0, 0))
-
-        chart_view = QChartView(chart)
-        chart_view.setObjectName("globalStatsChartView")
-        chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
-        chart_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        chart_view.setMinimumHeight(210)
-
+        chart, chart_view = create_global_pie_chart_view()
         card.layout.addWidget(chart_view)
-
         return card, chart
 
     def create_podium_card(self, title):
         card = GlobalStatsCard(title)
-
-        podium_layout = QHBoxLayout()
-        podium_layout.setContentsMargins(0, 8, 0, 0)
-        podium_layout.setSpacing(10)
-        podium_layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignHCenter)
-
+        podium_layout = create_podium_layout()
         card.layout.addLayout(podium_layout)
         card.podium_layout = podium_layout
-
         return card
 
     def clear_grid(self):
@@ -233,43 +161,7 @@ class GlobalStatsView(QWidget):
         self.build_podium(stats.get("highestRatedGames", []))
 
     def build_pie_chart(self, chart, items):
-        chart.removeAllSeries()
-
-        series = QPieSeries()
-        series.setHoleSize(0.48)
-        series.setPieSize(0.84)
-
-        colors = [
-            "#5C4E7E",
-            "#7D6EA1",
-            "#9C8BC5",
-            "#BFB2DE",
-            "#DED6F0",
-            "#FFFFFF"
-        ]
-
-        for index, item in enumerate(items[:6]):
-            label = item.get("label", "Brak")
-            value = item.get("value", 0)
-
-            slice_item = series.append(label, value)
-            color = QColor(colors[index % len(colors)])
-
-            slice_item.setBrush(color)
-            slice_item.setBorderColor(color)
-            slice_item.setLabelVisible(False)
-            slice_item.hovered.connect(
-                lambda state, s=slice_item, l=label, v=value:
-                self.on_slice_hover(state, s, l, v)
-            )
-
-        chart.addSeries(series)
-
-    def on_slice_hover(self, state, slice_item, label, value):
-        if state:
-            QToolTip.showText(self.cursor().pos(), f"{label}: {value}", self)
-        else:
-            QToolTip.hideText()
+        build_global_pie_chart(chart, items, self)
 
     def clear_podium(self):
         while self.highest_rated_games_card.podium_layout.count():
@@ -303,12 +195,6 @@ class GlobalStatsView(QWidget):
         for item in sorted_items:
             name = item.get("label", "Brak")
             value = item.get("value", 0)
-
-            higher_scores_count = len({
-                other.get("value", 0)
-                for other in sorted_items
-                if other.get("value", 0) > value
-            })
 
             same_or_higher_items_count = len([
                 other

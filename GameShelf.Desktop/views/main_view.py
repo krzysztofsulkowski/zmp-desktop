@@ -57,18 +57,28 @@ from components.main_filter_combo_box import MainFilterComboBox
 from components.sidebar_widget import SidebarWidget
 from components.game_card import AddGameCard, GameCard
 from constants.collection_tabs import ALL_COLLECTION_ID, MAIN_COLLECTION_NAME, PROTECTED_COLLECTION_NAMES
+from constants.view_indices import (
+    CHAT_VIEW_INDEX,
+    FRIENDS_VIEW_INDEX,
+    GLOBAL_STATS_VIEW_INDEX,
+    HOME_VIEW_INDEX,
+    NOTIFICATIONS_VIEW_INDEX,
+    PROFILE_VIEW_INDEX,
+    SETTINGS_VIEW_INDEX,
+    STATS_VIEW_INDEX,
+)
 from services.cover_image_service import CoverImageService
 from utils.game_filters import filter_games, get_unique_genres, get_unique_platforms, sort_games
 
 class MainView(QWidget):
-    PROFILE_VIEW_INDEX = 0
-    HOME_VIEW_INDEX = 1
-    FRIENDS_VIEW_INDEX = 2
-    CHAT_VIEW_INDEX = 3
-    NOTIFICATIONS_VIEW_INDEX = 4
-    STATS_VIEW_INDEX = 5
-    GLOBAL_STATS_VIEW_INDEX = 6
-    SETTINGS_VIEW_INDEX = 7
+    PROFILE_VIEW_INDEX = PROFILE_VIEW_INDEX
+    HOME_VIEW_INDEX = HOME_VIEW_INDEX
+    FRIENDS_VIEW_INDEX = FRIENDS_VIEW_INDEX
+    CHAT_VIEW_INDEX = CHAT_VIEW_INDEX
+    NOTIFICATIONS_VIEW_INDEX = NOTIFICATIONS_VIEW_INDEX
+    STATS_VIEW_INDEX = STATS_VIEW_INDEX
+    GLOBAL_STATS_VIEW_INDEX = GLOBAL_STATS_VIEW_INDEX
+    SETTINGS_VIEW_INDEX = SETTINGS_VIEW_INDEX
 
     def __init__(self, controller):
         super().__init__()
